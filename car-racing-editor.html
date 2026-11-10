@@ -282,7 +282,7 @@ function drawRoadsideSigns(){
  if(!selected.length)return;
  for(let i=0;i<6;i++){
   const y=((i*118+frame*1.55)%760)-100,x=i%2===0?53:307,item=selected[i%selected.length];
-  if(item.custom){const img=roadSignImageCache[item.custom.id];if(img&&img.complete&&img.naturalWidth)ctx.drawImage(img,x-19,y-27,38,54);}
+  if(item.custom){let img=roadSignImageCache[item.custom.id];if(!img){img=new Image();img.onload=()=>draw();img.src=item.custom.imageData;roadSignImageCache[item.custom.id]=img;}if(img.complete&&img.naturalWidth)ctx.drawImage(img,x-19,y-27,38,54);}
   else drawRoadSignArt(ctx,x,y,item.type,.78);
  }
 }
