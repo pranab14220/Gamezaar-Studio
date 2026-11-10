@@ -45,6 +45,12 @@
 <div class="sign-option" style="margin:8px 0;align-items:center"><input id="scorePassOn" type="checkbox" checked><span style="flex:1">🚗 Traffic car ko paar karne par</span><label style="display:flex;align-items:center;gap:5px">Points <input id="scorePassPoints" type="number" min="0" max="999999" value="5" style="width:66px;padding:7px;border-radius:7px"></label></div>
 <div class="sign-option" style="margin:8px 0;align-items:center"><input id="scoreSurvivalOn" type="checkbox" checked><span style="flex:1">⏱️ Har 1 second survival par</span><label style="display:flex;align-items:center;gap:5px">Points / second <input id="scoreSurvivalPoints" type="number" min="0" max="999999" value="1" style="width:66px;padding:7px;border-radius:7px"></label></div>
 <div class="tree-note">Points 0 rakhne par event enabled rahega, lekin score add nahi hoga. OFF karne par event se koi score nahi milega.</div>
+<div class="section-title">13 · Score-Based Speed</div>
+<label class="sign-option active" style="margin:8px 0"><input id="scoreSpeedToggle" type="checkbox"> <span>Enable score-based speed (default OFF)</span></label>
+<div class="tip" style="margin:0 0 10px">Set the score milestone and game speed. When the score reaches a milestone, the game and roadside scenery speed up automatically.</div>
+<div id="speedMilestones" style="display:grid;gap:8px"></div>
+<button class="btn secondary" type="button" id="addSpeedMilestone" style="margin-top:10px;width:100%">＋ Add score milestone</button>
+<div class="tree-note" id="speedSystemStatus">OFF · Game runs at normal speed.</div>
 <div class="tip">Changes update the live preview. Save your project to keep the settings on this device.</div>
 </aside>
 </div>
@@ -54,9 +60,9 @@
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
 const project=JSON.parse(localStorage.getItem('gamezaar_current_project')||'{}');
 const trafficDefaults=[{id:'hatchback',name:'Hatchback',color:'#4388d8',selected:true,imageData:''},{id:'sedan',name:'Sedan',color:'#e7b849',selected:true,imageData:''},{id:'sports',name:'Sports Car',color:'#8d75c9',selected:true,imageData:''},{id:'suv',name:'SUV',color:'#52a88a',selected:true,imageData:''},{id:'taxi',name:'Taxi',color:'#e6c94d',selected:false,imageData:''},{id:'van',name:'Mini Van',color:'#d87857',selected:false,imageData:''}];
-const defaults={name:project.name||'My Racing Game',type:'Car Traffic Racing',carColor:'#ed654b',carImageData:'',trafficCars:trafficDefaults,houses:{type:'spring',imageData:''},pedestriansOn:true,streetLightsOn:true,streetLights:['classic','curved'],customStreetLights:[],scoreSystem:{passOn:true,passPoints:5,coinOn:true,coinPoints:10,survivalOn:true,survivalPoints:1}};
+const defaults={name:project.name||'My Racing Game',type:'Car Traffic Racing',carColor:'#ed654b',carImageData:'',trafficCars:trafficDefaults,houses:{type:'spring',imageData:''},pedestriansOn:true,streetLightsOn:true,streetLights:['classic','curved'],customStreetLights:[],scoreSystem:{passOn:true,passPoints:5,coinOn:true,coinPoints:10,survivalOn:true,survivalPoints:1},speedSystem:{enabled:false,milestones:[{score:100,speed:1.2},{score:250,speed:1.5},{score:500,speed:2}]}};
 let settings={...defaults,...JSON.parse(localStorage.getItem('gamezaar_racing_settings')||'{}')};
-let running=false,over=false,score=0,frame=0,playerLane=1,trafficCars=[],raf=0,lastSpawn=0,uploadedCarImage=null;
+let running=false,over=false,score=0,frame=0,worldFrame=0,playerLane=1,trafficCars=[],raf=0,lastSpawn=0,uploadedCarImage=null;
 let trafficImageCache={};
 const carPreview=document.getElementById('carPreview'),carPreviewCtx=carPreview.getContext('2d');
 const laneX=[105,180,255],player={x:180,y:455,w:38,h:66};
@@ -173,7 +179,7 @@ const landPalettes={spring:{base:'#78965c',patch:'#91ad6c',detail:'#d8a0bd'},sum
 function drawLandThumb(cv,type){const g=cv.getContext('2d'),p=landPalettes[type];g.fillStyle=p.base;g.fillRect(0,0,48,58);for(let i=0;i<12;i++){g.fillStyle=i%2?p.patch:p.detail;g.fillRect((i*17)%46,(i*23)%56,3,3);}if(type==='winter'){g.fillStyle='#fff';g.fillRect(4,8,8,2);g.fillRect(30,38,10,2);}if(type==='desert'){g.fillStyle='#ad814b';g.fillRect(4,42,14,3);g.fillRect(29,15,12,3);}}
 function renderLandOptions(){const grid=document.getElementById('landOptions');if(!grid)return;grid.innerHTML='';landTypes.forEach(item=>{const b=document.createElement('button');b.type='button';b.className='road-option'+(settings.land.type===item.id&&!settings.land.imageData?' active':'');b.innerHTML='<canvas class="road-thumb" width="48" height="58"></canvas><span>'+item.name+'</span>';grid.appendChild(b);drawLandThumb(b.querySelector('canvas'),item.id);b.addEventListener('click',()=>{settings.land={type:item.id,imageData:''};landImage=null;document.getElementById('landUploadStatus').textContent='Using '+item.name+'.';renderLandOptions();draw();});});}
 document.getElementById('landUpload').addEventListener('change',e=>{const file=e.target.files&&e.target.files[0];if(!file)return;if(!file.type.startsWith('image/')){document.getElementById('landUploadStatus').textContent='Please choose a valid image.';e.target.value='';return;}const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const cv=document.createElement('canvas'),scale=Math.min(1,512/img.width,1024/img.height);cv.width=Math.max(1,Math.round(img.width*scale));cv.height=Math.max(1,Math.round(img.height*scale));cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);settings.land={type:'summer',imageData:cv.toDataURL('image/webp',.82)};landImage=new Image();landImage.onload=()=>draw();landImage.src=settings.land.imageData;document.getElementById('landUploadStatus').textContent='✓ Your custom land image is selected.';renderLandOptions();draw();};img.onerror=()=>{document.getElementById('landUploadStatus').textContent='Could not load this image.';};img.src=reader.result;};reader.readAsDataURL(file);e.target.value='';});
-function drawLandGround(){const type=settings.land?.type||'summer',p=landPalettes[type]||landPalettes.summer;ctx.fillStyle=p.base;ctx.fillRect(0,0,360,560);if(landImage&&landImage.complete&&landImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(0,0,65,560);ctx.rect(295,0,65,560);ctx.clip();ctx.drawImage(landImage,0,0,65,560);ctx.drawImage(landImage,295,0,65,560);ctx.restore();return;}for(let y=-25+(frame*1.7)%54;y<590;y+=54){for(const x of [10,42,310,342]){ctx.fillStyle=((Math.floor(y/54)+Math.floor(x/30))%2)?p.patch:p.detail;ctx.fillRect(x,y,3,3);if(type==='winter'){ctx.fillStyle='#f7fbff';ctx.fillRect(x+5,y+8,5,2);}else if(type==='autumn'){ctx.fillStyle='#e69a45';ctx.fillRect(x+5,y+8,4,3);}else if(type==='spring'){ctx.fillStyle='#f3b4cf';ctx.fillRect(x+5,y+8,3,3);}}}}
+function drawLandGround(){const type=settings.land?.type||'summer',p=landPalettes[type]||landPalettes.summer;ctx.fillStyle=p.base;ctx.fillRect(0,0,360,560);if(landImage&&landImage.complete&&landImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(0,0,65,560);ctx.rect(295,0,65,560);ctx.clip();ctx.drawImage(landImage,0,0,65,560);ctx.drawImage(landImage,295,0,65,560);ctx.restore();return;}for(let y=-25+(worldFrame*1.7)%54;y<590;y+=54){for(const x of [10,42,310,342]){ctx.fillStyle=((Math.floor(y/54)+Math.floor(x/30))%2)?p.patch:p.detail;ctx.fillRect(x,y,3,3);if(type==='winter'){ctx.fillStyle='#f7fbff';ctx.fillRect(x+5,y+8,5,2);}else if(type==='autumn'){ctx.fillStyle='#e69a45';ctx.fillRect(x+5,y+8,4,3);}else if(type==='spring'){ctx.fillStyle='#f3b4cf';ctx.fillRect(x+5,y+8,3,3);}}}}
 
 const houseTypes=[{id:'spring',name:'Spring Cottage'},{id:'summer',name:'Summer Modern House'},{id:'autumn',name:'Autumn Wooden Cabin'},{id:'winter',name:'Winter Snow Cottage'},{id:'desert',name:'Desert Villa'}];
 if(!settings.houses||typeof settings.houses!=='object')settings.houses={type:'spring',imageData:''};
@@ -250,7 +256,7 @@ function drawRoadsideStreetLights(){
  if(settings.streetLightsOn===false)return;
  const selected=(settings.streetLights||[]).map(type=>({type})).concat((settings.customStreetLights||[]).filter(x=>x.selected!==false).map(item=>({custom:item})));
  if(!selected.length)return;
- for(let i=0;i<6;i++){const y=((i*116+frame*1.45)%760)-105,x=i%2===0?53:307,item=selected[i%selected.length],rightSide=i%2!==0;
+ for(let i=0;i<6;i++){const y=((i*116+worldFrame*1.45)%760)-105,x=i%2===0?53:307,item=selected[i%selected.length],rightSide=i%2!==0;
   ctx.save();ctx.translate(x,y);if(rightSide)ctx.scale(-1,1);
   if(item.custom){let img=streetLightImageCache[item.custom.id];if(!img){img=new Image();img.onload=()=>draw();img.src=item.custom.imageData;streetLightImageCache[item.custom.id]=img;}if(img.complete&&img.naturalWidth)ctx.drawImage(img,-13,-43,26,58);}
   else drawStreetLightArt(ctx,0,0,item.type,.72);
@@ -328,7 +334,7 @@ function drawRoadsideSigns(){
  const selected=(settings.roadSigns||[]).map(id=>({type:id})).concat((settings.customRoadSigns||[]).filter(s=>s.selected!==false).map(item=>({custom:item})));
  if(!selected.length)return;
  for(let i=0;i<6;i++){
-  const y=((i*118+frame*1.55)%760)-100,x=i%2===0?53:307,item=selected[i%selected.length];
+  const y=((i*118+worldFrame*1.55)%760)-100,x=i%2===0?53:307,item=selected[i%selected.length];
   if(item.custom){let img=roadSignImageCache[item.custom.id];if(!img){img=new Image();img.onload=()=>draw();img.src=item.custom.imageData;roadSignImageCache[item.custom.id]=img;}if(img.complete&&img.naturalWidth)ctx.drawImage(img,x-19,y-27,38,54);}
   else drawRoadSignArt(ctx,x,y,item.type,.78);
  }
@@ -386,8 +392,8 @@ function drawRoadsidePedestrians(){
   {action:'couple',variant:4},{action:'dog',variant:2},{action:'walk',variant:3}
  ];
  for(let i=0;i<scenes.length;i++){
-  const y=((i*67+frame*1.18)%850)-120;
-  const left=i%2===0,x=left?43:317,phase=frame*.22+i*1.37,scene=scenes[i];
+  const y=((i*67+worldFrame*1.18)%850)-120;
+  const left=i%2===0,x=left?43:317,phase=worldFrame*.22+i*1.37,scene=scenes[i];
   if(scene.action==='couple'){
    drawPixelPedestrian(x-7,y,phase,scene.variant,'walk');
    drawPixelPedestrian(x+7,y+2,phase+1.1,scene.variant+1,'walk');
@@ -401,7 +407,7 @@ function drawRoadsidePedestrians(){
 function drawRoadsideHouses(){
  const type=settings.houses?.type||'spring';
  for(let i=0;i<4;i++){
-  const y=((i*148+frame*1.35)%740)-100;
+  const y=((i*148+worldFrame*1.35)%740)-100;
   const x=i%2===0?31:329,yy=y+(i%2?42:0);
   if(houseImage&&houseImage.complete&&houseImage.naturalWidth){ctx.drawImage(houseImage,x-25,yy-25,50,50);}
   else drawHouseArt(ctx,x,yy,type,.92);
@@ -411,7 +417,7 @@ function drawRoadsideHouses(){
 function drawRoadsideTrees(){
  const chosen=getSelectedTreeItems();if(!chosen.length)return;
  for(let i=0;i<7;i++){
-  const y=((i*92+frame*2.2)%700)-90;
+  const y=((i*92+worldFrame*2.2)%700)-90;
   const drawOne=(item,x,yy)=>{if(item.kind==='custom'){const img=customTreeImageCache[item.id];if(img&&img.complete&&img.naturalWidth)ctx.drawImage(img,x-25,yy-34,50,58);}else drawSeasonTree(ctx,x,yy,item.type,.95);};
   drawOne(chosen[i%chosen.length],37,y);drawOne(chosen[(i+1)%chosen.length],323,y+43);
  }
@@ -422,16 +428,16 @@ function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx
 drawRoadsideTrees();
 drawRoadsideHouses();drawRoadsideStreetLights();drawRoadsideSigns();
 ctx.fillStyle=t.road;ctx.fillRect(65,0,230,560);if(roadImage&&roadImage.complete&&roadImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(70,0,220,560);ctx.clip();ctx.drawImage(roadImage,70,0,220,560);ctx.restore();}ctx.fillStyle=t.edge;ctx.fillRect(65,0,5,560);ctx.fillRect(290,0,5,560);
-ctx.strokeStyle=t.line;ctx.lineWidth=3;ctx.setLineDash([25,22]);ctx.lineDashOffset=-(frame*4)%47;ctx.beginPath();ctx.moveTo(141,0);ctx.lineTo(141,560);ctx.moveTo(218,0);ctx.lineTo(218,560);ctx.stroke();ctx.setLineDash([]);
+ctx.strokeStyle=t.line;ctx.lineWidth=3;ctx.setLineDash([25,22]);ctx.lineDashOffset=-(worldFrame*4)%47;ctx.beginPath();ctx.moveTo(141,0);ctx.lineTo(141,560);ctx.moveTo(218,0);ctx.lineTo(218,560);ctx.stroke();ctx.setLineDash([]);
 drawRoadsidePedestrians();
 
 trafficCars.forEach(c=>drawTrafficShape(ctx,c.x,c.y,c.model));drawCar(player.x,player.y,settings.carColor,true);
 ctx.fillStyle='#171326cc';ctx.fillRect(10,10,105,34);ctx.fillStyle='#fff';ctx.font='bold 14px system-ui';ctx.fillText('SCORE '+score,20,32);
 if(!running){ctx.fillStyle='#100e19aa';ctx.fillRect(0,0,360,560);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='900 24px system-ui';ctx.fillText(over?'GAME OVER':'READY TO RACE',180,255);ctx.font='13px system-ui';ctx.fillStyle='#ffe0a5';ctx.fillText(over?'Tap Restart to try again':'Press Start race',180,281);ctx.textAlign='left';}}
-function reset(){cancelAnimationFrame(raf);running=false;over=false;score=0;frame=0;playerLane=1;player.x=laneX[1];trafficCars=[];lastSpawn=0;setState('READY TO PLAY');draw();}
+function reset(){cancelAnimationFrame(raf);running=false;over=false;score=0;frame=0;worldFrame=0;playerLane=1;player.x=laneX[1];trafficCars=[];lastSpawn=0;setState('READY TO PLAY');draw();}
 function setState(s){document.getElementById('gameState').textContent=s;document.getElementById('startBtn').textContent=running?'Ⅱ Pause':'▶ Start race';}
 function spawn(){const lane=Math.floor(Math.random()*3),x=laneX[lane];const selected=getTrafficModels().filter(v=>v.selected);if(selected.length){const model=selected[Math.floor(Math.random()*selected.length)];trafficCars.push({x,y:-45,color:model.color,model,speed:2+3*.65+3*.25});}}
-function loop(){if(!running)return;frame++;const speed=1+3*.55;trafficCars.forEach(c=>c.y+=c.speed*speed/2);trafficCars=trafficCars.filter(c=>c.y<620);if(frame-lastSpawn>Math.max(25,115-3*16)){spawn();lastSpawn=frame;}
+function loop(){if(!running)return;frame++;const speedMultiplier=getScoreSpeedMultiplier();worldFrame+=speedMultiplier;const speed=1+3*.55;trafficCars.forEach(c=>c.y+=c.speed*speed*speedMultiplier/2);trafficCars=trafficCars.filter(c=>c.y<620);if(frame-lastSpawn>Math.max(25,(115-3*16)/speedMultiplier)){spawn();lastSpawn=frame;}
 for(const c of trafficCars){if(Math.abs(c.x-player.x)<31&&Math.abs(c.y-player.y)<48){running=false;over=true;setState('GAME OVER');draw();return;}}
 const scoreCfg=settings.scoreSystem||{};trafficCars.forEach(c=>{if(!c.passed&&c.y>player.y+35){c.passed=true;if(scoreCfg.passOn!==false)score+=Math.max(0,Number(scoreCfg.passPoints)||0);}});
 if(frame%60===0&&scoreCfg.survivalOn!==false)score+=Math.max(0,Number(scoreCfg.survivalPoints)||0);draw();raf=requestAnimationFrame(loop);}
@@ -450,6 +456,46 @@ document.getElementById('carUpload').addEventListener('change',e=>{const file=e.
 if(settings.carImageData){uploadedCarImage=new Image();uploadedCarImage.onload=()=>{drawCarPreview();draw();updateAssetMeter();};uploadedCarImage.src=settings.carImageData;}else{updateAssetMeter();}
 if(typeof settings.pedestriansOn!=='boolean')settings.pedestriansOn=true;const pedestriansToggle=document.getElementById('pedestriansToggle');pedestriansToggle.checked=settings.pedestriansOn;pedestriansToggle.addEventListener('change',e=>{settings.pedestriansOn=e.target.checked;draw();});
 if(!settings.scoreSystem||typeof settings.scoreSystem!=='object')settings.scoreSystem={passOn:true,passPoints:5,coinOn:true,coinPoints:10,survivalOn:true,survivalPoints:1};
+ if(!settings.speedSystem||typeof settings.speedSystem!=='object')settings.speedSystem={enabled:false,milestones:[{score:100,speed:1.2},{score:250,speed:1.5},{score:500,speed:2}]};
+ if(typeof settings.speedSystem.enabled!=='boolean')settings.speedSystem.enabled=false;
+ if(!Array.isArray(settings.speedSystem.milestones))settings.speedSystem.milestones=[{score:100,speed:1.2},{score:250,speed:1.5},{score:500,speed:2}];
+ settings.speedSystem.milestones=settings.speedSystem.milestones.slice(0,10).map(m=>({score:Math.max(0,Math.floor(Number(m.score)||0)),speed:Math.max(1,Math.min(5,Number(m.speed)||1.2))}));
+ function getScoreSpeedMultiplier(){
+  if(!settings.speedSystem?.enabled)return 1;
+  const eligible=settings.speedSystem.milestones.filter(m=>score>=Number(m.score)).sort((a,b)=>Number(a.score)-Number(b.score));
+  return eligible.length?Math.max(1,Math.min(5,Number(eligible[eligible.length-1].speed)||1)):1;
+ }
+ function updateSpeedSystemStatus(){document.getElementById('speedSystemStatus').textContent=settings.speedSystem.enabled?'ON · Current game speed: '+getScoreSpeedMultiplier().toFixed(1)+'×':'OFF · Game runs at normal speed.';}
+ function renderSpeedMilestones(){
+  const wrap=document.getElementById('speedMilestones');wrap.innerHTML='';
+  settings.speedSystem.milestones.forEach((m,i)=>{
+   const row=document.createElement('div');row.className='sign-option';row.style.cssText='display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:7px;padding:9px';
+   row.innerHTML='<label style="font-size:10px;color:var(--muted)">At score<input type="number" min="0" step="1" data-speed-score="'+i+'" value="'+m.score+'" style="display:block;width:100%;margin-top:5px;padding:8px;border-radius:7px;border:1px solid var(--line);background:#171326;color:white"></label><label style="font-size:10px;color:var(--muted)">Speed (×)<input type="number" min="1" max="5" step="0.1" data-speed-value="'+i+'" value="'+m.speed+'" style="display:block;width:100%;margin-top:5px;padding:8px;border-radius:7px;border:1px solid var(--line);background:#171326;color:white"></label><button type="button" class="btn secondary" data-speed-delete="'+i+'" aria-label="Delete milestone" style="padding:7px 9px;align-self:end">✕</button>';
+   wrap.appendChild(row);
+  });
+  document.getElementById('addSpeedMilestone').disabled=settings.speedSystem.milestones.length>=10;
+  updateSpeedSystemStatus();
+ }
+ const scoreSpeedToggle=document.getElementById('scoreSpeedToggle');scoreSpeedToggle.checked=settings.speedSystem.enabled;
+ scoreSpeedToggle.addEventListener('change',e=>{settings.speedSystem.enabled=e.target.checked;updateSpeedSystemStatus();draw();});
+ document.getElementById('speedMilestones').addEventListener('input',e=>{
+  const si=e.target.dataset.speedScore,vi=e.target.dataset.speedValue;
+  if(si!==undefined)settings.speedSystem.milestones[Number(si)].score=Math.max(0,Math.floor(Number(e.target.value)||0));
+  if(vi!==undefined)settings.speedSystem.milestones[Number(vi)].speed=Math.max(1,Math.min(5,Number(e.target.value)||1));
+  updateSpeedSystemStatus();draw();
+ });
+ document.getElementById('speedMilestones').addEventListener('click',e=>{
+  const index=e.target.dataset.speedDelete;if(index===undefined)return;
+  settings.speedSystem.milestones.splice(Number(index),1);renderSpeedMilestones();draw();
+ });
+ document.getElementById('addSpeedMilestone').addEventListener('click',()=>{
+  if(settings.speedSystem.milestones.length>=10)return;
+  const ordered=settings.speedSystem.milestones.slice().sort((a,b)=>a.score-b.score),last=ordered[ordered.length-1];
+  settings.speedSystem.milestones.push({score:last?last.score+100:100,speed:last?Math.min(5,Math.round((last.speed+.5)*10)/10):1.2});
+  renderSpeedMilestones();draw();
+ });
+ renderSpeedMilestones();
+
 const scoreFields=[['scorePassOn','passOn'],['scoreSurvivalOn','survivalOn']];
 scoreFields.forEach(([id,key])=>{const el=document.getElementById(id);el.checked=settings.scoreSystem[key]!==false;el.addEventListener('change',()=>{settings.scoreSystem[key]=el.checked;});});
 [['scorePassPoints','passPoints'],['scoreSurvivalPoints','survivalPoints']].forEach(([id,key])=>{const el=document.getElementById(id);el.value=Math.max(0,Number(settings.scoreSystem[key]??0));el.addEventListener('input',()=>{settings.scoreSystem[key]=Math.max(0,Math.floor(Number(el.value)||0));});});
