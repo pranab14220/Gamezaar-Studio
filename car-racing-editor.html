@@ -441,7 +441,7 @@ drawRoadsidePedestrians();
 
 trafficCars.forEach(c=>drawTrafficShape(ctx,c.x,c.y,c.model));drawCar(player.x,player.y,settings.carColor,true);
 ctx.fillStyle='#171326cc';ctx.fillRect(10,10,105,34);ctx.fillStyle='#fff';ctx.font='bold 14px system-ui';ctx.fillText('SCORE '+score,20,32);
-const enemyCount=getScoreDifficultyCount();ctx.fillStyle='#171326cc';ctx.fillRect(222,10,128,34);ctx.fillStyle='#ffe0a5';ctx.font='bold 11px system-ui';ctx.fillText('ENEMIES / WAVE: '+enemyCount,230,31);
+
 if(!running){ctx.fillStyle='#100e19aa';ctx.fillRect(0,0,360,560);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='900 24px system-ui';ctx.fillText(over?'GAME OVER':'READY TO RACE',180,255);ctx.font='13px system-ui';ctx.fillStyle='#ffe0a5';ctx.fillText(over?'Tap Restart to try again':'Press Start race',180,281);ctx.textAlign='left';}}
 function reset(){cancelAnimationFrame(raf);running=false;over=false;score=0;frame=0;worldFrame=0;playerLane=1;player.x=playerLaneX[1];trafficCars=[];lastSpawn=0;setState('READY TO PLAY');draw();}
 function setState(s){document.getElementById('gameState').textContent=s;document.getElementById('startBtn').textContent=running?'Ⅱ Pause':'▶ Start race';}
