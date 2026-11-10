@@ -71,16 +71,16 @@ let settings={...defaults,...JSON.parse(localStorage.getItem('gamezaar_racing_se
 let running=false,over=false,score=0,frame=0,worldFrame=0,playerLane=1,trafficCars=[],raf=0,lastSpawn=0,uploadedCarImage=null;
 let trafficImageCache={};
 const carPreview=document.getElementById('carPreview'),carPreviewCtx=carPreview.getContext('2d');
-const laneX=[105,180,255],player={x:180,y:455,w:38,h:66};
+const laneX=[112,180,248],player={x:180,y:455,w:32,h:54};
 const themes={spring:{grass:'#78965c',road:'#655d5b',edge:'#f6c5d8',line:'#fff0f5'},summer:{grass:'#416b4b',road:'#42434b',edge:'#e6d7b0',line:'#eee3c6'},autumn:{grass:'#a96d3f',road:'#51413c',edge:'#e9a45a',line:'#f5d19a'},winter:{grass:'#c8d7dc',road:'#626b78',edge:'#f3f5f7',line:'#f7fbff'},desert:{grass:'#c49a59',road:'#51463f',edge:'#f0d39c',line:'#f3dfb5'}};
 function syncSettings(){document.getElementById('gameName').value=settings.name;document.getElementById('projectTitle').textContent=settings.name;document.querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active',b.dataset.color===settings.carColor));drawCarPreview();}
 function rounded(x,y,w,h,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
-function drawCar(x,y,color,playerCar=false){if(playerCar&&uploadedCarImage){ctx.drawImage(uploadedCarImage,x-24,y-36,48,72);return;}rounded(x-18,y-30,36,60,9,color);rounded(x-12,y-20,24,17,5,'#b9dce4');rounded(x-12,y+3,24,13,4,'#26333e');ctx.fillStyle='#171820';ctx.fillRect(x-21,y-19,5,14);ctx.fillRect(x+16,y-19,5,14);ctx.fillRect(x-21,y+13,5,14);ctx.fillRect(x+16,y+13,5,14);ctx.fillStyle=playerCar?'#fff0b4':'#ffedc0';ctx.fillRect(x-13,y-29,7,4);ctx.fillRect(x+6,y-29,7,4);}
+function drawCar(x,y,color,playerCar=false){if(playerCar&&uploadedCarImage){ctx.drawImage(uploadedCarImage,x-17,y-27,34,54);return;}rounded(x-15,y-25,30,50,8,color);rounded(x-10,y-17,20,14,4,'#b9dce4');rounded(x-10,y+3,20,11,3,'#26333e');ctx.fillStyle='#171820';ctx.fillRect(x-18,y-16,4,12);ctx.fillRect(x+14,y-16,4,12);ctx.fillRect(x-18,y+10,4,12);ctx.fillRect(x+14,y+10,4,12);ctx.fillStyle=playerCar?'#fff0b4':'#ffedc0';ctx.fillRect(x-10,y-24,6,3);ctx.fillRect(x+4,y-24,6,3);}
 function drawCarPreview(){carPreviewCtx.clearRect(0,0,240,150);carPreviewCtx.fillStyle='#171326';carPreviewCtx.fillRect(0,0,240,150);if(uploadedCarImage){carPreviewCtx.drawImage(uploadedCarImage,82,8,76,134);}else{carPreviewCtx.fillStyle='#101018';carPreviewCtx.fillRect(89,37,62,78);carPreviewCtx.fillStyle=settings.carColor;carPreviewCtx.beginPath();carPreviewCtx.roundRect(94,28,52,94,13);carPreviewCtx.fill();carPreviewCtx.fillStyle='#b9dce4';carPreviewCtx.beginPath();carPreviewCtx.roundRect(101,42,38,25,7);carPreviewCtx.fill();carPreviewCtx.fillStyle='#26333e';carPreviewCtx.beginPath();carPreviewCtx.roundRect(101,82,38,20,5);carPreviewCtx.fill();carPreviewCtx.fillStyle='#171820';carPreviewCtx.fillRect(89,44,7,19);carPreviewCtx.fillRect(144,44,7,19);carPreviewCtx.fillRect(89,88,7,19);carPreviewCtx.fillRect(144,88,7,19);carPreviewCtx.fillStyle='#fff0b4';carPreviewCtx.fillRect(101,29,9,4);carPreviewCtx.fillRect(130,29,9,4);}}
 
 const trafficPalette=['#ed654b','#348be8','#35b77a','#f2b83f','#a77af0','#eeeeee'];
 function getTrafficModels(){return settings.trafficCars||trafficDefaults.map(x=>({...x}));}
-function drawTrafficShape(g,x,y,model){const image=trafficImageCache[model.id];if(image&&image.complete){ctx.drawImage(image,x-22,y-34,44,68);return;}ctx.save();ctx.translate(x,y);const color=model.color||'#4388d8';ctx.fillStyle='#171820';ctx.fillRect(-22,-20,6,15);ctx.fillRect(16,-20,6,15);ctx.fillRect(-22,12,6,15);ctx.fillRect(16,12,6,15);ctx.fillStyle=color;ctx.beginPath();if(model.id==='sports'){ctx.moveTo(-15,-32);ctx.lineTo(15,-32);ctx.lineTo(19,-17);ctx.lineTo(18,25);ctx.lineTo(12,32);ctx.lineTo(-12,32);ctx.lineTo(-18,25);ctx.lineTo(-19,-17);}else if(model.id==='suv'||model.id==='van'){ctx.roundRect(-19,-32,38,64,model.id==='van'?5:8);}else if(model.id==='taxi'){ctx.roundRect(-17,-29,34,58,7);}else if(model.id==='hatchback'){ctx.roundRect(-17,-29,34,58,10);}else{ctx.roundRect(-18,-31,36,62,8);}ctx.fill();ctx.fillStyle='#b9dce4';if(model.id==='sports'){ctx.beginPath();ctx.moveTo(-12,-20);ctx.lineTo(12,-20);ctx.lineTo(9,-7);ctx.lineTo(-9,-7);ctx.fill();}else{ctx.beginPath();ctx.roundRect(-12,-20,24,17,4);ctx.fill();}ctx.fillStyle='#26333e';ctx.beginPath();ctx.roundRect(-12,5,24,14,4);ctx.fill();ctx.fillStyle='#ffedc0';ctx.fillRect(-12,-30,7,4);ctx.fillRect(5,-30,7,4);if(model.id==='taxi'){ctx.fillStyle='#fff1a8';ctx.fillRect(-7,-34,14,5);}if(model.id==='van'){ctx.fillStyle='#d8e8ee';ctx.fillRect(-11,-2,22,5);}ctx.restore();}
+function drawTrafficShape(g,x,y,model){const image=trafficImageCache[model.id];if(image&&image.complete){ctx.drawImage(image,x-18,y-28,36,56);return;}ctx.save();ctx.translate(x,y);ctx.scale(.82,.82);const color=model.color||'#4388d8';ctx.fillStyle='#171820';ctx.fillRect(-22,-20,6,15);ctx.fillRect(16,-20,6,15);ctx.fillRect(-22,12,6,15);ctx.fillRect(16,12,6,15);ctx.fillStyle=color;ctx.beginPath();if(model.id==='sports'){ctx.moveTo(-15,-32);ctx.lineTo(15,-32);ctx.lineTo(19,-17);ctx.lineTo(18,25);ctx.lineTo(12,32);ctx.lineTo(-12,32);ctx.lineTo(-18,25);ctx.lineTo(-19,-17);}else if(model.id==='suv'||model.id==='van'){ctx.roundRect(-19,-32,38,64,model.id==='van'?5:8);}else if(model.id==='taxi'){ctx.roundRect(-17,-29,34,58,7);}else if(model.id==='hatchback'){ctx.roundRect(-17,-29,34,58,10);}else{ctx.roundRect(-18,-31,36,62,8);}ctx.fill();ctx.fillStyle='#b9dce4';if(model.id==='sports'){ctx.beginPath();ctx.moveTo(-12,-20);ctx.lineTo(12,-20);ctx.lineTo(9,-7);ctx.lineTo(-9,-7);ctx.fill();}else{ctx.beginPath();ctx.roundRect(-12,-20,24,17,4);ctx.fill();}ctx.fillStyle='#26333e';ctx.beginPath();ctx.roundRect(-12,5,24,14,4);ctx.fill();ctx.fillStyle='#ffedc0';ctx.fillRect(-12,-30,7,4);ctx.fillRect(5,-30,7,4);if(model.id==='taxi'){ctx.fillStyle='#fff1a8';ctx.fillRect(-7,-34,14,5);}if(model.id==='van'){ctx.fillStyle='#d8e8ee';ctx.fillRect(-11,-2,22,5);}ctx.restore();}
 function drawTrafficThumb(canvasEl,model){const g=canvasEl.getContext('2d');g.clearRect(0,0,canvasEl.width,canvasEl.height);g.fillStyle='#211b31';g.fillRect(0,0,canvasEl.width,canvasEl.height);const img=trafficImageCache[model.id];if(img&&img.complete){g.drawImage(img,canvasEl.width/2-22,4,44,78);return;}const x=canvasEl.width/2,y=43;g.save();g.translate(x,y);g.fillStyle='#111018';g.fillRect(-23,-17,6,14);g.fillRect(17,-17,6,14);g.fillRect(-23,10,6,14);g.fillRect(17,10,6,14);g.fillStyle=model.color;g.beginPath();if(model.id==='sports'){g.moveTo(-14,-36);g.lineTo(14,-36);g.lineTo(19,-15);g.lineTo(16,31);g.lineTo(-16,31);g.lineTo(-19,-15);}else{g.roundRect(-18,-34,36,68,model.id==='van'?5:9);}g.fill();g.fillStyle='#b9dce4';g.beginPath();g.roundRect(-12,-22,24,18,4);g.fill();g.fillStyle='#26333e';g.beginPath();g.roundRect(-12,7,24,14,4);g.fill();if(model.id==='taxi'){g.fillStyle='#fff1a8';g.fillRect(-7,-39,14,5);}g.restore();}
 function renderTrafficCards(){const grid=document.getElementById('trafficCarsGrid');if(!grid)return;grid.innerHTML='';getTrafficModels().forEach(model=>{const card=document.createElement('div');card.className='traffic-card'+(model.selected?' selected':'');card.dataset.carId=model.id;card.innerHTML='<div class="traffic-card-top"><span>'+model.name+'</span><label><input type="checkbox" class="traffic-select" '+(model.selected?'checked':'')+'> Use</label></div><canvas class="traffic-thumb" width="180" height="86"></canvas><div class="traffic-colors">'+trafficPalette.map((color,i)=>'<button type="button" class="traffic-color '+(model.color===color?'active':'')+'" data-color="'+color+'" style="background:'+color+'" aria-label="Color '+(i+1)+'"></button>').join('')+'</div><label class="traffic-upload">＋ Upload car photo<input type="file" class="traffic-file" accept="image/*" '+(!model.selected?'disabled':'')+'></label><div class="traffic-status">'+(model.imageData?'Custom photo selected':'Pixel car design')+'</div>';grid.appendChild(card);drawTrafficThumb(card.querySelector('canvas'),model);});document.getElementById('trafficCount').textContent=getTrafficModels().filter(x=>x.selected).length+' / 4 selected';}
 function loadTrafficImages(){trafficImageCache={};getTrafficModels().forEach(model=>{if(model.imageData){const img=new Image();img.onload=()=>{trafficImageCache[model.id]=img;renderTrafficCards();draw();};img.src=model.imageData;}});}
@@ -185,7 +185,7 @@ const landPalettes={spring:{base:'#78965c',patch:'#91ad6c',detail:'#d8a0bd'},sum
 function drawLandThumb(cv,type){const g=cv.getContext('2d'),p=landPalettes[type];g.fillStyle=p.base;g.fillRect(0,0,48,58);for(let i=0;i<12;i++){g.fillStyle=i%2?p.patch:p.detail;g.fillRect((i*17)%46,(i*23)%56,3,3);}if(type==='winter'){g.fillStyle='#fff';g.fillRect(4,8,8,2);g.fillRect(30,38,10,2);}if(type==='desert'){g.fillStyle='#ad814b';g.fillRect(4,42,14,3);g.fillRect(29,15,12,3);}}
 function renderLandOptions(){const grid=document.getElementById('landOptions');if(!grid)return;grid.innerHTML='';landTypes.forEach(item=>{const b=document.createElement('button');b.type='button';b.className='road-option'+(settings.land.type===item.id&&!settings.land.imageData?' active':'');b.innerHTML='<canvas class="road-thumb" width="48" height="58"></canvas><span>'+item.name+'</span>';grid.appendChild(b);drawLandThumb(b.querySelector('canvas'),item.id);b.addEventListener('click',()=>{settings.land={type:item.id,imageData:''};landImage=null;document.getElementById('landUploadStatus').textContent='Using '+item.name+'.';renderLandOptions();draw();});});}
 document.getElementById('landUpload').addEventListener('change',e=>{const file=e.target.files&&e.target.files[0];if(!file)return;if(!file.type.startsWith('image/')){document.getElementById('landUploadStatus').textContent='Please choose a valid image.';e.target.value='';return;}const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const cv=document.createElement('canvas'),scale=Math.min(1,512/img.width,1024/img.height);cv.width=Math.max(1,Math.round(img.width*scale));cv.height=Math.max(1,Math.round(img.height*scale));cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);settings.land={type:'summer',imageData:cv.toDataURL('image/webp',.82)};landImage=new Image();landImage.onload=()=>draw();landImage.src=settings.land.imageData;document.getElementById('landUploadStatus').textContent='✓ Your custom land image is selected.';renderLandOptions();draw();};img.onerror=()=>{document.getElementById('landUploadStatus').textContent='Could not load this image.';};img.src=reader.result;};reader.readAsDataURL(file);e.target.value='';});
-function drawLandGround(){const type=settings.land?.type||'summer',p=landPalettes[type]||landPalettes.summer;ctx.fillStyle=p.base;ctx.fillRect(0,0,360,560);if(landImage&&landImage.complete&&landImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(0,0,65,560);ctx.rect(295,0,65,560);ctx.clip();ctx.drawImage(landImage,0,0,65,560);ctx.drawImage(landImage,295,0,65,560);ctx.restore();return;}for(let y=-25+(worldFrame*1.7)%54;y<590;y+=54){for(const x of [10,42,310,342]){ctx.fillStyle=((Math.floor(y/54)+Math.floor(x/30))%2)?p.patch:p.detail;ctx.fillRect(x,y,3,3);if(type==='winter'){ctx.fillStyle='#f7fbff';ctx.fillRect(x+5,y+8,5,2);}else if(type==='autumn'){ctx.fillStyle='#e69a45';ctx.fillRect(x+5,y+8,4,3);}else if(type==='spring'){ctx.fillStyle='#f3b4cf';ctx.fillRect(x+5,y+8,3,3);}}}}
+function drawLandGround(){const type=settings.land?.type||'summer',p=landPalettes[type]||landPalettes.summer;ctx.fillStyle=p.base;ctx.fillRect(0,0,360,560);if(landImage&&landImage.complete&&landImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(0,0,78,560);ctx.rect(282,0,78,560);ctx.clip();ctx.drawImage(landImage,0,0,78,560);ctx.drawImage(landImage,282,0,78,560);ctx.restore();return;}for(let y=-25+(worldFrame*1.7)%54;y<590;y+=54){for(const x of [10,48,312,350]){ctx.fillStyle=((Math.floor(y/54)+Math.floor(x/30))%2)?p.patch:p.detail;ctx.fillRect(x,y,3,3);if(type==='winter'){ctx.fillStyle='#f7fbff';ctx.fillRect(x+5,y+8,5,2);}else if(type==='autumn'){ctx.fillStyle='#e69a45';ctx.fillRect(x+5,y+8,4,3);}else if(type==='spring'){ctx.fillStyle='#f3b4cf';ctx.fillRect(x+5,y+8,3,3);}}}}
 
 const houseTypes=[{id:'spring',name:'Spring Cottage'},{id:'summer',name:'Summer Modern House'},{id:'autumn',name:'Autumn Wooden Cabin'},{id:'winter',name:'Winter Snow Cottage'},{id:'desert',name:'Desert Villa'}];
 if(!settings.houses||typeof settings.houses!=='object')settings.houses={type:'spring',imageData:''};
@@ -262,7 +262,7 @@ function drawRoadsideStreetLights(){
  if(settings.streetLightsOn===false)return;
  const selected=(settings.streetLights||[]).map(type=>({type})).concat((settings.customStreetLights||[]).filter(x=>x.selected!==false).map(item=>({custom:item})));
  if(!selected.length)return;
- for(let i=0;i<6;i++){const y=((i*116+worldFrame*1.45)%760)-105,x=i%2===0?53:307,item=selected[i%selected.length],rightSide=i%2!==0;
+ for(let i=0;i<6;i++){const y=((i*158+worldFrame*1.25)%950)-150,x=i%2===0?69:291,item=selected[i%selected.length],rightSide=i%2!==0;
   ctx.save();ctx.translate(x,y);if(rightSide)ctx.scale(-1,1);
   if(item.custom){let img=streetLightImageCache[item.custom.id];if(!img){img=new Image();img.onload=()=>draw();img.src=item.custom.imageData;streetLightImageCache[item.custom.id]=img;}if(img.complete&&img.naturalWidth)ctx.drawImage(img,-13,-43,26,58);}
   else drawStreetLightArt(ctx,0,0,item.type,.72);
@@ -339,8 +339,8 @@ document.getElementById('roadSignUpload').addEventListener('change',e=>{
 function drawRoadsideSigns(){
  const selected=(settings.roadSigns||[]).map(id=>({type:id})).concat((settings.customRoadSigns||[]).filter(s=>s.selected!==false).map(item=>({custom:item})));
  if(!selected.length)return;
- for(let i=0;i<6;i++){
-  const y=((i*118+worldFrame*1.55)%760)-100,x=i%2===0?53:307,item=selected[i%selected.length];
+ for(let i=0;i<5;i++){
+  const y=((i*190+worldFrame*1.35)%950)-170,x=i%2===0?82:278,item=selected[i%selected.length];
   if(item.custom){let img=roadSignImageCache[item.custom.id];if(!img){img=new Image();img.onload=()=>draw();img.src=item.custom.imageData;roadSignImageCache[item.custom.id]=img;}if(img.complete&&img.naturalWidth)ctx.drawImage(img,x-19,y-27,38,54);}
   else drawRoadSignArt(ctx,x,y,item.type,.78);
  }
@@ -398,8 +398,8 @@ function drawRoadsidePedestrians(){
   {action:'couple',variant:4},{action:'dog',variant:2},{action:'walk',variant:3}
  ];
  for(let i=0;i<scenes.length;i++){
-  const y=((i*67+worldFrame*1.18)%850)-120;
-  const left=i%2===0,x=left?43:317,phase=worldFrame*.22+i*1.37,scene=scenes[i];
+  const y=((i*91+worldFrame*1.05)%1092)-150;
+  const left=i%2===0,x=left?54:306,phase=worldFrame*.18+i*1.37,scene=scenes[i];
   if(scene.action==='couple'){
    drawPixelPedestrian(x-7,y,phase,scene.variant,'walk');
    drawPixelPedestrian(x+7,y+2,phase+1.1,scene.variant+1,'walk');
@@ -413,19 +413,19 @@ function drawRoadsidePedestrians(){
 function drawRoadsideHouses(){
  const type=settings.houses?.type||'spring';
  for(let i=0;i<4;i++){
-  const y=((i*148+worldFrame*1.35)%740)-100;
-  const x=i%2===0?31:329,yy=y+(i%2?42:0);
-  if(houseImage&&houseImage.complete&&houseImage.naturalWidth){ctx.drawImage(houseImage,x-25,yy-25,50,50);}
-  else drawHouseArt(ctx,x,yy,type,.92);
+  const y=((i*205+worldFrame*1.1)%820)-130;
+  const x=i%2===0?43:317,yy=y+(i%2?70:0);
+  if(houseImage&&houseImage.complete&&houseImage.naturalWidth){ctx.drawImage(houseImage,x-21,yy-21,42,42);}
+  else drawHouseArt(ctx,x,yy,type,.76);
  }
 }
 
 function drawRoadsideTrees(){
  const chosen=getSelectedTreeItems();if(!chosen.length)return;
- for(let i=0;i<7;i++){
-  const y=((i*92+worldFrame*2.2)%700)-90;
-  const drawOne=(item,x,yy)=>{if(item.kind==='custom'){const img=customTreeImageCache[item.id];if(img&&img.complete&&img.naturalWidth)ctx.drawImage(img,x-25,yy-34,50,58);}else drawSeasonTree(ctx,x,yy,item.type,.95);};
-  drawOne(chosen[i%chosen.length],37,y);drawOne(chosen[(i+1)%chosen.length],323,y+43);
+ for(let i=0;i<6;i++){
+  const y=((i*132+worldFrame*1.65)%792)-105;
+  const drawOne=(item,x,yy)=>{if(item.kind==='custom'){const img=customTreeImageCache[item.id];if(img&&img.complete&&img.naturalWidth)ctx.drawImage(img,x-21,yy-29,42,50);}else drawSeasonTree(ctx,x,yy,item.type,.78);};
+  drawOne(chosen[i%chosen.length],20,y);drawOne(chosen[(i+1)%chosen.length],340,y+66);
  }
 }
 
@@ -433,8 +433,8 @@ function drawRoadsideTrees(){
 function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);drawLandGround();
 drawRoadsideTrees();
 drawRoadsideHouses();drawRoadsideStreetLights();drawRoadsideSigns();
-ctx.fillStyle=t.road;ctx.fillRect(65,0,230,560);if(roadImage&&roadImage.complete&&roadImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(70,0,220,560);ctx.clip();ctx.drawImage(roadImage,70,0,220,560);ctx.restore();}ctx.fillStyle=t.edge;ctx.fillRect(65,0,5,560);ctx.fillRect(290,0,5,560);
-ctx.strokeStyle=t.line;ctx.lineWidth=3;ctx.setLineDash([25,22]);ctx.lineDashOffset=-(worldFrame*4)%47;ctx.beginPath();ctx.moveTo(141,0);ctx.lineTo(141,560);ctx.moveTo(218,0);ctx.lineTo(218,560);ctx.stroke();ctx.setLineDash([]);
+ctx.fillStyle=t.road;ctx.fillRect(78,0,204,560);if(roadImage&&roadImage.complete&&roadImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(82,0,196,560);ctx.clip();ctx.drawImage(roadImage,82,0,196,560);ctx.restore();}ctx.fillStyle=t.edge;ctx.fillRect(78,0,4,560);ctx.fillRect(278,0,4,560);
+ctx.strokeStyle=t.line;ctx.lineWidth=3;ctx.setLineDash([25,22]);ctx.lineDashOffset=-(worldFrame*4)%47;ctx.beginPath();ctx.moveTo(146,0);ctx.lineTo(146,560);ctx.moveTo(214,0);ctx.lineTo(214,560);ctx.stroke();ctx.setLineDash([]);
 drawRoadsidePedestrians();
 
 trafficCars.forEach(c=>drawTrafficShape(ctx,c.x,c.y,c.model));drawCar(player.x,player.y,settings.carColor,true);
