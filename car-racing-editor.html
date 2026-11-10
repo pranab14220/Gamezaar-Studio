@@ -72,7 +72,7 @@ let running=false,over=false,score=0,frame=0,worldFrame=0,playerLane=1,trafficCa
 let trafficImageCache={};
 const carPreview=document.getElementById('carPreview'),carPreviewCtx=carPreview.getContext('2d');
 const laneX=[108,180,252],playerLaneX=laneX,player={x:180,y:455,w:32,h:54};
-let spawnPatternHistory=[];
+let spawnPatternHistory=[],nextWaveDelay=70;
 const themes={spring:{grass:'#78965c',road:'#655d5b',edge:'#f6c5d8',line:'#fff0f5'},summer:{grass:'#416b4b',road:'#42434b',edge:'#e6d7b0',line:'#eee3c6'},autumn:{grass:'#a96d3f',road:'#51413c',edge:'#e9a45a',line:'#f5d19a'},winter:{grass:'#c8d7dc',road:'#626b78',edge:'#f3f5f7',line:'#f7fbff'},desert:{grass:'#c49a59',road:'#51463f',edge:'#f0d39c',line:'#f3dfb5'}};
 function syncSettings(){document.getElementById('gameName').value=settings.name;document.getElementById('projectTitle').textContent=settings.name;document.querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active',b.dataset.color===settings.carColor));drawCarPreview();}
 function rounded(x,y,w,h,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
@@ -461,22 +461,28 @@ function spawn(){
  if(!choices.length)choices=patterns;
  const pattern=choices[Math.floor(Math.random()*choices.length)];
  spawnPatternHistory.push(pattern.slice());if(spawnPatternHistory.length>8)spawnPatternHistory.shift();
+ // Every horizontal row is built from exactly 1 or 2 distinct lanes.
+ // Keep cars in a row at the same Y so separate rows never visually merge.
  let rowOffset=0,formation=[];
  pattern.forEach((rowCount,rowIndex)=>{
   const lanes=[0,1,2];
   for(let i=lanes.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[lanes[i],lanes[j]]=[lanes[j],lanes[i]];}
-  const rowGap=[150,150,150,140+Math.floor(Math.random()*61)][Math.floor(Math.random()*4)]; // equal-distance waves plus varied safe gaps
-  lanes.slice(0,rowCount).forEach(lane=>{
-   formation.push({lane,offset:rowOffset+Math.floor(Math.random()*9)});
+  const rowGap=[150,150,150,140+Math.floor(Math.random()*61)][Math.floor(Math.random()*4)];
+  lanes.slice(0,Math.min(2,rowCount)).forEach(lane=>{
+   formation.push({lane,offset:rowOffset});
   });
   rowOffset+=rowGap;
  });
+ // Wait long enough for the previous multi-row formation to move clear,
+ // preventing rows from different waves appearing as one 3-car row.
+ const baseTrafficSpeed=(2+3*.65+3*.25)*(1+3*.55)/2;
+ nextWaveDelay=Math.ceil((rowOffset+TRAFFIC_CAR_HEIGHT+100)/baseTrafficSpeed);
  formation.forEach(item=>{
   const model=selected[Math.floor(Math.random()*selected.length)];
   trafficCars.push({x:laneX[item.lane],y:-65-item.offset,color:model.color,model,speed:2+3*.65+3*.25});
  });
 }
-function loop(){if(!running)return;frame++;const speedMultiplier=getScoreSpeedMultiplier();worldFrame+=speedMultiplier;const speed=1+3*.55;trafficCars.forEach(c=>c.y+=c.speed*speed*speedMultiplier/2);trafficCars=trafficCars.filter(c=>c.y<620);if(frame-lastSpawn>Math.max(25,(115-3*16)/speedMultiplier)){spawn();lastSpawn=frame;}
+function loop(){if(!running)return;frame++;const speedMultiplier=getScoreSpeedMultiplier();worldFrame+=speedMultiplier;const speed=1+3*.55;trafficCars.forEach(c=>c.y+=c.speed*speed*speedMultiplier/2);trafficCars=trafficCars.filter(c=>c.y<620);if(frame-lastSpawn>Math.max(45,Math.ceil(nextWaveDelay/speedMultiplier))){spawn();lastSpawn=frame;}
 for(const c of trafficCars){if(Math.abs(c.x-player.x)<(PLAYER_CAR_WIDTH+TRAFFIC_CAR_WIDTH)/2&&Math.abs(c.y-player.y)<(PLAYER_CAR_HEIGHT+TRAFFIC_CAR_HEIGHT)/2){running=false;over=true;setState('GAME OVER');draw();return;}}
 const scoreCfg=settings.scoreSystem||{};trafficCars.forEach(c=>{if(!c.passed&&c.y>player.y+35){c.passed=true;if(scoreCfg.passOn!==false)score+=Math.max(0,Number(scoreCfg.passPoints)||0);}});
 if(frame%60===0&&scoreCfg.survivalOn!==false)score+=Math.max(0,Number(scoreCfg.survivalPoints)||0);updateSpeedSystemStatus();updateDifficultySystemStatus();draw();raf=requestAnimationFrame(loop);}
