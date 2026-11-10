@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#171326">
+<title>Game Builder — GAMEZAAR Studio</title>
+<style>
+:root{--bg:#171326;--panel:#29223f;--panel2:#342b4e;--line:#ffffff20;--gold:#ffb84d;--gold2:#ffd18a;--text:#f8f5ff;--muted:#b9b1ca}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#7564a530,transparent 35%),var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}.wrap{width:min(1100px,calc(100% - 30px));margin:auto}header{height:68px;border-bottom:1px solid var(--line);display:flex;align-items:center;background:#171326e8}.nav{display:flex;justify-content:space-between;align-items:center}.brand{font-weight:900;letter-spacing:.6px}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:2px}.back{color:var(--gold2);text-decoration:none;font-size:13px;font-weight:700}.intro{padding:38px 0 22px}.eyebrow{font-size:11px;color:var(--gold2);letter-spacing:1.8px;font-weight:900}.intro h1{font-size:clamp(30px,5vw,44px);margin:8px 0}.intro p{color:var(--muted);font-size:14px;margin:0}.section-title{font-size:17px;margin:24px 0 13px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.game{background:linear-gradient(145deg,#302744,#241e36);border:1px solid var(--line);border-radius:16px;padding:16px;text-align:left;color:var(--text);cursor:pointer;transition:.18s;min-height:126px}.game:hover{transform:translateY(-3px);border-color:#ffb84d88}.game.selected{border:2px solid var(--gold);background:#473653;box-shadow:0 0 0 3px #ffb84d18}.emoji{font-size:29px}.game strong{display:block;font-size:14px;margin-top:8px}.game small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.form{margin:24px 0 50px;padding:20px;background:linear-gradient(145deg,#302744,#241e36);border:1px solid var(--line);border-radius:18px}.form label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}.form input{width:100%;max-width:460px;padding:13px 14px;border:1px solid var(--line);border-radius:11px;background:#171326;color:white;font:inherit;outline:none}.form input:focus{border-color:var(--gold)}.actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:17px}.btn{border:0;border-radius:11px;padding:12px 19px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#281c31;font-weight:900;cursor:pointer}.btn:disabled{opacity:.4;cursor:not-allowed}.hint{font-size:11px;color:var(--muted)}.notice{display:none;margin-top:14px;color:#bde7c8;font-size:13px}
+@media(max-width:650px){.grid{grid-template-columns:repeat(2,1fr);gap:9px}.game{padding:13px;min-height:120px}.intro{padding-top:28px}.form{padding:16px}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav"><div class="brand">GAMEZAAR<small>STUDIO · BUILDER</small></div><a class="back" href="index.html">← Back to studio</a></div></header>
+<main class="wrap">
+<section class="intro"><div class="eyebrow">LET'S MAKE A GAME</div><h1>Choose your game template</h1><p>Start with a template. You can customize it in the next step.</p></section>
+<h2 class="section-title">01 / Select a game type</h2>
+<section class="grid" id="games">
+<button class="game" data-type="Car Traffic Racing"><span class="emoji">🏎️</span><strong>Car Traffic Racing</strong><small>Dodge traffic and collect coins</small></button>
+<button class="game" data-type="Space Shooter"><span class="emoji">🚀</span><strong>Space Shooter</strong><small>Shoot enemies and survive</small></button>
+<button class="game" data-type="Endless Runner"><span class="emoji">🏃</span><strong>Endless Runner</strong><small>Run, jump and avoid obstacles</small></button>
+<button class="game" data-type="Dinosaur Run"><span class="emoji">🦖</span><strong>Dinosaur Run</strong><small>Jump over incoming obstacles</small></button>
+<button class="game" data-type="2048 Puzzle"><span class="emoji">🔢</span><strong>2048 Puzzle</strong><small>Merge matching number tiles</small></button>
+<button class="game" data-type="Memory Game"><span class="emoji">🧠</span><strong>Memory Game</strong><small>Find matching pairs</small></button>
+<button class="game" data-type="Pinball"><span class="emoji">🎱</span><strong>Pinball</strong><small>Keep the ball in play</small></button>
+<button class="game" data-type="Brick Breaker"><span class="emoji">🧱</span><strong>Brick Breaker</strong><small>Break bricks with the ball</small></button>
+<button class="game" data-type="Bubble Shooter"><span class="emoji">🫧</span><strong>Bubble Shooter</strong><small>Aim and pop matching bubbles</small></button>
+<button class="game" data-type="Flappy Bird Style"><span class="emoji">🐤</span><strong>Flappy Bird Style</strong><small>Fly through the gaps</small></button>
+<button class="game" data-type="Airplane Adventure"><span class="emoji">✈️</span><strong>Airplane Adventure</strong><small>Fly, collect and explore</small></button>
+</section>
+<section class="form"><h2 class="section-title" style="margin-top:0">02 / Name your project</h2><label for="projectName">Project name</label><input id="projectName" maxlength="40" placeholder="e.g. My First Racing Game"><div class="actions"><button class="btn" id="createBtn" disabled>Create project →</button><span class="hint">You can change the name later.</span></div><div class="notice" id="notice"></div></section>
+</main>
+<script>
+let selected='';
+const cards=[...document.querySelectorAll('.game')];
+const createBtn=document.getElementById('createBtn');
+cards.forEach(card=>card.addEventListener('click',()=>{cards.forEach(c=>c.classList.remove('selected'));card.classList.add('selected');selected=card.dataset.type;createBtn.disabled=false;}));
+createBtn.addEventListener('click',()=>{const name=document.getElementById('projectName').value.trim()||'My '+selected+' Game';const project={name,type:selected,createdAt:new Date().toISOString()};try{localStorage.setItem('gamezaar_current_project',JSON.stringify(project));document.getElementById('notice').style.display='block';document.getElementById('notice').textContent='✓ Project setup started: '+name+' ('+selected+'). Next we will add its editor and playable preview.';}catch(e){document.getElementById('notice').style.display='block';document.getElementById('notice').textContent='Your browser could not save this project.';}});
+</script>
+</body></html>
