@@ -42,7 +42,7 @@
  <div class="meter-foot"><span id="assetRemaining">10 MB remaining</span><span>Goal: 8 MB · Max: 10 MB</span></div>
  <div class="asset-message" id="assetMessage">Images: max 300 KB each before compression. Uploaded assets are counted after WebP compression.</div>
 </div>
-<div class="section-title">03 · Traffic Cars</div><div class="traffic-counter">Choose up to 4 cars for traffic. <strong id="trafficCount">4 / 4 selected</strong></div><div class="traffic-grid" id="trafficCarsGrid"></div><div class="tip">Choose a different color for each traffic car, or replace any selected car with your own image.</div><div class="section-title">04 · Coins & Collectibles</div><div class="tip" style="margin:0 0 10px">Choose one coin design for your game, or upload your own image.</div><div class="coin-grid" id="coinOptions"></div><label class="upload-box" for="coinUpload" style="margin-top:10px">＋ Upload your own coin image<input id="coinUpload" type="file" accept="image/*"></label><div class="coin-upload-status" id="coinUploadStatus">No custom coin uploaded.</div><div class="section-title">05 · Trees & Seasons</div><div class="tip" style="margin:0 0 10px">Choose one or multiple seasonal trees to decorate the roadside in your game.</div><div class="tree-grid" id="treeOptions"></div><div class="tree-note">Selected trees appear along both sides of the road. You can mix different seasons.</div><div class="tip">Changes update the live preview. Save your project to keep the settings on this device.</div>
+<div class="section-title">03 · Traffic Cars</div><div class="traffic-counter">Choose up to 4 cars for traffic. <strong id="trafficCount">4 / 4 selected</strong></div><div class="traffic-grid" id="trafficCarsGrid"></div><div class="tip">Choose a different color for each traffic car, or replace any selected car with your own image.</div><div class="section-title">04 · Coins & Collectibles</div><div class="tip" style="margin:0 0 10px">Choose one coin design for your game, or upload your own image.</div><div class="coin-grid" id="coinOptions"></div><label class="upload-box" for="coinUpload" style="margin-top:10px">＋ Upload your own coin image<input id="coinUpload" type="file" accept="image/*"></label><div class="coin-upload-status" id="coinUploadStatus">No custom coin uploaded.</div><div class="section-title">05 · Trees & Seasons</div><div class="tip" style="margin:0 0 10px">Choose any 2 trees, upload up to 2 of your own, or mix both. Maximum 2 active trees.</div><div class="tree-note" id="treeCount">0 / 2 trees selected</div><div class="tree-grid" id="treeOptions"></div><label class="upload-box" for="treeUpload" style="margin-top:10px">＋ Upload your own tree image (max 2)<input id="treeUpload" type="file" accept="image/*" multiple></label><div class="tree-grid" id="customTreeOptions" style="margin-top:9px"></div><div class="tree-note">Selected trees appear along both sides of the road. You can mix seasonal and uploaded trees.</div><div class="tip">Changes update the live preview. Save your project to keep the settings on this device.</div>
 </aside>
 </div>
 <div class="savebar"><button class="btn" id="saveBtn">Save project</button><span class="status" id="saveStatus"></span></div>
@@ -81,11 +81,14 @@ function renderCoinOptions(){const grid=document.getElementById('coinOptions');i
 document.getElementById('coinUpload').addEventListener('change',e=>{const file=e.target.files&&e.target.files[0];if(!file)return;if(!file.type.startsWith('image/')){document.getElementById('coinUploadStatus').textContent='Please choose a valid image.';e.target.value='';return;}const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const cv=document.createElement('canvas'),scale=Math.min(1,256/img.width,256/img.height);cv.width=Math.max(1,Math.round(img.width*scale));cv.height=Math.max(1,Math.round(img.height*scale));cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);const data=cv.toDataURL('image/webp',.82);settings.coin={type:'star',imageData:data};coinImage=new Image();coinImage.onload=()=>{document.getElementById('coinUploadStatus').textContent='✓ Your custom coin image is selected.';renderCoinOptions();draw();};coinImage.src=data;};img.onerror=()=>{document.getElementById('coinUploadStatus').textContent='Could not load this image.';};img.src=reader.result;};reader.readAsDataURL(file);});
 
 
+
 const treeTypes=[{id:'spring',name:'Spring Tree'},{id:'summer',name:'Summer Tree'},{id:'autumn',name:'Autumn Tree'},{id:'winter',name:'Winter Tree'},{id:'desert',name:'Desert Tree'}];
 if(!Array.isArray(settings.treesSelected))settings.treesSelected=['summer'];
+if(!Array.isArray(settings.customTrees))settings.customTrees=[];
+if(settings.treesSelected.length+settings.customTrees.filter(t=>t.selected).length>2){settings.treesSelected=settings.treesSelected.slice(0,2);settings.customTrees.forEach(t=>t.selected=false);}
 function drawSeasonTree(g,x,y,type,scale=1){
  g.save();g.translate(x,y);g.scale(scale,scale);g.imageSmoothingEnabled=false;
- const trunk='#795036';g.fillStyle=trunk;g.fillRect(-4,4,8,22);
+ g.fillStyle='#795036';g.fillRect(-4,4,8,22);
  if(type==='desert'){
   g.fillStyle='#9b7047';g.fillRect(-3,5,6,21);g.fillRect(-13,-3,4,15);g.fillRect(9,-7,4,17);
   g.fillStyle='#4b9b58';g.fillRect(-15,-7,8,5);g.fillRect(-18,-12,8,5);g.fillRect(8,-11,8,5);g.fillRect(9,-16,8,5);g.fillRect(-4,-18,8,5);g.fillRect(-5,-23,8,5);
@@ -94,18 +97,78 @@ function drawSeasonTree(g,x,y,type,scale=1){
   g.fillStyle=palette[0];g.fillRect(-13,-13,26,20);g.fillRect(-9,-20,18,10);g.fillRect(-17,-7,34,10);
   g.fillStyle=palette[1];g.fillRect(-9,-17,18,10);g.fillRect(-13,-5,26,8);g.fillRect(-5,-24,10,7);
   g.fillStyle=palette[2];g.fillRect(-5,-19,5,5);g.fillRect(5,-10,5,5);g.fillRect(-12,-3,5,4);
-  if(type==='winter'){g.fillStyle='#ffffff';g.fillRect(-13,-13,26,3);g.fillRect(-9,-20,18,3);g.fillRect(-17,-7,8,3);g.fillRect(9,-7,8,3);}
+  if(type==='winter'){g.fillStyle='#fff';g.fillRect(-13,-13,26,3);g.fillRect(-9,-20,18,3);g.fillRect(-17,-7,8,3);g.fillRect(9,-7,8,3);}
   if(type==='spring'){g.fillStyle='#fff0a8';g.fillRect(-8,-10,3,3);g.fillRect(6,-2,3,3);g.fillRect(1,-19,3,3);}
  }
  g.restore();
 }
-function drawTreeThumb(canvasEl,type){const g=canvasEl.getContext('2d');g.clearRect(0,0,56,58);drawSeasonTree(g,28,26,type,1.35);}
-function renderTreeOptions(){const grid=document.getElementById('treeOptions');if(!grid)return;grid.innerHTML='';treeTypes.forEach(item=>{const active=settings.treesSelected.includes(item.id);const label=document.createElement('label');label.className='tree-option'+(active?' active':'');label.innerHTML='<canvas class="tree-thumb" width="56" height="58"></canvas><span><input type="checkbox" value="'+item.id+'" '+(active?'checked':'')+'> '+item.name+'</span>';grid.appendChild(label);drawTreeThumb(label.querySelector('canvas'),item.id);});}
-document.getElementById('treeOptions').addEventListener('change',e=>{if(e.target.type!=='checkbox')return;const id=e.target.value;if(e.target.checked){if(!settings.treesSelected.includes(id))settings.treesSelected.push(id);}else{settings.treesSelected=settings.treesSelected.filter(x=>x!==id);}renderTreeOptions();draw();});
-function drawRoadsideTrees(){
- const chosen=settings.treesSelected||[];if(!chosen.length)return;
- for(let i=0;i<7;i++){const y=((i*92+frame*2.2)%700)-90;const type=chosen[i%chosen.length];drawSeasonTree(ctx,37,y,type,.95);drawSeasonTree(ctx,323,y+43,type,.95);}
+function getSelectedTreeItems(){
+ const preset=(settings.treesSelected||[]).map(id=>({kind:'preset',id,type:id,name:treeTypes.find(t=>t.id===id)?.name||id}));
+ const custom=(settings.customTrees||[]).filter(t=>t.selected).map(t=>({kind:'custom',id:t.id,type:'custom',name:t.name,imageData:t.imageData}));
+ return [...preset,...custom].slice(0,2);
 }
+function drawTreeThumb(canvasEl,type){const g=canvasEl.getContext('2d');g.clearRect(0,0,56,58);drawSeasonTree(g,28,26,type,1.35);}
+function renderTreeOptions(){
+ const grid=document.getElementById('treeOptions');if(!grid)return;grid.innerHTML='';
+ const selectedCount=getSelectedTreeItems().length;
+ treeTypes.forEach(item=>{
+  const active=settings.treesSelected.includes(item.id),label=document.createElement('label');
+  label.className='tree-option'+(active?' active':'');
+  label.innerHTML='<canvas class="tree-thumb" width="56" height="58"></canvas><span><input type="checkbox" value="'+item.id+'" '+(active?'checked':'')+'> '+item.name+'</span>';
+  const check=label.querySelector('input');check.disabled=!active&&selectedCount>=2;grid.appendChild(label);drawTreeThumb(label.querySelector('canvas'),item.id);
+ });
+ renderCustomTreeOptions();
+ document.getElementById('treeCount').textContent=getSelectedTreeItems().length+' / 2 trees selected';
+ document.getElementById('treeUpload').disabled=settings.customTrees.length>=2;
+}
+function renderCustomTreeOptions(){
+ const grid=document.getElementById('customTreeOptions');if(!grid)return;grid.innerHTML='';
+ (settings.customTrees||[]).forEach(tree=>{
+  const card=document.createElement('div');card.className='tree-option'+(tree.selected?' active':'');
+  card.innerHTML='<img class="tree-thumb" alt="Custom tree" src="'+tree.imageData+'"><span style="flex:1;min-width:0">'+tree.name+'<br><small>'+(tree.selected?'Selected':'Not selected')+'</small><br><button type="button" class="btn secondary tree-use" style="padding:5px 8px;margin-top:5px">'+(tree.selected?'Remove selection':'Use tree')+'</button> <button type="button" class="btn secondary tree-delete" style="padding:5px 8px;margin-top:5px">Delete</button></span>';
+  card.dataset.treeId=tree.id;grid.appendChild(card);
+ });
+}
+document.getElementById('treeOptions').addEventListener('change',e=>{
+ if(e.target.type!=='checkbox')return;const id=e.target.value;
+ if(e.target.checked){if(getSelectedTreeItems().length>=2){e.target.checked=false;alert('You can use only 2 trees in total.');return;}if(!settings.treesSelected.includes(id))settings.treesSelected.push(id);}
+ else settings.treesSelected=settings.treesSelected.filter(x=>x!==id);
+ renderTreeOptions();draw();
+});
+document.getElementById('customTreeOptions').addEventListener('click',e=>{
+ const card=e.target.closest('[data-tree-id]');if(!card)return;const tree=settings.customTrees.find(t=>t.id===card.dataset.treeId);if(!tree)return;
+ if(e.target.classList.contains('tree-delete')){settings.customTrees=settings.customTrees.filter(t=>t.id!==tree.id);}
+ else if(e.target.classList.contains('tree-use')){if(tree.selected)tree.selected=false;else if(getSelectedTreeItems().length>=2){alert('You can use only 2 trees in total.');return;}else tree.selected=true;}
+ renderTreeOptions();draw();
+});
+document.getElementById('treeUpload').addEventListener('change',e=>{
+ const files=Array.from(e.target.files||[]);if(!files.length)return;
+ let remaining=2-settings.customTrees.length;if(remaining<=0){alert('You can upload a maximum of 2 custom trees.');e.target.value='';return;}
+ files.slice(0,remaining).forEach(file=>{
+  if(!file.type.startsWith('image/'))return;
+  const reader=new FileReader();reader.onload=()=>{
+   const img=new Image();img.onload=()=>{
+    const cv=document.createElement('canvas'),scale=Math.min(1,256/img.width,320/img.height);
+    cv.width=Math.max(1,Math.round(img.width*scale));cv.height=Math.max(1,Math.round(img.height*scale));
+    cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+    const item={id:'custom-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),name:'My Tree '+(settings.customTrees.length+1),imageData:cv.toDataURL('image/webp',.82),selected:false};
+    settings.customTrees.push(item);
+    if(getSelectedTreeItems().length<2)item.selected=true;
+    renderTreeOptions();draw();
+   };img.onerror=()=>alert('Could not load '+file.name);img.src=reader.result;
+  };reader.readAsDataURL(file);
+ });
+ e.target.value='';
+});
+function drawRoadsideTrees(){
+ const chosen=getSelectedTreeItems();if(!chosen.length)return;
+ for(let i=0;i<7;i++){
+  const y=((i*92+frame*2.2)%700)-90;
+  const drawOne=(item,x,yy)=>{if(item.kind==='custom'){const img=new Image();img.src=item.imageData;try{ctx.drawImage(img,x-25,yy-34,50,58);}catch(e){}}else drawSeasonTree(ctx,x,yy,item.type,.95);};
+  drawOne(chosen[i%chosen.length],37,y);drawOne(chosen[(i+1)%chosen.length],323,y+43);
+ }
+}
+
 
 function draw(){const t=themes.summer;ctx.clearRect(0,0,360,560);ctx.fillStyle=t.grass;ctx.fillRect(0,0,360,560);
 for(let y=-40+(frame*4)%70;y<600;y+=70){ctx.fillStyle='#315b3e';ctx.beginPath();ctx.arc(24,y,9,0,7);ctx.arc(337,y+25,11,0,7);ctx.fill();}
