@@ -53,7 +53,7 @@
 <div class="tree-note" id="speedSystemStatus">OFF · Game runs at normal speed.</div>
 <div class="section-title">14 · Score-Based Difficulty</div>
 <label class="sign-option active" style="margin:8px 0"><input id="scoreDifficultyToggle" type="checkbox"> <span>Enable score-based difficulty (default OFF)</span></label>
-<div class="tip" style="margin:0 0 10px">Set score milestones and enemy cars per wave. Maximum 2 cars will be side by side; any extra car will appear in a separate row with a safe gap.</div>
+<div class="tip" style="margin:0 0 10px">Set score milestones and enemy cars per wave. Set 1–6 cars per wave. Up to 3 lanes can be used in each row; extra cars arrive in later rows with randomized safe gaps.</div>
 <div id="difficultyMilestones" style="display:grid;gap:8px"></div>
 <button class="btn secondary" type="button" id="addDifficultyMilestone" style="margin-top:10px;width:100%">＋ Add difficulty milestone</button>
 <div class="tree-note" id="difficultySystemStatus">OFF · 1 enemy car per wave.</div>
@@ -444,7 +444,7 @@ const enemyCount=getScoreDifficultyCount();ctx.fillStyle='#171326cc';ctx.fillRec
 if(!running){ctx.fillStyle='#100e19aa';ctx.fillRect(0,0,360,560);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='900 24px system-ui';ctx.fillText(over?'GAME OVER':'READY TO RACE',180,255);ctx.font='13px system-ui';ctx.fillStyle='#ffe0a5';ctx.fillText(over?'Tap Restart to try again':'Press Start race',180,281);ctx.textAlign='left';}}
 function reset(){cancelAnimationFrame(raf);running=false;over=false;score=0;frame=0;worldFrame=0;playerLane=1;player.x=laneX[1];trafficCars=[];lastSpawn=0;setState('READY TO PLAY');draw();}
 function setState(s){document.getElementById('gameState').textContent=s;document.getElementById('startBtn').textContent=running?'Ⅱ Pause':'▶ Start race';}
-function spawn(){const selected=getTrafficModels().filter(v=>v.selected);if(!selected.length)return;const count=Math.min(3,getScoreDifficultyCount());const lanes=[0,1,2];for(let i=lanes.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[lanes[i],lanes[j]]=[lanes[j],lanes[i]];}let formation=[];if(count===1){formation=[{lane:lanes[0],offset:Math.floor(Math.random()*61)}];}else if(count===2){if(Math.random()<0.48){const lead=Math.floor(Math.random()*18);formation=[{lane:lanes[0],offset:lead},{lane:lanes[1],offset:0}];}else{const gap=105+Math.floor(Math.random()*56);const firstAhead=Math.random()<0.5;formation=[{lane:lanes[0],offset:firstAhead?0:gap},{lane:lanes[1],offset:firstAhead?gap:0}];}}else if(Math.random()<0.58){const gap=130+Math.floor(Math.random()*41);const pairOffset=Math.floor(Math.random()*26);formation=[{lane:lanes[0],offset:0},{lane:lanes[1],offset:pairOffset},{lane:lanes[2],offset:gap}];}else{const gap=105+Math.floor(Math.random()*36);const startOffset=Math.floor(Math.random()*25);formation=[{lane:lanes[0],offset:startOffset},{lane:lanes[1],offset:startOffset+gap},{lane:lanes[2],offset:startOffset+gap*2}];}formation.forEach(item=>{const model=selected[Math.floor(Math.random()*selected.length)];trafficCars.push({x:laneX[item.lane],y:-55-item.offset,color:model.color,model,speed:2+3*.65+3*.25});});}
+function spawn(){const selected=getTrafficModels().filter(v=>v.selected);if(!selected.length)return;const count=Math.min(6,getScoreDifficultyCount());let formation=[],remaining=count,rowOffset=0;while(remaining>0){const rowCount=Math.min(3,remaining);const lanes=[0,1,2];for(let i=lanes.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[lanes[i],lanes[j]]=[lanes[j],lanes[i]];}const rowGap=110+Math.floor(Math.random()*51);lanes.slice(0,rowCount).forEach(lane=>{const offset=rowOffset+(rowCount>1?Math.floor(Math.random()*24):Math.floor(Math.random()*51));formation.push({lane,offset});});remaining-=rowCount;rowOffset+=rowGap;}formation.forEach(item=>{const model=selected[Math.floor(Math.random()*selected.length)];trafficCars.push({x:laneX[item.lane],y:-55-item.offset,color:model.color,model,speed:2+3*.65+3*.25});});}
 function loop(){if(!running)return;frame++;const speedMultiplier=getScoreSpeedMultiplier();worldFrame+=speedMultiplier;const speed=1+3*.55;trafficCars.forEach(c=>c.y+=c.speed*speed*speedMultiplier/2);trafficCars=trafficCars.filter(c=>c.y<620);if(frame-lastSpawn>Math.max(25,(115-3*16)/speedMultiplier)){spawn();lastSpawn=frame;}
 for(const c of trafficCars){if(Math.abs(c.x-player.x)<27&&Math.abs(c.y-player.y)<42){running=false;over=true;setState('GAME OVER');draw();return;}}
 const scoreCfg=settings.scoreSystem||{};trafficCars.forEach(c=>{if(!c.passed&&c.y>player.y+35){c.passed=true;if(scoreCfg.passOn!==false)score+=Math.max(0,Number(scoreCfg.passPoints)||0);}});
@@ -507,11 +507,11 @@ if(!settings.scoreSystem||typeof settings.scoreSystem!=='object')settings.scoreS
  if(!settings.difficultySystem||typeof settings.difficultySystem!=='object')settings.difficultySystem={enabled:false,milestones:[{score:200,cars:2},{score:500,cars:3}]};
  if(typeof settings.difficultySystem.enabled!=='boolean')settings.difficultySystem.enabled=false;
  if(!Array.isArray(settings.difficultySystem.milestones))settings.difficultySystem.milestones=[{score:200,cars:2},{score:500,cars:3}];
- settings.difficultySystem.milestones=settings.difficultySystem.milestones.slice(0,10).map(m=>({score:Math.max(0,Math.floor(Number(m.score)||0)),cars:Math.max(1,Math.min(3,Math.floor(Number(m.cars)||1)))}));
+ settings.difficultySystem.milestones=settings.difficultySystem.milestones.slice(0,10).map(m=>({score:Math.max(0,Math.floor(Number(m.score)||0)),cars:Math.max(1,Math.min(6,Math.floor(Number(m.cars)||1)))}));
  function getScoreDifficultyCount(){
   if(!settings.difficultySystem?.enabled)return 1;
   const eligible=settings.difficultySystem.milestones.filter(m=>score>=Number(m.score)).sort((a,b)=>Number(a.score)-Number(b.score));
-  return eligible.length?Math.max(1,Math.min(3,Number(eligible[eligible.length-1].cars)||1)):1;
+  return eligible.length?Math.max(1,Math.min(6,Number(eligible[eligible.length-1].cars)||1)):1;
  }
  function updateDifficultySystemStatus(){
   const count=getScoreDifficultyCount(),el=document.getElementById('difficultySystemStatus');
@@ -522,7 +522,7 @@ if(!settings.scoreSystem||typeof settings.scoreSystem!=='object')settings.scoreS
   const wrap=document.getElementById('difficultyMilestones');wrap.innerHTML='';
   settings.difficultySystem.milestones.forEach((m,i)=>{
    const row=document.createElement('div');row.className='sign-option';row.style.cssText='display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:7px;padding:9px';
-   row.innerHTML='<label style="font-size:10px;color:var(--muted)">After score<input type="number" min="0" step="1" data-difficulty-score="'+i+'" value="'+m.score+'" style="display:block;width:100%;margin-top:5px;padding:8px;border-radius:7px;border:1px solid var(--line);background:#171326;color:white"></label><label style="font-size:10px;color:var(--muted)">Cars per wave<input type="number" min="1" max="3" step="1" data-difficulty-cars="'+i+'" value="'+m.cars+'" style="display:block;width:100%;margin-top:5px;padding:8px;border-radius:7px;border:1px solid var(--line);background:#171326;color:white"></label><button type="button" class="btn secondary" data-difficulty-delete="'+i+'" aria-label="Delete milestone" style="padding:7px 9px;align-self:end">✕</button>';
+   row.innerHTML='<label style="font-size:10px;color:var(--muted)">After score<input type="number" min="0" step="1" data-difficulty-score="'+i+'" value="'+m.score+'" style="display:block;width:100%;margin-top:5px;padding:8px;border-radius:7px;border:1px solid var(--line);background:#171326;color:white"></label><label style="font-size:10px;color:var(--muted)">Cars per wave<input type="number" min="1" max="6" step="1" data-difficulty-cars="'+i+'" value="'+m.cars+'" style="display:block;width:100%;margin-top:5px;padding:8px;border-radius:7px;border:1px solid var(--line);background:#171326;color:white"></label><button type="button" class="btn secondary" data-difficulty-delete="'+i+'" aria-label="Delete milestone" style="padding:7px 9px;align-self:end">✕</button>';
    wrap.appendChild(row);
   });
   document.getElementById('addDifficultyMilestone').disabled=settings.difficultySystem.milestones.length>=10;
@@ -533,7 +533,7 @@ if(!settings.scoreSystem||typeof settings.scoreSystem!=='object')settings.scoreS
  document.getElementById('difficultyMilestones').addEventListener('input',e=>{
   const si=e.target.dataset.difficultyScore,ci=e.target.dataset.difficultyCars;
   if(si!==undefined)settings.difficultySystem.milestones[Number(si)].score=Math.max(0,Math.floor(Number(e.target.value)||0));
-  if(ci!==undefined)settings.difficultySystem.milestones[Number(ci)].cars=Math.max(1,Math.min(3,Math.floor(Number(e.target.value)||1)));
+  if(ci!==undefined)settings.difficultySystem.milestones[Number(ci)].cars=Math.max(1,Math.min(6,Math.floor(Number(e.target.value)||1)));
   updateDifficultySystemStatus();draw();
  });
  document.getElementById('difficultyMilestones').addEventListener('click',e=>{
