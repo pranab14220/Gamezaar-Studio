@@ -447,7 +447,7 @@ function spawn(){const selected=getTrafficModels().filter(v=>v.selected);if(!sel
 function loop(){if(!running)return;frame++;const speedMultiplier=getScoreSpeedMultiplier();worldFrame+=speedMultiplier;const speed=1+3*.55;trafficCars.forEach(c=>c.y+=c.speed*speed*speedMultiplier/2);trafficCars=trafficCars.filter(c=>c.y<620);if(frame-lastSpawn>Math.max(25,(115-3*16)/speedMultiplier)){spawn();lastSpawn=frame;}
 for(const c of trafficCars){if(Math.abs(c.x-player.x)<31&&Math.abs(c.y-player.y)<48){running=false;over=true;setState('GAME OVER');draw();return;}}
 const scoreCfg=settings.scoreSystem||{};trafficCars.forEach(c=>{if(!c.passed&&c.y>player.y+35){c.passed=true;if(scoreCfg.passOn!==false)score+=Math.max(0,Number(scoreCfg.passPoints)||0);}});
-if(frame%60===0&&scoreCfg.survivalOn!==false)score+=Math.max(0,Number(scoreCfg.survivalPoints)||0);updateSpeedSystemStatus();draw();raf=requestAnimationFrame(loop);}
+if(frame%60===0&&scoreCfg.survivalOn!==false)score+=Math.max(0,Number(scoreCfg.survivalPoints)||0);updateSpeedSystemStatus();updateDifficultySystemStatus();draw();raf=requestAnimationFrame(loop);}
 function move(dir){if(!running)return;playerLane=Math.max(0,Math.min(2,playerLane+dir));player.x=laneX[playerLane];}
 function start(){if(over){reset();}running=!running;setState(running?'RACING':'PAUSED');if(running)loop();else cancelAnimationFrame(raf);draw();}
 document.getElementById('startBtn').addEventListener('click',start);document.getElementById('restartBtn').addEventListener('click',reset);
