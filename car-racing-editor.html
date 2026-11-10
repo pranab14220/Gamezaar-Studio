@@ -51,6 +51,12 @@
 <div id="speedMilestones" style="display:grid;gap:8px"></div>
 <button class="btn secondary" type="button" id="addSpeedMilestone" style="margin-top:10px;width:100%">＋ Add score milestone</button>
 <div class="tree-note" id="speedSystemStatus">OFF · Game runs at normal speed.</div>
+<div class="section-title">14 · Score-Based Difficulty</div>
+<label class="sign-option active" style="margin:8px 0"><input id="scoreDifficultyToggle" type="checkbox"> <span>Enable score-based difficulty (default OFF)</span></label>
+<div class="tip" style="margin:0 0 10px">Set your score milestones and how many enemy cars arrive together in one wave. Maximum 3 cars at a time because the road has 3 lanes.</div>
+<div id="difficultyMilestones" style="display:grid;gap:8px"></div>
+<button class="btn secondary" type="button" id="addDifficultyMilestone" style="margin-top:10px;width:100%">＋ Add difficulty milestone</button>
+<div class="tree-note" id="difficultySystemStatus">OFF · 1 enemy car per wave.</div>
 <div class="tip">Changes update the live preview. Save your project to keep the settings on this device.</div>
 </aside>
 </div>
@@ -433,10 +439,11 @@ drawRoadsidePedestrians();
 
 trafficCars.forEach(c=>drawTrafficShape(ctx,c.x,c.y,c.model));drawCar(player.x,player.y,settings.carColor,true);
 ctx.fillStyle='#171326cc';ctx.fillRect(10,10,105,34);ctx.fillStyle='#fff';ctx.font='bold 14px system-ui';ctx.fillText('SCORE '+score,20,32);
+const enemyCount=getScoreDifficultyCount();ctx.fillStyle='#171326cc';ctx.fillRect(222,10,128,34);ctx.fillStyle='#ffe0a5';ctx.font='bold 11px system-ui';ctx.fillText('ENEMIES / WAVE: '+enemyCount,230,31);
 if(!running){ctx.fillStyle='#100e19aa';ctx.fillRect(0,0,360,560);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='900 24px system-ui';ctx.fillText(over?'GAME OVER':'READY TO RACE',180,255);ctx.font='13px system-ui';ctx.fillStyle='#ffe0a5';ctx.fillText(over?'Tap Restart to try again':'Press Start race',180,281);ctx.textAlign='left';}}
 function reset(){cancelAnimationFrame(raf);running=false;over=false;score=0;frame=0;worldFrame=0;playerLane=1;player.x=laneX[1];trafficCars=[];lastSpawn=0;setState('READY TO PLAY');draw();}
 function setState(s){document.getElementById('gameState').textContent=s;document.getElementById('startBtn').textContent=running?'Ⅱ Pause':'▶ Start race';}
-function spawn(){const lane=Math.floor(Math.random()*3),x=laneX[lane];const selected=getTrafficModels().filter(v=>v.selected);if(selected.length){const model=selected[Math.floor(Math.random()*selected.length)];trafficCars.push({x,y:-45,color:model.color,model,speed:2+3*.65+3*.25});}}
+function spawn(){const selected=getTrafficModels().filter(v=>v.selected);if(!selected.length)return;const count=getScoreDifficultyCount(),lanes=[0,1,2].sort(()=>Math.random()-.5).slice(0,count);lanes.forEach((lane,index)=>{const model=selected[Math.floor(Math.random()*selected.length)];trafficCars.push({x:laneX[lane],y:-45-(index%2)*12,color:model.color,model,speed:2+3*.65+3*.25});});}
 function loop(){if(!running)return;frame++;const speedMultiplier=getScoreSpeedMultiplier();worldFrame+=speedMultiplier;const speed=1+3*.55;trafficCars.forEach(c=>c.y+=c.speed*speed*speedMultiplier/2);trafficCars=trafficCars.filter(c=>c.y<620);if(frame-lastSpawn>Math.max(25,(115-3*16)/speedMultiplier)){spawn();lastSpawn=frame;}
 for(const c of trafficCars){if(Math.abs(c.x-player.x)<31&&Math.abs(c.y-player.y)<48){running=false;over=true;setState('GAME OVER');draw();return;}}
 const scoreCfg=settings.scoreSystem||{};trafficCars.forEach(c=>{if(!c.passed&&c.y>player.y+35){c.passed=true;if(scoreCfg.passOn!==false)score+=Math.max(0,Number(scoreCfg.passPoints)||0);}});
@@ -495,6 +502,50 @@ if(!settings.scoreSystem||typeof settings.scoreSystem!=='object')settings.scoreS
   renderSpeedMilestones();draw();
  });
  renderSpeedMilestones();
+
+ if(!settings.difficultySystem||typeof settings.difficultySystem!=='object')settings.difficultySystem={enabled:false,milestones:[{score:200,cars:2},{score:500,cars:3}]};
+ if(typeof settings.difficultySystem.enabled!=='boolean')settings.difficultySystem.enabled=false;
+ if(!Array.isArray(settings.difficultySystem.milestones))settings.difficultySystem.milestones=[{score:200,cars:2},{score:500,cars:3}];
+ settings.difficultySystem.milestones=settings.difficultySystem.milestones.slice(0,10).map(m=>({score:Math.max(0,Math.floor(Number(m.score)||0)),cars:Math.max(1,Math.min(3,Math.floor(Number(m.cars)||1)))}));
+ function getScoreDifficultyCount(){
+  if(!settings.difficultySystem?.enabled)return 1;
+  const eligible=settings.difficultySystem.milestones.filter(m=>score>=Number(m.score)).sort((a,b)=>Number(a.score)-Number(b.score));
+  return eligible.length?Math.max(1,Math.min(3,Number(eligible[eligible.length-1].cars)||1)):1;
+ }
+ function updateDifficultySystemStatus(){
+  const count=getScoreDifficultyCount(),el=document.getElementById('difficultySystemStatus');
+  const label=(settings.difficultySystem.enabled?'ON':'OFF')+' · '+count+' enemy car'+(count===1?'':'s')+' per wave'+(settings.difficultySystem.enabled?' at current score':'');
+  if(el.textContent!==label)el.textContent=label;
+ }
+ function renderDifficultyMilestones(){
+  const wrap=document.getElementById('difficultyMilestones');wrap.innerHTML='';
+  settings.difficultySystem.milestones.forEach((m,i)=>{
+   const row=document.createElement('div');row.className='sign-option';row.style.cssText='display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:7px;padding:9px';
+   row.innerHTML='<label style="font-size:10px;color:var(--muted)">After score<input type="number" min="0" step="1" data-difficulty-score="'+i+'" value="'+m.score+'" style="display:block;width:100%;margin-top:5px;padding:8px;border-radius:7px;border:1px solid var(--line);background:#171326;color:white"></label><label style="font-size:10px;color:var(--muted)">Cars per wave<input type="number" min="1" max="3" step="1" data-difficulty-cars="'+i+'" value="'+m.cars+'" style="display:block;width:100%;margin-top:5px;padding:8px;border-radius:7px;border:1px solid var(--line);background:#171326;color:white"></label><button type="button" class="btn secondary" data-difficulty-delete="'+i+'" aria-label="Delete milestone" style="padding:7px 9px;align-self:end">✕</button>';
+   wrap.appendChild(row);
+  });
+  document.getElementById('addDifficultyMilestone').disabled=settings.difficultySystem.milestones.length>=10;
+  updateDifficultySystemStatus();
+ }
+ const difficultyToggle=document.getElementById('scoreDifficultyToggle');difficultyToggle.checked=settings.difficultySystem.enabled;
+ difficultyToggle.addEventListener('change',e=>{settings.difficultySystem.enabled=e.target.checked;updateDifficultySystemStatus();draw();});
+ document.getElementById('difficultyMilestones').addEventListener('input',e=>{
+  const si=e.target.dataset.difficultyScore,ci=e.target.dataset.difficultyCars;
+  if(si!==undefined)settings.difficultySystem.milestones[Number(si)].score=Math.max(0,Math.floor(Number(e.target.value)||0));
+  if(ci!==undefined)settings.difficultySystem.milestones[Number(ci)].cars=Math.max(1,Math.min(3,Math.floor(Number(e.target.value)||1)));
+  updateDifficultySystemStatus();draw();
+ });
+ document.getElementById('difficultyMilestones').addEventListener('click',e=>{
+  const index=e.target.dataset.difficultyDelete;if(index===undefined)return;
+  settings.difficultySystem.milestones.splice(Number(index),1);renderDifficultyMilestones();draw();
+ });
+ document.getElementById('addDifficultyMilestone').addEventListener('click',()=>{
+  if(settings.difficultySystem.milestones.length>=10)return;
+  const ordered=settings.difficultySystem.milestones.slice().sort((a,b)=>a.score-b.score),last=ordered[ordered.length-1];
+  settings.difficultySystem.milestones.push({score:last?last.score+200:200,cars:last?Math.min(3,last.cars+1):2});
+  renderDifficultyMilestones();draw();
+ });
+ renderDifficultyMilestones();
 
 const scoreFields=[['scorePassOn','passOn'],['scoreSurvivalOn','survivalOn']];
 scoreFields.forEach(([id,key])=>{const el=document.getElementById(id);el.checked=settings.scoreSystem[key]!==false;el.addEventListener('change',()=>{settings.scoreSystem[key]=el.checked;});});
