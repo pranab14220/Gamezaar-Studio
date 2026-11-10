@@ -262,7 +262,7 @@ function drawRoadsideStreetLights(){
  if(settings.streetLightsOn===false)return;
  const selected=(settings.streetLights||[]).map(type=>({type})).concat((settings.customStreetLights||[]).filter(x=>x.selected!==false).map(item=>({custom:item})));
  if(!selected.length)return;
- for(let i=0;i<6;i++){const y=((i*158+worldFrame*1.25)%950)-150,x=i%2===0?69:291,item=selected[i%selected.length],rightSide=i%2!==0;
+ for(let i=0;i<6;i++){const y=((i*158+worldFrame*1.25)%950)-150,x=i%2===0?54:306,item=selected[i%selected.length],rightSide=i%2!==0;
   ctx.save();ctx.translate(x,y);if(rightSide)ctx.scale(-1,1);
   if(item.custom){let img=streetLightImageCache[item.custom.id];if(!img){img=new Image();img.onload=()=>draw();img.src=item.custom.imageData;streetLightImageCache[item.custom.id]=img;}if(img.complete&&img.naturalWidth)ctx.drawImage(img,-13,-43,26,58);}
   else drawStreetLightArt(ctx,0,0,item.type,.72);
@@ -340,7 +340,7 @@ function drawRoadsideSigns(){
  const selected=(settings.roadSigns||[]).map(id=>({type:id})).concat((settings.customRoadSigns||[]).filter(s=>s.selected!==false).map(item=>({custom:item})));
  if(!selected.length)return;
  for(let i=0;i<5;i++){
-  const y=((i*190+worldFrame*1.35)%950)-170,x=i%2===0?82:278,item=selected[i%selected.length];
+  const y=((i*190+worldFrame*1.35)%950)-170,x=i%2===0?58:302,item=selected[i%selected.length];
   if(item.custom){let img=roadSignImageCache[item.custom.id];if(!img){img=new Image();img.onload=()=>draw();img.src=item.custom.imageData;roadSignImageCache[item.custom.id]=img;}if(img.complete&&img.naturalWidth)ctx.drawImage(img,x-19,y-27,38,54);}
   else drawRoadSignArt(ctx,x,y,item.type,.78);
  }
@@ -432,9 +432,10 @@ function drawRoadsideTrees(){
 
 function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);drawLandGround();
 drawRoadsideTrees();
-drawRoadsideHouses();drawRoadsideStreetLights();drawRoadsideSigns();
+drawRoadsideHouses();
 ctx.fillStyle=t.road;ctx.fillRect(78,0,204,560);if(roadImage&&roadImage.complete&&roadImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(82,0,196,560);ctx.clip();ctx.drawImage(roadImage,82,0,196,560);ctx.restore();}ctx.fillStyle=t.edge;ctx.fillRect(78,0,4,560);ctx.fillRect(278,0,4,560);
 ctx.strokeStyle=t.line;ctx.lineWidth=3;ctx.setLineDash([25,22]);ctx.lineDashOffset=-(worldFrame*4)%47;ctx.beginPath();ctx.moveTo(146,0);ctx.lineTo(146,560);ctx.moveTo(214,0);ctx.lineTo(214,560);ctx.stroke();ctx.setLineDash([]);
+drawRoadsideStreetLights();drawRoadsideSigns();
 drawRoadsidePedestrians();
 
 trafficCars.forEach(c=>drawTrafficShape(ctx,c.x,c.y,c.model));drawCar(player.x,player.y,settings.carColor,true);
