@@ -53,7 +53,7 @@
 <div class="tree-note" id="speedSystemStatus">OFF · Game runs at normal speed.</div>
 <div class="section-title">14 · Score-Based Difficulty</div>
 <label class="sign-option active" style="margin:8px 0"><input id="scoreDifficultyToggle" type="checkbox"> <span>Enable score-based difficulty (default OFF)</span></label>
-<div class="tip" style="margin:0 0 10px">Set your score milestones and how many enemy cars arrive together in one wave. Maximum 3 cars at a time because the road has 3 lanes.</div>
+<div class="tip" style="margin:0 0 10px">Set score milestones and enemy cars per wave. Maximum 2 cars will be side by side; any extra car will appear in a separate row with a safe gap.</div>
 <div id="difficultyMilestones" style="display:grid;gap:8px"></div>
 <button class="btn secondary" type="button" id="addDifficultyMilestone" style="margin-top:10px;width:100%">＋ Add difficulty milestone</button>
 <div class="tree-note" id="difficultySystemStatus">OFF · 1 enemy car per wave.</div>
@@ -444,7 +444,7 @@ const enemyCount=getScoreDifficultyCount();ctx.fillStyle='#171326cc';ctx.fillRec
 if(!running){ctx.fillStyle='#100e19aa';ctx.fillRect(0,0,360,560);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='900 24px system-ui';ctx.fillText(over?'GAME OVER':'READY TO RACE',180,255);ctx.font='13px system-ui';ctx.fillStyle='#ffe0a5';ctx.fillText(over?'Tap Restart to try again':'Press Start race',180,281);ctx.textAlign='left';}}
 function reset(){cancelAnimationFrame(raf);running=false;over=false;score=0;frame=0;worldFrame=0;playerLane=1;player.x=laneX[1];trafficCars=[];lastSpawn=0;setState('READY TO PLAY');draw();}
 function setState(s){document.getElementById('gameState').textContent=s;document.getElementById('startBtn').textContent=running?'Ⅱ Pause':'▶ Start race';}
-function spawn(){const selected=getTrafficModels().filter(v=>v.selected);if(!selected.length)return;const count=getScoreDifficultyCount(),lanes=[0,1,2].sort(()=>Math.random()-.5).slice(0,count);lanes.forEach((lane,index)=>{const model=selected[Math.floor(Math.random()*selected.length)];trafficCars.push({x:laneX[lane],y:-45-(index%2)*12,color:model.color,model,speed:2+3*.65+3*.25});});}
+function spawn(){const selected=getTrafficModels().filter(v=>v.selected);if(!selected.length)return;const count=Math.min(3,getScoreDifficultyCount());const lanes=[0,1,2];for(let i=lanes.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[lanes[i],lanes[j]]=[lanes[j],lanes[i]];}lanes.slice(0,count).forEach((lane,index)=>{const model=selected[Math.floor(Math.random()*selected.length)];const row=Math.floor(index/2);const y=-55-row*135;trafficCars.push({x:laneX[lane],y,color:model.color,model,speed:2+3*.65+3*.25});});}
 function loop(){if(!running)return;frame++;const speedMultiplier=getScoreSpeedMultiplier();worldFrame+=speedMultiplier;const speed=1+3*.55;trafficCars.forEach(c=>c.y+=c.speed*speed*speedMultiplier/2);trafficCars=trafficCars.filter(c=>c.y<620);if(frame-lastSpawn>Math.max(25,(115-3*16)/speedMultiplier)){spawn();lastSpawn=frame;}
 for(const c of trafficCars){if(Math.abs(c.x-player.x)<27&&Math.abs(c.y-player.y)<42){running=false;over=true;setState('GAME OVER');draw();return;}}
 const scoreCfg=settings.scoreSystem||{};trafficCars.forEach(c=>{if(!c.passed&&c.y>player.y+35){c.passed=true;if(scoreCfg.passOn!==false)score+=Math.max(0,Number(scoreCfg.passPoints)||0);}});
