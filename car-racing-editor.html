@@ -335,26 +335,69 @@ function drawRoadsideSigns(){
   else drawRoadSignArt(ctx,x,y,item.type,.78);
  }
 }
-function drawPixelPedestrian(x,y,phase,variant=0){
+function drawPixelPedestrian(x,y,phase,variant=0,action='walk'){
  const step=Math.sin(phase)*3,arm=Math.cos(phase)*2;
- const outfits=['#e85c62','#4e9be8','#e7b84b','#55b78a','#a77af0','#f08c55'];
+ const outfits=['#e85c62','#4e9be8','#e7b84b','#55b78a','#a77af0','#f08c55','#ed8bba','#54c4c4'];
  const shirt=outfits[variant%outfits.length],skin=['#e8b58d','#c98d68','#f0c7a0'][variant%3];
+ const girl=variant%2===1, darkHair=variant%3===0?'#211c25':'#493126';
  ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.imageSmoothingEnabled=false;
+ // Head, hair and simple gender/style variations
  ctx.fillStyle=skin;ctx.fillRect(-4,-22,8,8);
- ctx.fillStyle=variant%2?'#34251f':'#211c25';ctx.fillRect(-4,-24,8,3);ctx.fillRect(-5,-21,2,4);
- ctx.fillStyle=shirt;ctx.fillRect(-5,-13,10,11);ctx.fillRect(-6,-12,2,7);ctx.fillRect(4,-12,2,7);
- ctx.fillStyle=skin;ctx.fillRect(-7,-11,2,Math.max(3,5+arm));ctx.fillRect(5,-11,2,Math.max(3,5-arm));
- ctx.fillStyle='#30384b';ctx.fillRect(-4,-2,3,7+step);ctx.fillRect(1,-2,3,7-step);
- ctx.fillStyle='#24202a';ctx.fillRect(-5,5+step,5,2);ctx.fillRect(1,5-step,5,2);
+ ctx.fillStyle=darkHair;ctx.fillRect(-4,-24,8,3);ctx.fillRect(-5,-21,2,4);
+ if(girl){ctx.fillRect(3,-21,3,7);ctx.fillRect(-5,-18,2,4);}
+ ctx.fillStyle=shirt;ctx.fillRect(-5,-13,10,11);
+ if(girl){ctx.fillStyle=shirt;ctx.fillRect(-6,-3,12,3);}
+ if(action==='sit'){
+  ctx.fillStyle='#795d45';ctx.fillRect(-10,1,20,3);ctx.fillRect(-8,4,2,8);ctx.fillRect(6,4,2,8);
+  ctx.fillStyle=shirt;ctx.fillRect(-5,-3,10,6);ctx.fillRect(2,1,7,3);
+  ctx.fillStyle='#30384b';ctx.fillRect(2,4,3,5);ctx.fillRect(5,7,6,2);
+  ctx.fillStyle=skin;ctx.fillRect(-7,-11,3,8);ctx.fillRect(5,-11,3,7);
+ }else{
+  ctx.fillStyle=skin;
+  if(action==='work'){
+   ctx.fillRect(-7,-11,2,7);ctx.fillRect(5,-12,2,5);
+   ctx.fillStyle='#b7a27a';ctx.fillRect(8,-9,2,20);ctx.fillStyle='#d4b77e';ctx.fillRect(5,9,8,3);
+  }else if(action==='phone'){
+   ctx.fillRect(-7,-11,2,7);ctx.fillRect(5,-13,2,7);ctx.fillStyle='#202735';ctx.fillRect(6,-17,3,5);
+  }else{
+   ctx.fillRect(-7,-11,2,Math.max(3,5+arm));ctx.fillRect(5,-11,2,Math.max(3,5-arm));
+  }
+  ctx.fillStyle='#30384b';ctx.fillRect(-4,-2,3,7+step);ctx.fillRect(1,-2,3,7-step);
+  ctx.fillStyle='#24202a';ctx.fillRect(-5,5+step,5,2);ctx.fillRect(1,5-step,5,2);
+ }
+ ctx.restore();
+}
+function drawPixelDogWalker(x,y,phase,variant=0){
+ drawPixelPedestrian(x,y,phase,variant,'walk');
+ ctx.save();ctx.translate(Math.round(x+15),Math.round(y+2));ctx.imageSmoothingEnabled=false;
+ const bounce=Math.sin(phase)*1.5;
+ ctx.fillStyle='#bd8955';ctx.fillRect(-5,-5+bounce,10,6);ctx.fillRect(3,-8+bounce,5,5);
+ ctx.fillStyle='#5a3928';ctx.fillRect(6,-7+bounce,2,2);ctx.fillRect(-4,1+bounce,2,4);ctx.fillRect(2,1-bounce,2,4);
+ ctx.fillStyle='#bd8955';ctx.fillRect(-7,-7+bounce,3,3);
+ // leash held by the walker
+ ctx.strokeStyle='#f2d18a';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-13,-10);ctx.lineTo(-3,-4+bounce);ctx.stroke();
  ctx.restore();
 }
 function drawRoadsidePedestrians(){
  if(settings.pedestriansOn===false)return;
- for(let i=0;i<5;i++){
-  const y=((i*137+frame*1.18)%760)-100;
-  const x=i%2===0?43:317,phase=frame*.22+i*1.7;
-  if(i%3===1){drawPixelPedestrian(x-7,y,phase,i+1);drawPixelPedestrian(x+7,y+2,phase+1.1,i+3);}
-  else drawPixelPedestrian(x,y,phase,i+2);
+ // A busier neighbourhood: walkers, couples, people resting, working and walking dogs.
+ const scenes=[
+  {action:'walk',variant:0},{action:'couple',variant:1},{action:'sit',variant:2},
+  {action:'work',variant:3},{action:'dog',variant:4},{action:'phone',variant:5},
+  {action:'walk',variant:6},{action:'work',variant:7},{action:'sit',variant:1},
+  {action:'couple',variant:4},{action:'dog',variant:2},{action:'walk',variant:3}
+ ];
+ for(let i=0;i<scenes.length;i++){
+  const y=((i*67+frame*1.18)%850)-120;
+  const left=i%2===0,x=left?43:317,phase=frame*.22+i*1.37,scene=scenes[i];
+  if(scene.action==='couple'){
+   drawPixelPedestrian(x-7,y,phase,scene.variant,'walk');
+   drawPixelPedestrian(x+7,y+2,phase+1.1,scene.variant+1,'walk');
+  }else if(scene.action==='dog'){
+   drawPixelDogWalker(x,y,phase,scene.variant);
+  }else{
+   drawPixelPedestrian(x,y,phase,scene.variant,scene.action);
+  }
  }
 }
 function drawRoadsideHouses(){
