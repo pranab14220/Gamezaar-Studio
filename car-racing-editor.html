@@ -445,7 +445,7 @@ function reset(){cancelAnimationFrame(raf);running=false;over=false;score=0;fram
 function setState(s){document.getElementById('gameState').textContent=s;document.getElementById('startBtn').textContent=running?'Ⅱ Pause':'▶ Start race';}
 function spawn(){const selected=getTrafficModels().filter(v=>v.selected);if(!selected.length)return;const count=getScoreDifficultyCount(),lanes=[0,1,2].sort(()=>Math.random()-.5).slice(0,count);lanes.forEach((lane,index)=>{const model=selected[Math.floor(Math.random()*selected.length)];trafficCars.push({x:laneX[lane],y:-45-(index%2)*12,color:model.color,model,speed:2+3*.65+3*.25});});}
 function loop(){if(!running)return;frame++;const speedMultiplier=getScoreSpeedMultiplier();worldFrame+=speedMultiplier;const speed=1+3*.55;trafficCars.forEach(c=>c.y+=c.speed*speed*speedMultiplier/2);trafficCars=trafficCars.filter(c=>c.y<620);if(frame-lastSpawn>Math.max(25,(115-3*16)/speedMultiplier)){spawn();lastSpawn=frame;}
-for(const c of trafficCars){if(Math.abs(c.x-player.x)<31&&Math.abs(c.y-player.y)<48){running=false;over=true;setState('GAME OVER');draw();return;}}
+for(const c of trafficCars){if(Math.abs(c.x-player.x)<27&&Math.abs(c.y-player.y)<42){running=false;over=true;setState('GAME OVER');draw();return;}}
 const scoreCfg=settings.scoreSystem||{};trafficCars.forEach(c=>{if(!c.passed&&c.y>player.y+35){c.passed=true;if(scoreCfg.passOn!==false)score+=Math.max(0,Number(scoreCfg.passPoints)||0);}});
 if(frame%60===0&&scoreCfg.survivalOn!==false)score+=Math.max(0,Number(scoreCfg.survivalPoints)||0);updateSpeedSystemStatus();updateDifficultySystemStatus();draw();raf=requestAnimationFrame(loop);}
 function move(dir){if(!running)return;playerLane=Math.max(0,Math.min(2,playerLane+dir));player.x=laneX[playerLane];}
