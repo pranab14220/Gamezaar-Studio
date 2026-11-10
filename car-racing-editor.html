@@ -153,6 +153,7 @@ document.getElementById('treeUpload').addEventListener('change',e=>{
     cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
     const item={id:'custom-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),name:'My Tree '+(settings.customTrees.length+1),imageData:cv.toDataURL('image/webp',.82),selected:false};
     settings.customTrees.push(item);
+    const treeImg=new Image();treeImg.onload=()=>draw();treeImg.src=item.imageData;customTreeImageCache[item.id]=treeImg;
     if(getSelectedTreeItems().length<2)item.selected=true;
     renderTreeOptions();draw();
    };img.onerror=()=>alert('Could not load '+file.name);img.src=reader.result;
@@ -160,11 +161,13 @@ document.getElementById('treeUpload').addEventListener('change',e=>{
  });
  e.target.value='';
 });
+const customTreeImageCache={};
+function loadCustomTreeImages(){(settings.customTrees||[]).forEach(tree=>{const img=new Image();img.onload=()=>draw();img.src=tree.imageData;customTreeImageCache[tree.id]=img;});}
 function drawRoadsideTrees(){
  const chosen=getSelectedTreeItems();if(!chosen.length)return;
  for(let i=0;i<7;i++){
   const y=((i*92+frame*2.2)%700)-90;
-  const drawOne=(item,x,yy)=>{if(item.kind==='custom'){const img=new Image();img.src=item.imageData;try{ctx.drawImage(img,x-25,yy-34,50,58);}catch(e){}}else drawSeasonTree(ctx,x,yy,item.type,.95);};
+  const drawOne=(item,x,yy)=>{if(item.kind==='custom'){const img=customTreeImageCache[item.id];if(img&&img.complete&&img.naturalWidth)ctx.drawImage(img,x-25,yy-34,50,58);}else drawSeasonTree(ctx,x,yy,item.type,.95);};
   drawOne(chosen[i%chosen.length],37,y);drawOne(chosen[(i+1)%chosen.length],323,y+43);
  }
 }
@@ -201,6 +204,6 @@ function updateAssetMeter(){const bytes=dataUrlBytes(settings.carImageData),pct=
 document.getElementById('carUpload').addEventListener('change',e=>{const file=e.target.files&&e.target.files[0];if(!file)return;const status=document.getElementById('uploadStatus');if(!file.type.startsWith('image/')){status.textContent='Please choose a valid image file.';e.target.value='';return;}if(file.size>IMAGE_UPLOAD_LIMIT_BYTES){status.textContent='Image is too large. Maximum original image size is 300 KB.';e.target.value='';return;}const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const cv=document.createElement('canvas'),scale=Math.min(1,512/img.width,768/img.height);cv.width=Math.max(1,Math.round(img.width*scale));cv.height=Math.max(1,Math.round(img.height*scale));const cx=cv.getContext('2d');cx.drawImage(img,0,0,cv.width,cv.height);let quality=.82,data=cv.toDataURL('image/webp',quality);while(dataUrlBytes(data)>300*1024&&quality>.35){quality-=.08;data=cv.toDataURL('image/webp',quality);}const nextBytes=dataUrlBytes(data);if(nextBytes>ASSET_LIMIT_BYTES){status.textContent='Upload would exceed the 10 MB project asset limit. Remove or reduce another asset first.';e.target.value='';return;}settings.carImageData=data;uploadedCarImage=new Image();uploadedCarImage.onload=()=>{drawCarPreview();draw();updateAssetMeter();};uploadedCarImage.src=data;status.textContent='✓ Compressed WebP image · '+Math.ceil(nextBytes/1024)+' KB';};img.onerror=()=>{status.textContent='Could not load this image. Try another one.';};img.src=reader.result;};reader.readAsDataURL(file);});
 if(settings.carImageData){uploadedCarImage=new Image();uploadedCarImage.onload=()=>{drawCarPreview();draw();updateAssetMeter();};uploadedCarImage.src=settings.carImageData;}else{updateAssetMeter();}
 document.getElementById('saveBtn').addEventListener('click',()=>{try{localStorage.setItem('gamezaar_current_project',JSON.stringify({name:settings.name,type:'Car Traffic Racing',updatedAt:new Date().toISOString()}));localStorage.setItem('gamezaar_racing_settings',JSON.stringify(settings));document.getElementById('saveStatus').textContent='✓ Project saved on this device';}catch(err){document.getElementById('saveStatus').textContent='Could not save. Try a smaller car image.';}});
-if(!Array.isArray(settings.trafficCars)||settings.trafficCars.length!==6)settings.trafficCars=trafficDefaults.map(x=>({...x}));else settings.trafficCars=settings.trafficCars.map((x,i)=>({...trafficDefaults[i],...x}));if(settings.trafficCars.filter(x=>x.selected).length>4)settings.trafficCars.forEach((x,i)=>x.selected=i<4);loadTrafficImages();renderTrafficCards();if(!settings.coin)settings.coin={type:'star',imageData:''};renderCoinOptions();renderTreeOptions();if(settings.coin.imageData){coinImage=new Image();coinImage.onload=()=>draw();coinImage.src=settings.coin.imageData;document.getElementById('coinUploadStatus').textContent='✓ Your custom coin image is selected.';}else{document.getElementById('coinUploadStatus').textContent='Using '+(coinTypes.find(x=>x.id===settings.coin.type)?.name||'Star Coin')+'.';}syncSettings();reset();
+if(!Array.isArray(settings.trafficCars)||settings.trafficCars.length!==6)settings.trafficCars=trafficDefaults.map(x=>({...x}));else settings.trafficCars=settings.trafficCars.map((x,i)=>({...trafficDefaults[i],...x}));if(settings.trafficCars.filter(x=>x.selected).length>4)settings.trafficCars.forEach((x,i)=>x.selected=i<4);loadTrafficImages();renderTrafficCards();if(!settings.coin)settings.coin={type:'star',imageData:''};renderCoinOptions();renderTreeOptions();loadCustomTreeImages();if(settings.coin.imageData){coinImage=new Image();coinImage.onload=()=>draw();coinImage.src=settings.coin.imageData;document.getElementById('coinUploadStatus').textContent='✓ Your custom coin image is selected.';}else{document.getElementById('coinUploadStatus').textContent='Using '+(coinTypes.find(x=>x.id===settings.coin.type)?.name||'Star Coin')+'.';}syncSettings();reset();
 </script>
 </body></html>
