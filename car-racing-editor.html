@@ -27,8 +27,6 @@
 <div class="panel-head"><h2>Game Builder</h2><span class="tag">SECTION 01</span></div>
 <div class="section-title">01 · Game Settings</div>
 <div class="field"><label for="gameName">Game name</label><input id="gameName" type="text" maxlength="40" placeholder="My Racing Game"></div>
-<div class="field"><label for="difficulty">Difficulty</label><input id="difficulty" type="range" min="1" max="5" value="3"><div class="range-row"><span>Easy</span><strong id="difficultyValue">Normal</strong><span>Hard</span></div></div>
-<div class="field"><label for="speed">Game speed</label><input id="speed" type="range" min="1" max="5" value="3"><div class="range-row"><span>Slow</span><strong id="speedValue">Normal</strong><span>Fast</span></div></div>
 <div class="section-title">02 · Player Car</div>
 <canvas id="carPreview" class="car-preview" width="240" height="150" aria-label="Player car preview"></canvas>
 <div class="field"><label>Choose car color</label><div class="colors" id="colors">
@@ -56,14 +54,14 @@
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
 const project=JSON.parse(localStorage.getItem('gamezaar_current_project')||'{}');
 const trafficDefaults=[{id:'hatchback',name:'Hatchback',color:'#4388d8',selected:true,imageData:''},{id:'sedan',name:'Sedan',color:'#e7b849',selected:true,imageData:''},{id:'sports',name:'Sports Car',color:'#8d75c9',selected:true,imageData:''},{id:'suv',name:'SUV',color:'#52a88a',selected:true,imageData:''},{id:'taxi',name:'Taxi',color:'#e6c94d',selected:false,imageData:''},{id:'van',name:'Mini Van',color:'#d87857',selected:false,imageData:''}];
-const defaults={name:project.name||'My Racing Game',type:'Car Traffic Racing',carColor:'#ed654b',difficulty:3,speed:3,carImageData:'',trafficCars:trafficDefaults,houses:{type:'spring',imageData:''},pedestriansOn:true,streetLightsOn:true,streetLights:['classic','curved'],customStreetLights:[],scoreSystem:{passOn:true,passPoints:5,coinOn:true,coinPoints:10,survivalOn:true,survivalPoints:1}};
+const defaults={name:project.name||'My Racing Game',type:'Car Traffic Racing',carColor:'#ed654b',carImageData:'',trafficCars:trafficDefaults,houses:{type:'spring',imageData:''},pedestriansOn:true,streetLightsOn:true,streetLights:['classic','curved'],customStreetLights:[],scoreSystem:{passOn:true,passPoints:5,coinOn:true,coinPoints:10,survivalOn:true,survivalPoints:1}};
 let settings={...defaults,...JSON.parse(localStorage.getItem('gamezaar_racing_settings')||'{}')};
 let running=false,over=false,score=0,frame=0,playerLane=1,trafficCars=[],raf=0,lastSpawn=0,uploadedCarImage=null;
 let trafficImageCache={};
 const carPreview=document.getElementById('carPreview'),carPreviewCtx=carPreview.getContext('2d');
 const laneX=[105,180,255],player={x:180,y:455,w:38,h:66};
 const themes={spring:{grass:'#78965c',road:'#655d5b',edge:'#f6c5d8',line:'#fff0f5'},summer:{grass:'#416b4b',road:'#42434b',edge:'#e6d7b0',line:'#eee3c6'},autumn:{grass:'#a96d3f',road:'#51413c',edge:'#e9a45a',line:'#f5d19a'},winter:{grass:'#c8d7dc',road:'#626b78',edge:'#f3f5f7',line:'#f7fbff'},desert:{grass:'#c49a59',road:'#51463f',edge:'#f0d39c',line:'#f3dfb5'}};
-function syncSettings(){document.getElementById('gameName').value=settings.name;document.getElementById('difficulty').value=settings.difficulty;document.getElementById('speed').value=settings.speed;document.getElementById('projectTitle').textContent=settings.name;document.querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active',b.dataset.color===settings.carColor));document.getElementById('difficultyValue').textContent=['','Very easy','Easy','Normal','Hard','Very hard'][settings.difficulty];document.getElementById('speedValue').textContent=['','Very slow','Slow','Normal','Fast','Very fast'][settings.speed];drawCarPreview();}
+function syncSettings(){document.getElementById('gameName').value=settings.name;document.getElementById('projectTitle').textContent=settings.name;document.querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active',b.dataset.color===settings.carColor));drawCarPreview();}
 function rounded(x,y,w,h,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
 function drawCar(x,y,color,playerCar=false){if(playerCar&&uploadedCarImage){ctx.drawImage(uploadedCarImage,x-24,y-36,48,72);return;}rounded(x-18,y-30,36,60,9,color);rounded(x-12,y-20,24,17,5,'#b9dce4');rounded(x-12,y+3,24,13,4,'#26333e');ctx.fillStyle='#171820';ctx.fillRect(x-21,y-19,5,14);ctx.fillRect(x+16,y-19,5,14);ctx.fillRect(x-21,y+13,5,14);ctx.fillRect(x+16,y+13,5,14);ctx.fillStyle=playerCar?'#fff0b4':'#ffedc0';ctx.fillRect(x-13,y-29,7,4);ctx.fillRect(x+6,y-29,7,4);}
 function drawCarPreview(){carPreviewCtx.clearRect(0,0,240,150);carPreviewCtx.fillStyle='#171326';carPreviewCtx.fillRect(0,0,240,150);if(uploadedCarImage){carPreviewCtx.drawImage(uploadedCarImage,82,8,76,134);}else{carPreviewCtx.fillStyle='#101018';carPreviewCtx.fillRect(89,37,62,78);carPreviewCtx.fillStyle=settings.carColor;carPreviewCtx.beginPath();carPreviewCtx.roundRect(94,28,52,94,13);carPreviewCtx.fill();carPreviewCtx.fillStyle='#b9dce4';carPreviewCtx.beginPath();carPreviewCtx.roundRect(101,42,38,25,7);carPreviewCtx.fill();carPreviewCtx.fillStyle='#26333e';carPreviewCtx.beginPath();carPreviewCtx.roundRect(101,82,38,20,5);carPreviewCtx.fill();carPreviewCtx.fillStyle='#171820';carPreviewCtx.fillRect(89,44,7,19);carPreviewCtx.fillRect(144,44,7,19);carPreviewCtx.fillRect(89,88,7,19);carPreviewCtx.fillRect(144,88,7,19);carPreviewCtx.fillStyle='#fff0b4';carPreviewCtx.fillRect(101,29,9,4);carPreviewCtx.fillRect(130,29,9,4);}}
@@ -432,8 +430,8 @@ ctx.fillStyle='#171326cc';ctx.fillRect(10,10,105,34);ctx.fillStyle='#fff';ctx.fo
 if(!running){ctx.fillStyle='#100e19aa';ctx.fillRect(0,0,360,560);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='900 24px system-ui';ctx.fillText(over?'GAME OVER':'READY TO RACE',180,255);ctx.font='13px system-ui';ctx.fillStyle='#ffe0a5';ctx.fillText(over?'Tap Restart to try again':'Press Start race',180,281);ctx.textAlign='left';}}
 function reset(){cancelAnimationFrame(raf);running=false;over=false;score=0;frame=0;playerLane=1;player.x=laneX[1];trafficCars=[];lastSpawn=0;setState('READY TO PLAY');draw();}
 function setState(s){document.getElementById('gameState').textContent=s;document.getElementById('startBtn').textContent=running?'Ⅱ Pause':'▶ Start race';}
-function spawn(){const lane=Math.floor(Math.random()*3),x=laneX[lane];const selected=getTrafficModels().filter(v=>v.selected);if(selected.length){const model=selected[Math.floor(Math.random()*selected.length)];trafficCars.push({x,y:-45,color:model.color,model,speed:2+settings.speed*.65+settings.difficulty*.25});}}
-function loop(){if(!running)return;frame++;const speed=1+settings.speed*.55;trafficCars.forEach(c=>c.y+=c.speed*speed/2);trafficCars=trafficCars.filter(c=>c.y<620);if(frame-lastSpawn>Math.max(25,115-settings.difficulty*16)){spawn();lastSpawn=frame;}
+function spawn(){const lane=Math.floor(Math.random()*3),x=laneX[lane];const selected=getTrafficModels().filter(v=>v.selected);if(selected.length){const model=selected[Math.floor(Math.random()*selected.length)];trafficCars.push({x,y:-45,color:model.color,model,speed:2+3*.65+3*.25});}}
+function loop(){if(!running)return;frame++;const speed=1+3*.55;trafficCars.forEach(c=>c.y+=c.speed*speed/2);trafficCars=trafficCars.filter(c=>c.y<620);if(frame-lastSpawn>Math.max(25,115-3*16)){spawn();lastSpawn=frame;}
 for(const c of trafficCars){if(Math.abs(c.x-player.x)<31&&Math.abs(c.y-player.y)<48){running=false;over=true;setState('GAME OVER');draw();return;}}
 const scoreCfg=settings.scoreSystem||{};trafficCars.forEach(c=>{if(!c.passed&&c.y>player.y+35){c.passed=true;if(scoreCfg.passOn!==false)score+=Math.max(0,Number(scoreCfg.passPoints)||0);}});
 if(frame%60===0&&scoreCfg.survivalOn!==false)score+=Math.max(0,Number(scoreCfg.survivalPoints)||0);draw();raf=requestAnimationFrame(loop);}
@@ -444,8 +442,6 @@ document.getElementById('startBtn').addEventListener('click',start);document.get
 document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a'){e.preventDefault();move(-1)}if(e.key==='ArrowRight'||e.key.toLowerCase()==='d'){e.preventDefault();move(1)}if(e.key===' '){e.preventDefault();start()}});
 document.getElementById('gameName').addEventListener('input',e=>{settings.name=e.target.value||'My Racing Game';document.getElementById('projectTitle').textContent=settings.name;});
 document.querySelectorAll('.swatch').forEach(b=>b.addEventListener('click',()=>{settings.carColor=b.dataset.color;syncSettings();draw()}));
-document.getElementById('difficulty').addEventListener('input',e=>{settings.difficulty=+e.target.value;syncSettings()});
-document.getElementById('speed').addEventListener('input',e=>{settings.speed=+e.target.value;syncSettings()});
 const ASSET_GOAL_BYTES=4*1024*1024,ASSET_LIMIT_BYTES=5*1024*1024,IMAGE_UPLOAD_LIMIT_BYTES=300*1024;
 function dataUrlBytes(data){if(!data)return 0;const part=data.split(',')[1]||'';return Math.floor(part.length*3/4)-(part.endsWith('==')?2:part.endsWith('=')?1:0);}
 function formatMB(bytes){return (bytes/1024/1024).toFixed(2);}
