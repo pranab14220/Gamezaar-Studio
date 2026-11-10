@@ -53,7 +53,7 @@
 <div class="tree-note" id="speedSystemStatus">OFF · Game runs at normal speed.</div>
 <div class="section-title">14 · Score-Based Difficulty</div>
 <label class="sign-option active" style="margin:8px 0"><input id="scoreDifficultyToggle" type="checkbox"> <span>Enable score-based difficulty (default OFF)</span></label>
-<div class="tip" style="margin:0 0 10px">Set score milestones and enemy cars per wave. Set 1–4 cars per wave. Maximum 2 cars share a row so at least one of the 3 road lanes stays open for the player. Row spacing can be equal or randomized.</div>
+<div class="tip" style="margin:0 0 10px">Set score milestones and enemy cars per wave. Set 1–5 cars per wave. Maximum 2 cars share a row so at least one of the 3 road lanes stays open for the player. Row spacing can be equal or randomized.</div>
 <div id="difficultyMilestones" style="display:grid;gap:8px"></div>
 <button class="btn secondary" type="button" id="addDifficultyMilestone" style="margin-top:10px;width:100%">＋ Add difficulty milestone</button>
 <div class="tree-note" id="difficultySystemStatus">OFF · 1 enemy car per wave.</div>
@@ -448,7 +448,7 @@ function reset(){cancelAnimationFrame(raf);running=false;over=false;score=0;fram
 function setState(s){document.getElementById('gameState').textContent=s;document.getElementById('startBtn').textContent=running?'Ⅱ Pause':'▶ Start race';}
 function spawn(){
  const selected=getTrafficModels().filter(v=>v.selected);if(!selected.length)return;
- const count=Math.min(4,getScoreDifficultyCount());
+ const count=Math.min(5,getScoreDifficultyCount());
  // Build every valid row-count pattern using 1, 2 or 3 cars per row.
  function buildPatterns(total,prefix=[],out=[]){
   if(total===0){out.push(prefix);return out;}
@@ -512,7 +512,7 @@ if(!settings.scoreSystem||typeof settings.scoreSystem!=='object')settings.scoreS
    row.innerHTML='<label style="font-size:10px;color:var(--muted)">At score<input type="number" min="0" step="1" data-speed-score="'+i+'" value="'+m.score+'" style="display:block;width:100%;margin-top:5px;padding:8px;border-radius:7px;border:1px solid var(--line);background:#171326;color:white"></label><label style="font-size:10px;color:var(--muted)">Speed (×)<input type="number" min="1" max="5" step="0.1" data-speed-value="'+i+'" value="'+m.speed+'" style="display:block;width:100%;margin-top:5px;padding:8px;border-radius:7px;border:1px solid var(--line);background:#171326;color:white"></label><button type="button" class="btn secondary" data-speed-delete="'+i+'" aria-label="Delete milestone" style="padding:7px 9px;align-self:end">✕</button>';
    wrap.appendChild(row);
   });
-  document.getElementById('addSpeedMilestone').disabled=settings.speedSystem.milestones.length>=10;
+  document.getElementById('addSpeedMilestone').disabled=settings.speedSystem.milestones.length>=5;
   updateSpeedSystemStatus();
  }
  const scoreSpeedToggle=document.getElementById('scoreSpeedToggle');scoreSpeedToggle.checked=settings.speedSystem.enabled;
@@ -538,11 +538,11 @@ if(!settings.scoreSystem||typeof settings.scoreSystem!=='object')settings.scoreS
  if(!settings.difficultySystem||typeof settings.difficultySystem!=='object')settings.difficultySystem={enabled:false,milestones:[{score:200,cars:2},{score:500,cars:3}]};
  if(typeof settings.difficultySystem.enabled!=='boolean')settings.difficultySystem.enabled=false;
  if(!Array.isArray(settings.difficultySystem.milestones))settings.difficultySystem.milestones=[{score:200,cars:2},{score:500,cars:3}];
- settings.difficultySystem.milestones=settings.difficultySystem.milestones.slice(0,10).map(m=>({score:Math.max(0,Math.floor(Number(m.score)||0)),cars:Math.max(1,Math.min(4,Math.floor(Number(m.cars)||1)))}));
+ settings.difficultySystem.milestones=settings.difficultySystem.milestones.slice(0,5).map(m=>({score:Math.max(0,Math.floor(Number(m.score)||0)),cars:Math.max(1,Math.min(5,Math.floor(Number(m.cars)||1)))}));
  function getScoreDifficultyCount(){
   if(!settings.difficultySystem?.enabled)return 1;
   const eligible=settings.difficultySystem.milestones.filter(m=>score>=Number(m.score)).sort((a,b)=>Number(a.score)-Number(b.score));
-  return eligible.length?Math.max(1,Math.min(4,Number(eligible[eligible.length-1].cars)||1)):1;
+  return eligible.length?Math.max(1,Math.min(5,Number(eligible[eligible.length-1].cars)||1)):1;
  }
  function updateDifficultySystemStatus(){
   const count=getScoreDifficultyCount(),el=document.getElementById('difficultySystemStatus');
@@ -553,7 +553,7 @@ if(!settings.scoreSystem||typeof settings.scoreSystem!=='object')settings.scoreS
   const wrap=document.getElementById('difficultyMilestones');wrap.innerHTML='';
   settings.difficultySystem.milestones.forEach((m,i)=>{
    const row=document.createElement('div');row.className='sign-option';row.style.cssText='display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:7px;padding:9px';
-   row.innerHTML='<label style="font-size:10px;color:var(--muted)">After score<input type="number" min="0" step="1" data-difficulty-score="'+i+'" value="'+m.score+'" style="display:block;width:100%;margin-top:5px;padding:8px;border-radius:7px;border:1px solid var(--line);background:#171326;color:white"></label><label style="font-size:10px;color:var(--muted)">Cars per wave<input type="number" min="1" max="4" step="1" data-difficulty-cars="'+i+'" value="'+m.cars+'" style="display:block;width:100%;margin-top:5px;padding:8px;border-radius:7px;border:1px solid var(--line);background:#171326;color:white"></label><button type="button" class="btn secondary" data-difficulty-delete="'+i+'" aria-label="Delete milestone" style="padding:7px 9px;align-self:end">✕</button>';
+   row.innerHTML='<label style="font-size:10px;color:var(--muted)">After score<input type="number" min="0" step="1" data-difficulty-score="'+i+'" value="'+m.score+'" style="display:block;width:100%;margin-top:5px;padding:8px;border-radius:7px;border:1px solid var(--line);background:#171326;color:white"></label><label style="font-size:10px;color:var(--muted)">Cars per wave<input type="number" min="1" max="5" step="1" data-difficulty-cars="'+i+'" value="'+m.cars+'" style="display:block;width:100%;margin-top:5px;padding:8px;border-radius:7px;border:1px solid var(--line);background:#171326;color:white"></label><button type="button" class="btn secondary" data-difficulty-delete="'+i+'" aria-label="Delete milestone" style="padding:7px 9px;align-self:end">✕</button>';
    wrap.appendChild(row);
   });
   document.getElementById('addDifficultyMilestone').disabled=settings.difficultySystem.milestones.length>=10;
@@ -564,7 +564,7 @@ if(!settings.scoreSystem||typeof settings.scoreSystem!=='object')settings.scoreS
  document.getElementById('difficultyMilestones').addEventListener('input',e=>{
   const si=e.target.dataset.difficultyScore,ci=e.target.dataset.difficultyCars;
   if(si!==undefined)settings.difficultySystem.milestones[Number(si)].score=Math.max(0,Math.floor(Number(e.target.value)||0));
-  if(ci!==undefined)settings.difficultySystem.milestones[Number(ci)].cars=Math.max(1,Math.min(4,Math.floor(Number(e.target.value)||1)));
+  if(ci!==undefined)settings.difficultySystem.milestones[Number(ci)].cars=Math.max(1,Math.min(5,Math.floor(Number(e.target.value)||1)));
   updateDifficultySystemStatus();draw();
  });
  document.getElementById('difficultyMilestones').addEventListener('click',e=>{
@@ -574,7 +574,7 @@ if(!settings.scoreSystem||typeof settings.scoreSystem!=='object')settings.scoreS
  document.getElementById('addDifficultyMilestone').addEventListener('click',()=>{
   if(settings.difficultySystem.milestones.length>=10)return;
   const ordered=settings.difficultySystem.milestones.slice().sort((a,b)=>a.score-b.score),last=ordered[ordered.length-1];
-  settings.difficultySystem.milestones.push({score:last?last.score+200:200,cars:last?Math.min(3,last.cars+1):2});
+  settings.difficultySystem.milestones.push({score:last?last.score+200:200,cars:last?Math.min(5,last.cars+1):2});
   renderDifficultyMilestones();draw();
  });
  renderDifficultyMilestones();
