@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#171326">
+<title>Car Racing Editor — GAMEZAAR Studio</title>
+<style>
+:root{--bg:#171326;--panel:#29223f;--line:#ffffff20;--gold:#ffb84d;--gold2:#ffd18a;--text:#f8f5ff;--muted:#b9b1ca}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#7564a530,transparent 35%),var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}.wrap{width:min(1120px,calc(100% - 28px));margin:auto}header{height:66px;border-bottom:1px solid var(--line);display:flex;align-items:center}.nav{display:flex;align-items:center;justify-content:space-between}.brand{font-weight:900;letter-spacing:.6px}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:2px}.back{color:var(--gold2);text-decoration:none;font-size:13px;font-weight:700}.top{padding:25px 0 18px}.eyebrow{font-size:10px;color:var(--gold2);letter-spacing:1.8px;font-weight:900}.top h1{font-size:clamp(27px,4vw,38px);margin:5px 0}.top p{margin:0;color:var(--muted);font-size:13px}.layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);gap:17px;align-items:start}.panel{background:linear-gradient(145deg,#302744,#241e36);border:1px solid var(--line);border-radius:17px;padding:15px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.panel h2{font-size:15px;margin:0}.tag{font-size:10px;color:#bce9c8;background:#bce9c817;padding:5px 8px;border-radius:20px}.stage{background:#100e19;border:1px solid #ffffff22;border-radius:13px;padding:8px;overflow:hidden}canvas{display:block;width:100%;height:auto;aspect-ratio:360/560;border-radius:8px;background:#38594b;touch-action:none}.preview-actions{display:flex;gap:8px;margin-top:11px}.btn{border:0;border-radius:10px;padding:10px 14px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#281c31;font-weight:900;font-size:12px;cursor:pointer}.btn.secondary{background:#ffffff12;color:var(--text);border:1px solid var(--line)}.btn:disabled{opacity:.45}.controls{display:flex;justify-content:center;gap:24px;margin-top:10px}.control{width:62px;height:46px;border-radius:12px;border:1px solid #ffffff25;background:#ffffff12;color:white;font-size:21px;font-weight:900;touch-action:none}.control:active{background:#ffb84d55}.field{margin:15px 0}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:8px}.field input[type=text],.field select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#171326;color:white;font:inherit;font-size:13px;outline:none}.field input:focus,.field select:focus{border-color:var(--gold)}.colors{display:flex;gap:10px;flex-wrap:wrap}.swatch{width:32px;height:32px;border-radius:50%;border:3px solid transparent;outline:1px solid #ffffff35;cursor:pointer}.swatch.active{border-color:#fff;outline:2px solid var(--gold)}input[type=range]{width:100%;accent-color:var(--gold)}.range-row{display:flex;justify-content:space-between;color:var(--muted);font-size:11px}.savebar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:17px 0 40px}.status{font-size:11px;color:#bce9c8}.tip{font-size:11px;color:var(--muted);line-height:1.6;margin-top:12px}.mobile-controls{display:none}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.panel.settings{order:1}.panel.preview-panel{order:2}.top{padding-top:20px}.preview-panel{max-width:520px;width:100%;margin:auto}.stage{max-width:380px;margin:auto}.mobile-controls{display:flex;justify-content:center;gap:28px;margin-top:10px}.control{width:72px;height:48px}.controls{display:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav"><div class="brand">GAMEZAAR<small>STUDIO · CAR RACING EDITOR</small></div><a class="back" href="game-builder.html">← Templates</a></div></header>
+<main class="wrap">
+<section class="top"><div class="eyebrow">TEMPLATE 01 / CAR TRAFFIC RACING</div><h1 id="projectTitle">My Racing Game</h1><p>Customize your car and road, then play the preview to test your game.</p></section>
+<div class="layout">
+<section class="panel preview-panel">
+<div class="panel-head"><h2>Live game preview</h2><span class="tag" id="gameState">READY TO PLAY</span></div>
+<div class="stage"><canvas id="game" width="360" height="560" aria-label="Car racing game preview"></canvas></div>
+<div class="preview-actions"><button class="btn" id="startBtn">▶ Start race</button><button class="btn secondary" id="restartBtn">↻ Restart</button></div>
+<div class="mobile-controls"><button class="control" id="leftBtn" aria-label="Move left">◀</button><button class="control" id="rightBtn" aria-label="Move right">▶</button></div>
+<div class="controls"><button class="control" id="leftBtnDesk" aria-label="Move left">◀</button><button class="control" id="rightBtnDesk" aria-label="Move right">▶</button></div>
+<p class="tip">Controls: use the left/right buttons, keyboard arrow keys, or A / D keys. Avoid traffic and collect coins.</p>
+</section>
+<aside class="panel settings">
+<div class="panel-head"><h2>Game settings</h2><span class="tag">CUSTOMIZE</span></div>
+<div class="field"><label for="gameName">Game name</label><input id="gameName" type="text" maxlength="40" placeholder="My Racing Game"></div>
+<div class="field"><label>Player car color</label><div class="colors" id="colors">
+<button class="swatch active" data-color="#ed654b" style="background:#ed654b" aria-label="Red"></button><button class="swatch" data-color="#348be8" style="background:#348be8" aria-label="Blue"></button><button class="swatch" data-color="#35b77a" style="background:#35b77a" aria-label="Green"></button><button class="swatch" data-color="#f2b83f" style="background:#f2b83f" aria-label="Yellow"></button><button class="swatch" data-color="#a77af0" style="background:#a77af0" aria-label="Purple"></button><button class="swatch" data-color="#eeeeee" style="background:#eeeeee" aria-label="White"></button>
+</div></div>
+<div class="field"><label for="roadTheme">Road environment</label><select id="roadTheme"><option value="summer">Summer green</option><option value="winter">Winter snow</option><option value="desert">Desert</option></select></div>
+<div class="field"><label for="traffic">Traffic amount</label><input id="traffic" type="range" min="1" max="5" value="3"><div class="range-row"><span>Less traffic</span><strong id="trafficValue">Normal</strong><span>Busy road</span></div></div>
+<div class="field"><label for="speed">Game speed</label><input id="speed" type="range" min="1" max="5" value="3"><div class="range-row"><span>Slow</span><strong id="speedValue">Normal</strong><span>Fast</span></div></div>
+<div class="tip">Changes update the preview. Project settings are saved in this browser on this device.</div>
+</aside>
+</div>
+<div class="savebar"><button class="btn" id="saveBtn">Save project</button><span class="status" id="saveStatus"></span></div>
+</main>
+<script>
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const project=JSON.parse(localStorage.getItem('gamezaar_current_project')||'{}');
+const defaults={name:project.name||'My Racing Game',type:'Car Traffic Racing',carColor:'#ed654b',roadTheme:'summer',traffic:3,speed:3};
+let settings={...defaults,...JSON.parse(localStorage.getItem('gamezaar_racing_settings')||'{}')};
+let running=false,over=false,score=0,frame=0,playerLane=1,trafficCars=[],coins=[],raf=0,lastSpawn=0;
+const laneX=[105,180,255],player={x:180,y:455,w:38,h:66};
+const themes={summer:{grass:'#416b4b',road:'#42434b',edge:'#e6d7b0',line:'#eee3c6'},winter:{grass:'#c8d7dc',road:'#626b78',edge:'#f3f5f7',line:'#f7fbff'},desert:{grass:'#c49a59',road:'#51463f',edge:'#f0d39c',line:'#f3dfb5'}};
+function syncSettings(){document.getElementById('gameName').value=settings.name;document.getElementById('roadTheme').value=settings.roadTheme;document.getElementById('traffic').value=settings.traffic;document.getElementById('speed').value=settings.speed;document.getElementById('projectTitle').textContent=settings.name;document.querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active',b.dataset.color===settings.carColor));document.getElementById('trafficValue').textContent=['','Very low','Low','Normal','High','Very high'][settings.traffic];document.getElementById('speedValue').textContent=['','Very slow','Slow','Normal','Fast','Very fast'][settings.speed];}
+function rounded(x,y,w,h,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
+function drawCar(x,y,color,playerCar=false){rounded(x-18,y-30,36,60,9,color);rounded(x-12,y-20,24,17,5,'#b9dce4');rounded(x-12,y+3,24,13,4,'#26333e');ctx.fillStyle='#171820';ctx.fillRect(x-21,y-19,5,14);ctx.fillRect(x+16,y-19,5,14);ctx.fillRect(x-21,y+13,5,14);ctx.fillRect(x+16,y+13,5,14);ctx.fillStyle=playerCar?'#fff0b4':'#ffedc0';ctx.fillRect(x-13,y-29,7,4);ctx.fillRect(x+6,y-29,7,4);}
+function draw(){const t=themes[settings.roadTheme];ctx.clearRect(0,0,360,560);ctx.fillStyle=t.grass;ctx.fillRect(0,0,360,560);
+for(let y=-40+(frame*4)%70;y<600;y+=70){ctx.fillStyle=settings.roadTheme==='winter'?'#ffffff':'#315b3e';ctx.beginPath();ctx.arc(24,y,9,0,7);ctx.arc(337,y+25,11,0,7);ctx.fill();}
+ctx.fillStyle=t.road;ctx.fillRect(65,0,230,560);ctx.fillStyle=t.edge;ctx.fillRect(65,0,5,560);ctx.fillRect(290,0,5,560);
+ctx.strokeStyle=t.line;ctx.lineWidth=3;ctx.setLineDash([25,22]);ctx.lineDashOffset=-(frame*4)%47;ctx.beginPath();ctx.moveTo(141,0);ctx.lineTo(141,560);ctx.moveTo(218,0);ctx.lineTo(218,560);ctx.stroke();ctx.setLineDash([]);
+coins.forEach(c=>{ctx.fillStyle='#ffcf42';ctx.beginPath();ctx.arc(c.x,c.y,9,0,7);ctx.fill();ctx.strokeStyle='#fff0a0';ctx.lineWidth=2;ctx.stroke();});
+trafficCars.forEach(c=>drawCar(c.x,c.y,c.color));drawCar(player.x,player.y,settings.carColor,true);
+ctx.fillStyle='#171326cc';ctx.fillRect(10,10,105,34);ctx.fillStyle='#fff';ctx.font='bold 14px system-ui';ctx.fillText('SCORE '+score,20,32);
+if(!running){ctx.fillStyle='#100e19aa';ctx.fillRect(0,0,360,560);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='900 24px system-ui';ctx.fillText(over?'GAME OVER':'READY TO RACE',180,255);ctx.font='13px system-ui';ctx.fillStyle='#ffe0a5';ctx.fillText(over?'Tap Restart to try again':'Press Start race',180,281);ctx.textAlign='left';}}
+function reset(){cancelAnimationFrame(raf);running=false;over=false;score=0;frame=0;playerLane=1;player.x=laneX[1];trafficCars=[];coins=[];lastSpawn=0;setState('READY TO PLAY');draw();}
+function setState(s){document.getElementById('gameState').textContent=s;document.getElementById('startBtn').textContent=running?'Ⅱ Pause':'▶ Start race';}
+function spawn(){const lane=Math.floor(Math.random()*3),x=laneX[lane];trafficCars.push({x,y:-45,color:['#4388d8','#e7b849','#8d75c9','#52a88a'][Math.floor(Math.random()*4)],speed:2+settings.speed*.65});if(Math.random()<.6)coins.push({x:laneX[Math.floor(Math.random()*3)],y:-120});}
+function loop(){if(!running)return;frame++;const speed=1+settings.speed*.55;trafficCars.forEach(c=>c.y+=c.speed*speed/2);coins.forEach(c=>c.y+=3*speed/2);trafficCars=trafficCars.filter(c=>c.y<620);coins=coins.filter(c=>c.y<590);if(frame-lastSpawn>Math.max(32,100-settings.traffic*13)){spawn();lastSpawn=frame;}
+for(const c of trafficCars){if(Math.abs(c.x-player.x)<31&&Math.abs(c.y-player.y)<48){running=false;over=true;setState('GAME OVER');draw();return;}}
+coins=coins.filter(c=>{if(Math.abs(c.x-player.x)<25&&Math.abs(c.y-player.y)<40){score+=10;return false;}return true;});if(frame%8===0)score++;draw();raf=requestAnimationFrame(loop);}
+function move(dir){if(!running)return;playerLane=Math.max(0,Math.min(2,playerLane+dir));player.x=laneX[playerLane];}
+function start(){if(over){reset();}running=!running;setState(running?'RACING':'PAUSED');if(running)loop();else cancelAnimationFrame(raf);draw();}
+document.getElementById('startBtn').addEventListener('click',start);document.getElementById('restartBtn').addEventListener('click',reset);
+[['leftBtn',-1],['leftBtnDesk',-1],['rightBtn',1],['rightBtnDesk',1]].forEach(([id,d])=>document.getElementById(id).addEventListener('click',()=>move(d)));
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a'){e.preventDefault();move(-1)}if(e.key==='ArrowRight'||e.key.toLowerCase()==='d'){e.preventDefault();move(1)}if(e.key===' '){e.preventDefault();start()}});
+document.getElementById('gameName').addEventListener('input',e=>{settings.name=e.target.value||'My Racing Game';document.getElementById('projectTitle').textContent=settings.name;});
+document.querySelectorAll('.swatch').forEach(b=>b.addEventListener('click',()=>{settings.carColor=b.dataset.color;syncSettings();draw()}));
+document.getElementById('roadTheme').addEventListener('change',e=>{settings.roadTheme=e.target.value;draw()});
+document.getElementById('traffic').addEventListener('input',e=>{settings.traffic=+e.target.value;syncSettings()});
+document.getElementById('speed').addEventListener('input',e=>{settings.speed=+e.target.value;syncSettings()});
+document.getElementById('saveBtn').addEventListener('click',()=>{localStorage.setItem('gamezaar_current_project',JSON.stringify({name:settings.name,type:'Car Traffic Racing',updatedAt:new Date().toISOString()}));localStorage.setItem('gamezaar_racing_settings',JSON.stringify(settings));document.getElementById('saveStatus').textContent='✓ Project saved on this device';});
+syncSettings();reset();
+</script>
+</body></html>
