@@ -607,7 +607,7 @@ if(!hasStarted||over){
  ctx.fillStyle='#3a2630';ctx.font='900 13px monospace';ctx.shadowColor='#fff0c0';ctx.shadowBlur=3;ctx.fillText(over?'▶ PLAY AGAIN':'▶ START GAME',180,by+24);ctx.shadowBlur=0;ctx.textAlign='left';
  }}
 function reset(){cancelAnimationFrame(raf);stopPopupAnimation();running=false;over=false;hasStarted=false;score=0;frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;setState('READY');draw();animatePopup();}
-function setState(s){document.getElementById('gameState').textContent=s;}
+function setState(s){const stateEl=document.getElementById('gameState');if(stateEl)stateEl.textContent=s;}
 function startGame(){if(running)return;stopPopupAnimation();if(over){score=0;frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;over=false;}hasStarted=true;running=true;setState('RACING');draw();loop();}
 function spawn(){
  const selected=getTrafficModels().filter(v=>v.selected);if(!selected.length)return;
