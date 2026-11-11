@@ -303,8 +303,12 @@ function drawRoadsideStreetLights(){
  if(settings.streetLightsOn===false)return;
  const selected=(settings.streetLights||[]).map(type=>({type})).concat((settings.customStreetLights||[]).filter(x=>x.selected!==false).map(item=>({custom:item})));
  if(!selected.length)return;
- for(let i=0;i<6;i++){const y=((i*158+worldFrame*1.25)%950)-150,x=i%2===0?78:282,item=selected[i%selected.length],rightSide=i%2!==0;
-  ctx.save();ctx.translate(x,y);if(rightSide)ctx.scale(-1,1);
+ for(let i=0;i<6;i++){
+  const y=((i*158+worldFrame*1.25)%950)-150,left=i%2===0,x=left?62:298,item=selected[i%selected.length];
+  // Small soil footing makes each pole visibly planted in the roadside ground
+  ctx.fillStyle='rgba(20,25,19,.34)';ctx.fillRect(x-7,y+48,14,4);
+  ctx.fillStyle='rgba(112,137,75,.8)';ctx.fillRect(x-5,y+48,10,2);
+  ctx.save();ctx.translate(x,y);if(!left)ctx.scale(-1,1);
   if(item.custom){let img=streetLightImageCache[item.custom.id];if(!img){img=new Image();img.onload=()=>draw();img.src=item.custom.imageData;streetLightImageCache[item.custom.id]=img;}if(img.complete&&img.naturalWidth)ctx.drawImage(img,-13,-43,26,58);}
   else drawStreetLightArt(ctx,0,0,item.type,.72);
   ctx.restore();
@@ -382,7 +386,10 @@ function drawRoadsideSigns(){
  const selected=(settings.roadSigns||[]).map(id=>({type:id})).concat((settings.customRoadSigns||[]).filter(s=>s.selected!==false).map(item=>({custom:item})));
  if(!selected.length)return;
  for(let i=0;i<5;i++){
-  const y=((i*190+worldFrame*1.35)%950)-170,x=i%2===0?78:282,item=selected[i%selected.length];
+  const y=((i*190+worldFrame*1.35)%950)-170,left=i%2===0,x=left?62:298,item=selected[i%selected.length];
+  // Ground contact shadow and small planted foot under each sign post
+  ctx.fillStyle='rgba(20,25,19,.38)';ctx.fillRect(x-6,y+40,12,4);
+  ctx.fillStyle='rgba(112,137,75,.82)';ctx.fillRect(x-4,y+40,8,2);
   if(item.custom){let img=roadSignImageCache[item.custom.id];if(!img){img=new Image();img.onload=()=>draw();img.src=item.custom.imageData;roadSignImageCache[item.custom.id]=img;}if(img.complete&&img.naturalWidth)ctx.drawImage(img,x-19,y-27,38,54);}
   else drawRoadSignArt(ctx,x,y,item.type,.78);
  }
