@@ -77,15 +77,15 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  width:25px;
-  height:25px;
-  border:1px solid #ffb84d55;
-  border-radius:8px;
-  background:#ffb84d12;
+  width:auto;
+  height:auto;
+  border:0;
+  border-radius:0;
+  background:transparent;
   color:#ffd18a;
-  font-size:17px;
+  font-size:20px;
   line-height:1;
-  transition:transform .18s ease,background .18s ease;
+  transition:transform .18s ease;
 }
 .builder-section[open] > summary{
   border-bottom:1px solid #ffffff1c;
@@ -93,7 +93,6 @@
 }
 .builder-section[open] .section-chevron{
   transform:rotate(180deg);
-  background:#ffb84d20;
 }
 .builder-section-body{padding:1px 14px 14px}
 .builder-section-body > .field:first-child{margin-top:14px}
