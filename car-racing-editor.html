@@ -446,11 +446,11 @@ function drawRoadsidePedestrians(){
  if(settings.pedestriansOn===false)return;
  // People are anchored to fixed roadside spots; only walking poses animate.
  const scenes=[
-  {x:65,worldY:105,action:'walk',variant:0},{x:296,worldY:310,action:'sit',variant:2},
-  {x:58,worldY:515,action:'dog',variant:4},{x:300,worldY:720,action:'cycle',variant:1},
-  {x:66,worldY:265,action:'sweep',variant:3},{x:296,worldY:475,action:'dance',variant:6},
-  {x:58,worldY:675,action:'swing',variant:5},{x:300,worldY:90,action:'phone',variant:7},
-  {x:64,worldY:395,action:'chase',variant:2},{x:298,worldY:590,action:'walk',variant:1}
+  {x:27,worldY:72,action:'walk',variant:0},{x:333,worldY:286,action:'sit',variant:2},
+  {x:61,worldY:548,action:'dog',variant:4},{x:294,worldY:744,action:'cycle',variant:1},
+  {x:14,worldY:224,action:'sweep',variant:3},{x:345,worldY:458,action:'dance',variant:6},
+  {x:46,worldY:684,action:'swing',variant:5},{x:310,worldY:126,action:'phone',variant:7},
+  {x:72,worldY:392,action:'chase',variant:2},{x:286,worldY:602,action:'walk',variant:1}
  ];
  const cycle=820,offset=(worldFrame*1.65)%cycle;
  scenes.forEach((scene,i)=>{
@@ -464,11 +464,17 @@ function drawRoadsidePedestrians(){
 }
 function drawRoadsideHouses(){
  const type=settings.houses?.type||'spring';
- const spots=[{x:43,y:15},{x:317,y:220},{x:43,y:425},{x:317,y:630}],cycle=820,offset=(worldFrame*1.1)%cycle;
+ // Houses are planted into the roadside: their foundation and ground shadow scroll at exactly the ground speed.
+ const spots=[{x:48,y:42},{x:319,y:252},{x:30,y:472},{x:337,y:690}],cycle=820,offset=(worldFrame*1.65)%cycle;
  spots.forEach((p)=>{
   const yy=((p.y+offset+cycle)%cycle)-45;
-  if(houseImage&&houseImage.complete&&houseImage.naturalWidth)ctx.drawImage(houseImage,p.x-21,yy-21,42,42);
-  else drawHouseArt(ctx,p.x,yy,type,.76);
+  ctx.save();
+  ctx.fillStyle='rgba(8,35,17,.32)';ctx.beginPath();ctx.ellipse(p.x,yy+19,25,6,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#246b36';ctx.fillRect(p.x-23,yy+16,46,4);
+  ctx.fillStyle='#5dbb4d';ctx.fillRect(p.x-19,yy+15,38,2);
+  if(houseImage&&houseImage.complete&&houseImage.naturalWidth)ctx.drawImage(houseImage,p.x-21,yy-25,42,42);
+  else drawHouseArt(ctx,p.x,yy-4,type,.76);
+  ctx.restore();
  });
 }
 function drawRoadsideTrees(){
