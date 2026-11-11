@@ -522,7 +522,9 @@ function drawRoadsideTrees(){
  });
 }
 let popupAnimRaf=0;
-function animatePopup(){if(running)return;draw();popupAnimRaf=requestAnimationFrame(animatePopup);}\nfunction stopPopupAnimation(){if(popupAnimRaf){cancelAnimationFrame(popupAnimRaf);popupAnimRaf=0;}}\nfunction draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);drawLandGround();
+function animatePopup(){if(running)return;draw();popupAnimRaf=requestAnimationFrame(animatePopup);}
+function stopPopupAnimation(){if(popupAnimRaf){cancelAnimationFrame(popupAnimRaf);popupAnimRaf=0;}}
+function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);drawLandGround();
 drawRoadsideTrees();
 drawRoadsideHouses();
 ctx.fillStyle=t.road;ctx.fillRect(78,0,204,560);if(roadImage&&roadImage.complete&&roadImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(82,0,196,560);ctx.clip();ctx.drawImage(roadImage,82,0,196,560);ctx.restore();}ctx.fillStyle=t.edge;ctx.fillRect(78,0,4,560);ctx.fillRect(278,0,4,560);
