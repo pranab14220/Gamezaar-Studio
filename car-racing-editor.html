@@ -187,7 +187,7 @@ document.getElementById('roadUpload').addEventListener('change',e=>{const file=e
 const landTypes=[{id:'spring',name:'Spring Land'},{id:'summer',name:'Summer Land'},{id:'autumn',name:'Autumn Land'},{id:'winter',name:'Winter Land'},{id:'desert',name:'Desert Land'}];
 if(!settings.land||typeof settings.land!=='object')settings.land={type:'summer',imageData:''};
 let landImage=null;
-const landPalettes={spring:{base:'#39a94b',patch:'#55c957',detail:'#b8ed72',deep:'#21853b',light:'#8be45c'},summer:{base:'#259b38',patch:'#43bd43',detail:'#a4e94e',deep:'#167b32',light:'#7ce84d'},autumn:{base:'#b96b2e',patch:'#df8b36',detail:'#ffd05b',deep:'#8f4828',light:'#f5b84b'},winter:{base:'#a9dce5',patch:'#d2f2ee',detail:'#ffffff',deep:'#6db9a4',light:'#eaffff'},desert:{base:'#d6a34c',patch:'#edc66b',detail:'#ffe49a',deep:'#a96d35',light:'#f8d985'}};
+const landPalettes={spring:{base:'#25843a',patch:'#369b43',detail:'#8bc95a',deep:'#17652f',light:'#55ad4c'},summer:{base:'#1d7832',patch:'#2b9140',detail:'#83c94c',deep:'#125d29',light:'#48a744'},autumn:{base:'#a95d2d',patch:'#c77a35',detail:'#e9ad52',deep:'#804326',light:'#df9845'},winter:{base:'#91c8d0',patch:'#b8e0dc',detail:'#f5ffff',deep:'#5b9e8e',light:'#d8f3e9'},desert:{base:'#bd8b43',patch:'#d5a957',detail:'#f0d084',deep:'#93612f',light:'#e5bd6d'}};
 function drawLandThumb(cv,type){const g=cv.getContext('2d'),p=landPalettes[type];g.fillStyle=p.base;g.fillRect(0,0,48,58);for(let i=0;i<12;i++){g.fillStyle=i%2?p.patch:p.detail;g.fillRect((i*17)%46,(i*23)%56,3,3);}if(type==='winter'){g.fillStyle='#fff';g.fillRect(4,8,8,2);g.fillRect(30,38,10,2);}if(type==='desert'){g.fillStyle='#ad814b';g.fillRect(4,42,14,3);g.fillRect(29,15,12,3);}}
 function renderLandOptions(){const grid=document.getElementById('landOptions');if(!grid)return;grid.innerHTML='';landTypes.forEach(item=>{const b=document.createElement('button');b.type='button';b.className='road-option'+(settings.land.type===item.id&&!settings.land.imageData?' active':'');b.innerHTML='<canvas class="road-thumb" width="48" height="58"></canvas><span>'+item.name+'</span>';grid.appendChild(b);drawLandThumb(b.querySelector('canvas'),item.id);b.addEventListener('click',()=>{settings.land={type:item.id,imageData:''};landImage=null;document.getElementById('landUploadStatus').textContent='Using '+item.name+'.';renderLandOptions();draw();});});}
 document.getElementById('landUpload').addEventListener('change',e=>{const file=e.target.files&&e.target.files[0];if(!file)return;if(!file.type.startsWith('image/')){document.getElementById('landUploadStatus').textContent='Please choose a valid image.';e.target.value='';return;}const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const cv=document.createElement('canvas'),scale=Math.min(1,512/img.width,1024/img.height);cv.width=Math.max(1,Math.round(img.width*scale));cv.height=Math.max(1,Math.round(img.height*scale));cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);settings.land={type:'summer',imageData:cv.toDataURL('image/webp',.82)};landImage=new Image();landImage.onload=()=>draw();landImage.src=settings.land.imageData;document.getElementById('landUploadStatus').textContent='✓ Your custom land image is selected.';renderLandOptions();draw();};img.onerror=()=>{document.getElementById('landUploadStatus').textContent='Could not load this image.';};img.src=reader.result;};reader.readAsDataURL(file);e.target.value='';});
@@ -206,14 +206,14 @@ function drawLandGround(){
  for(let y=-96+offset;y<600;y+=48){
   for(const side of [0,1]){
    const sx=side?284:0;
-   const patches=[[7,8,13,7],[29,22,9,5],[52,5,15,8],[15,35,8,5],[43,40,12,6]];
+   const patches=[[8,10,15,6],[39,28,13,5],[57,7,10,6]];
    patches.forEach((v,i)=>{
     const x=sx+v[0],yy=y+v[1],col=i%3===0?p.deep:(i%3===1?p.patch:p.light);
     ctx.fillStyle=col;ctx.fillRect(x,yy,v[2],v[3]);
     ctx.fillStyle=p.detail;ctx.fillRect(x+2,yy+1,Math.max(2,v[2]>>2),2);
    });
    // Tiny grass flecks and flower-like highlights
-   for(let k=0;k<13;k++){
+   for(let k=0;k<6;k++){
     const x=sx+((k*19+Math.floor(y/48)*11+7)%72),yy=y+((k*13+9)%45);
     ctx.fillStyle=k%5===0?p.detail:(k%3===0?p.deep:p.light);
     ctx.fillRect(x,yy,k%4===0?3:2,k%4===0?3:2);
@@ -439,7 +439,7 @@ function drawRoadsidePedestrians(){
  ];
  for(let i=0;i<scenes.length;i++){
   const y=((i*91+worldFrame*1.05)%1092)-150;
-  const left=i%2===0,x=left?54:306,phase=worldFrame*.18+i*1.37,scene=scenes[i];
+  const left=i%2===0,x=left?69:291,phase=worldFrame*.18+i*1.37,scene=scenes[i];
   if(scene.action==='couple'){
    drawPixelPedestrian(x-7,y,phase,scene.variant,'walk');
    drawPixelPedestrian(x+7,y+2,phase+1.1,scene.variant+1,'walk');
