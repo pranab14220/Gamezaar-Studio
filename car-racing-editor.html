@@ -71,13 +71,13 @@ let settings={...defaults,...JSON.parse(localStorage.getItem('gamezaar_racing_se
 let running=false,over=false,hasStarted=false,score=0,frame=0,worldFrame=0,playerLane=1,trafficCars=[],raf=0,lastSpawn=0,uploadedCarImage=null;
 let trafficImageCache={};
 const carPreview=document.getElementById('carPreview'),carPreviewCtx=carPreview.getContext('2d');
-const laneX=[108,180,252],playerLaneX=laneX,player={x:180,y:455,w:32,h:54};
+const laneX=[108,180,252],playerLaneX=laneX,player={x:180,targetX:180,tilt:0,y:455,w:32,h:54};
 let spawnPatternHistory=[],nextWaveDelay=70;
 const themes={spring:{grass:'#78965c',road:'#655d5b',edge:'#f6c5d8',line:'#fff0f5'},summer:{grass:'#416b4b',road:'#42434b',edge:'#e6d7b0',line:'#eee3c6'},autumn:{grass:'#a96d3f',road:'#51413c',edge:'#e9a45a',line:'#f5d19a'},winter:{grass:'#c8d7dc',road:'#626b78',edge:'#f3f5f7',line:'#f7fbff'},desert:{grass:'#c49a59',road:'#51463f',edge:'#f0d39c',line:'#f3dfb5'}};
 function syncSettings(){document.getElementById('gameName').value=settings.name;document.getElementById('projectTitle').textContent=settings.name;document.querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active',b.dataset.color===settings.carColor));drawCarPreview();}
 function rounded(x,y,w,h,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
 const PLAYER_CAR_WIDTH=24,PLAYER_CAR_HEIGHT=40,TRAFFIC_CAR_WIDTH=26,TRAFFIC_CAR_HEIGHT=42;
-function drawCar(x,y,color,playerCar=false){if(playerCar&&uploadedCarImage){ctx.drawImage(uploadedCarImage,x-PLAYER_CAR_WIDTH/2,y-PLAYER_CAR_HEIGHT/2,PLAYER_CAR_WIDTH,PLAYER_CAR_HEIGHT);return;}ctx.save();ctx.translate(x,y);ctx.scale(.8,.8);rounded(-15,-25,30,50,8,color);rounded(-10,-17,20,14,4,'#b9dce4');rounded(-10,3,20,11,3,'#26333e');ctx.fillStyle='#171820';ctx.fillRect(-18,-16,4,12);ctx.fillRect(14,-16,4,12);ctx.fillRect(-18,10,4,12);ctx.fillRect(14,10,4,12);ctx.fillStyle=playerCar?'#fff0b4':'#ffedc0';ctx.fillRect(-10,-24,6,3);ctx.fillRect(4,-24,6,3);ctx.restore();}
+function drawCar(x,y,color,playerCar=false,tilt=0){ctx.save();ctx.translate(x,y);if(playerCar&&Math.abs(tilt)>.015){ctx.fillStyle='rgba(0,0,0,.20)';ctx.beginPath();ctx.ellipse(tilt>0?5:-5,24,10,17,tilt*.35,0,Math.PI*2);ctx.fill();}ctx.rotate(tilt);if(playerCar&&uploadedCarImage){ctx.drawImage(uploadedCarImage,-PLAYER_CAR_WIDTH/2,-PLAYER_CAR_HEIGHT/2,PLAYER_CAR_WIDTH,PLAYER_CAR_HEIGHT);ctx.restore();return;}ctx.scale(.8,.8);rounded(-15,-25,30,50,8,color);rounded(-10,-17,20,14,4,'#b9dce4');rounded(-10,3,20,11,3,'#26333e');ctx.fillStyle='#171820';ctx.fillRect(-18,-16,4,12);ctx.fillRect(14,-16,4,12);ctx.fillRect(-18,10,4,12);ctx.fillRect(14,10,4,12);ctx.fillStyle=playerCar?'#fff0b4':'#ffedc0';ctx.fillRect(-10,-24,6,3);ctx.fillRect(4,-24,6,3);ctx.restore();}
 function drawCarPreview(){carPreviewCtx.clearRect(0,0,240,150);carPreviewCtx.fillStyle='#171326';carPreviewCtx.fillRect(0,0,240,150);if(uploadedCarImage){carPreviewCtx.drawImage(uploadedCarImage,82,8,76,134);}else{carPreviewCtx.fillStyle='#101018';carPreviewCtx.fillRect(89,37,62,78);carPreviewCtx.fillStyle=settings.carColor;carPreviewCtx.beginPath();carPreviewCtx.roundRect(94,28,52,94,13);carPreviewCtx.fill();carPreviewCtx.fillStyle='#b9dce4';carPreviewCtx.beginPath();carPreviewCtx.roundRect(101,42,38,25,7);carPreviewCtx.fill();carPreviewCtx.fillStyle='#26333e';carPreviewCtx.beginPath();carPreviewCtx.roundRect(101,82,38,20,5);carPreviewCtx.fill();carPreviewCtx.fillStyle='#171820';carPreviewCtx.fillRect(89,44,7,19);carPreviewCtx.fillRect(144,44,7,19);carPreviewCtx.fillRect(89,88,7,19);carPreviewCtx.fillRect(144,88,7,19);carPreviewCtx.fillStyle='#fff0b4';carPreviewCtx.fillRect(101,29,9,4);carPreviewCtx.fillRect(130,29,9,4);}}
 
 const trafficPalette=['#ed654b','#348be8','#35b77a','#f2b83f','#a77af0','#eeeeee'];
@@ -440,7 +440,7 @@ ctx.strokeStyle=t.line;ctx.lineWidth=3;ctx.setLineDash([25,22]);ctx.lineDashOffs
 drawRoadsideStreetLights();drawRoadsideSigns();
 drawRoadsidePedestrians();
 
-trafficCars.forEach(c=>drawTrafficShape(ctx,c.x,c.y,c.model));drawCar(player.x,player.y,settings.carColor,true);
+trafficCars.forEach(c=>drawTrafficShape(ctx,c.x,c.y,c.model));drawCar(player.x,player.y,settings.carColor,true,player.tilt);
 ctx.fillStyle='#171326cc';ctx.fillRect(10,10,105,34);ctx.fillStyle='#fff';ctx.font='bold 14px system-ui';ctx.fillText('SCORE '+score,20,32);
 
 if(!hasStarted||over){
@@ -455,7 +455,7 @@ if(!hasStarted||over){
  ctx.fillStyle='#d8d0e6';ctx.font='11px system-ui';const desc=(settings.description||'').trim()||'Get ready for an exciting drive!';const words=desc.split(/\\s+/);let line='',lines=[];words.forEach(word=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>220&&line){lines.push(line);line=word;}else line=test;});if(line)lines.push(line);lines.slice(0,2).forEach((v,i)=>ctx.fillText(v,180,cardY+91+i*16));
  const by=cardY+128;ctx.fillStyle='#ffbd59';ctx.beginPath();ctx.roundRect(113,by,134,37,10);ctx.fill();ctx.fillStyle='#281c31';ctx.font='900 13px system-ui';ctx.fillText(over?'▶ PLAY AGAIN':'▶ START GAME',180,by+24);ctx.textAlign='left';
  }}
-function reset(){cancelAnimationFrame(raf);running=false;over=false;hasStarted=false;score=0;frame=0;worldFrame=0;playerLane=1;player.x=playerLaneX[1];trafficCars=[];lastSpawn=0;setState('READY');draw();}
+function reset(){cancelAnimationFrame(raf);running=false;over=false;hasStarted=false;score=0;frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;setState('READY');draw();}
 function setState(s){document.getElementById('gameState').textContent=s;}
 function startGame(){if(running)return;if(over){score=0;frame=0;worldFrame=0;playerLane=1;player.x=playerLaneX[1];trafficCars=[];lastSpawn=0;over=false;}hasStarted=true;running=true;setState('RACING');draw();loop();}
 function spawn(){
@@ -494,11 +494,11 @@ function spawn(){
   trafficCars.push({x:laneX[item.lane],y:-65-item.offset,color:model.color,model,speed:2+3*.65+3*.25});
  });
 }
-function loop(){if(!running)return;frame++;const speedMultiplier=getScoreSpeedMultiplier();worldFrame+=speedMultiplier;const speed=1+3*.55;trafficCars.forEach(c=>c.y+=c.speed*speed*speedMultiplier/2);trafficCars=trafficCars.filter(c=>c.y<620);if(frame-lastSpawn>Math.max(45,Math.ceil(nextWaveDelay/speedMultiplier))){spawn();lastSpawn=frame;}
+function loop(){if(!running)return;frame++;const steerDelta=player.targetX-player.x;player.x+=steerDelta*.19;if(Math.abs(steerDelta)<.12)player.x=player.targetX;const targetTilt=Math.max(-.13,Math.min(.13,-steerDelta*.003));player.tilt+=(targetTilt-player.tilt)*.22;const speedMultiplier=getScoreSpeedMultiplier();worldFrame+=speedMultiplier;const speed=1+3*.55;trafficCars.forEach(c=>c.y+=c.speed*speed*speedMultiplier/2);trafficCars=trafficCars.filter(c=>c.y<620);if(frame-lastSpawn>Math.max(45,Math.ceil(nextWaveDelay/speedMultiplier))){spawn();lastSpawn=frame;}
 for(const c of trafficCars){if(Math.abs(c.x-player.x)<(PLAYER_CAR_WIDTH+TRAFFIC_CAR_WIDTH)/2&&Math.abs(c.y-player.y)<(PLAYER_CAR_HEIGHT+TRAFFIC_CAR_HEIGHT)/2){running=false;over=true;setState('GAME OVER');draw();return;}}
 const scoreCfg=settings.scoreSystem||{};trafficCars.forEach(c=>{if(!c.passed&&c.y>player.y+35){c.passed=true;if(scoreCfg.passOn!==false)score+=Math.max(0,Number(scoreCfg.passPoints)||0);}});
 if(frame%60===0&&scoreCfg.survivalOn!==false)score+=Math.max(0,Number(scoreCfg.survivalPoints)||0);updateSpeedSystemStatus();updateDifficultySystemStatus();draw();raf=requestAnimationFrame(loop);}
-function move(dir){if(!running)return;playerLane=Math.max(0,Math.min(2,playerLane+dir));player.x=playerLaneX[playerLane];}
+function move(dir){if(!running)return;playerLane=Math.max(0,Math.min(2,playerLane+dir));player.targetX=playerLaneX[playerLane];}
 canvas.addEventListener('click',e=>{if(running)return;const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)*canvas.width/rect.width,y=(e.clientY-rect.top)*canvas.height/rect.height;if(x>=105&&x<=255&&y>=300&&y<=355)startGame();});
 [['leftBtn',-1],['leftBtnDesk',-1],['rightBtn',1],['rightBtnDesk',1]].forEach(([id,d])=>document.getElementById(id).addEventListener('click',()=>move(d)));
 document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a'){e.preventDefault();move(-1)}if(e.key==='ArrowRight'||e.key.toLowerCase()==='d'){e.preventDefault();move(1)}if(e.key===' '&&!running){e.preventDefault();startGame();}});
