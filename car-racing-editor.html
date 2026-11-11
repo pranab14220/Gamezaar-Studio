@@ -64,7 +64,9 @@ const project=JSON.parse(localStorage.getItem('gamezaar_current_project')||'{}')
 const trafficDefaults=[{id:'hatchback',name:'Hatchback',color:'#4388d8',selected:true,imageData:''},{id:'sedan',name:'Sedan',color:'#e7b849',selected:true,imageData:''},{id:'sports',name:'Sports Car',color:'#8d75c9',selected:true,imageData:''},{id:'suv',name:'SUV',color:'#52a88a',selected:true,imageData:''},{id:'taxi',name:'Taxi',color:'#e6c94d',selected:false,imageData:''},{id:'van',name:'Mini Van',color:'#d87857',selected:false,imageData:''}];
 const defaults={name:project.name||'My Racing Game',description:'',type:'Car Traffic Racing',carColor:'#ed654b',carImageData:'',trafficCars:trafficDefaults,houses:{type:'spring',imageData:''},pedestriansOn:true,streetLightsOn:true,streetLights:['classic','curved'],customStreetLights:[],scoreSystem:{passOn:true,passPoints:5,coinOn:true,coinPoints:10,survivalOn:true,survivalPoints:1},speedSystem:{enabled:false,milestones:[{score:100,speed:1.2},{score:250,speed:1.5},{score:500,speed:2}]}};
 let settings={...defaults,...JSON.parse(localStorage.getItem('gamezaar_racing_settings')||'{}')};
-const highScoreKey='gamezaar_highscore_'+String(project.createdAt||project.name||'default').replace(/[^a-z0-9_-]/gi,'_');\nlet highScore=Math.max(0,Number(localStorage.getItem(highScoreKey))||0);\nlet running=false,over=false,hasStarted=false,score=0,frame=0,worldFrame=0,playerLane=1,trafficCars=[],raf=0,lastSpawn=0,uploadedCarImage=null;
+const highScoreKey='gamezaar_highscore_'+String(project.createdAt||project.name||'default').replace(/[^a-z0-9_-]/gi,'_');
+let highScore=Math.max(0,Number(localStorage.getItem(highScoreKey))||0);
+let running=false,over=false,hasStarted=false,score=0,frame=0,worldFrame=0,playerLane=1,trafficCars=[],raf=0,lastSpawn=0,uploadedCarImage=null;
 let trafficImageCache={};
 const carPreview=document.getElementById('carPreview'),carPreviewCtx=carPreview.getContext('2d');
 const laneX=[108,180,252],playerLaneX=laneX,player={x:180,targetX:180,tilt:0,y:455,w:32,h:54};
