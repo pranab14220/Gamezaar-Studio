@@ -391,85 +391,101 @@ function drawPixelPedestrian(x,y,phase,variant=0,action='walk'){
  const step=Math.sin(phase)*2,arm=Math.cos(phase)*1.5;
  const outfits=['#ff4e62','#238cf5','#ffd12e','#27d889','#bd75ff','#ff873d','#ff79b7','#20d9d0'];
  const shirt=outfits[variant%outfits.length],skin=['#f0bd91','#c98b62','#ffcf9e'][variant%3];
- const girl=variant%2===1,darkHair=variant%3===0?'#201722':'#493024';
+ const darkHair=variant%3===0?'#201722':'#493024';
  ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.imageSmoothingEnabled=false;
  ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(-8,8,17,3);
- // Dark pixel outline, face and hair highlights
  ctx.fillStyle='#201d29';ctx.fillRect(-6,-25,12,12);ctx.fillStyle=skin;ctx.fillRect(-4,-23,8,8);
- ctx.fillStyle=darkHair;ctx.fillRect(-5,-26,10,4);ctx.fillRect(-6,-23,2,5);ctx.fillStyle='#8b5739';ctx.fillRect(1,-25,3,2);
+ ctx.fillStyle=darkHair;ctx.fillRect(-5,-26,10,4);ctx.fillRect(-6,-23,2,5);
  ctx.fillStyle='#24202b';ctx.fillRect(-2,-18,5,2);
- if(girl){ctx.fillStyle=darkHair;ctx.fillRect(4,-22,3,8);ctx.fillRect(-6,-19,2,5);}
- // Shirt with dark outline and bright highlight
- ctx.fillStyle='#25202a';ctx.fillRect(-7,-15,14,15);ctx.fillStyle=shirt;ctx.fillRect(-5,-14,10,12);ctx.fillStyle='rgba(255,255,255,.38)';ctx.fillRect(-4,-13,3,8);
- if(girl){ctx.fillStyle=shirt;ctx.fillRect(-6,-3,12,4);}
+ ctx.fillStyle='#25202a';ctx.fillRect(-7,-15,14,15);ctx.fillStyle=shirt;ctx.fillRect(-5,-14,10,12);
+ ctx.fillStyle='rgba(255,255,255,.38)';ctx.fillRect(-4,-13,3,8);
  if(action==='sit'){
   ctx.fillStyle='#81552e';ctx.fillRect(-11,1,22,3);ctx.fillRect(-9,4,3,8);ctx.fillRect(6,4,3,8);
-  ctx.fillStyle='#24283a';ctx.fillRect(2,4,4,6);ctx.fillRect(5,8,7,3);ctx.fillStyle=skin;ctx.fillRect(-8,-11,3,8);ctx.fillRect(5,-11,3,7);
+  ctx.fillStyle='#24283a';ctx.fillRect(2,4,4,6);ctx.fillRect(5,8,7,3);
  }else{
   ctx.fillStyle='#24202b';
-  if(action==='work'){ctx.fillRect(-8,-12,4,8);ctx.fillRect(4,-13,4,8);ctx.fillStyle=skin;ctx.fillRect(-7,-11,2,6);ctx.fillRect(5,-12,2,5);ctx.fillStyle='#b87932';ctx.fillRect(8,-9,3,21);ctx.fillStyle='#f3c45c';ctx.fillRect(5,9,9,3);}
-  else if(action==='phone'){ctx.fillRect(-8,-12,4,8);ctx.fillRect(4,-14,4,8);ctx.fillStyle=skin;ctx.fillRect(-7,-11,2,6);ctx.fillRect(5,-13,2,6);ctx.fillStyle='#161923';ctx.fillRect(6,-18,4,6);ctx.fillStyle='#55e5ff';ctx.fillRect(7,-17,2,3);}
-  else{ctx.fillRect(-8,-12,4,Math.max(4,6+arm));ctx.fillRect(4,-12,4,Math.max(4,6-arm));ctx.fillStyle=skin;ctx.fillRect(-7,-11,2,Math.max(3,5+arm));ctx.fillRect(5,-11,2,Math.max(3,5-arm));}
-  ctx.fillStyle='#20202a';ctx.fillRect(-5,-2,4,9+step);ctx.fillRect(1,-2,4,9-step);
-  ctx.fillStyle='#34415d';ctx.fillRect(-4,0,2,5);ctx.fillRect(2,0,2,5);
+  if(action==='work'||action==='sweep'){ctx.fillRect(-8,-12,4,8);ctx.fillRect(4,-13,4,8);ctx.fillStyle=skin;ctx.fillRect(-7,-11,2,6);ctx.fillRect(5,-12,2,5);}
+  else if(action==='phone'){ctx.fillRect(-8,-12,4,8);ctx.fillRect(4,-14,4,8);ctx.fillStyle='#161923';ctx.fillRect(6,-18,4,6);ctx.fillStyle='#55e5ff';ctx.fillRect(7,-17,2,3);}
+  else{ctx.fillRect(-8,-12,4,Math.max(4,6+arm));ctx.fillRect(4,-12,4,Math.max(4,6-arm));}
+  ctx.fillStyle='#20202a';
+  if(action==='dance'){ctx.fillRect(-6,-2,4,8+step);ctx.fillRect(2,-2,4,8-step);ctx.fillStyle=shirt;ctx.fillRect(-11,-17,5,3);ctx.fillRect(6,-19,5,3);}
+  else{ctx.fillRect(-5,-2,4,9+step);ctx.fillRect(1,-2,4,9-step);}
   ctx.fillStyle='#171923';ctx.fillRect(-6,6+step,6,3);ctx.fillRect(1,6-step,6,3);
-  ctx.fillStyle='#f7d68a';ctx.fillRect(-5,7+step,3,1);ctx.fillRect(2,7-step,3,1);
+  if(action==='sweep'){
+   ctx.strokeStyle='#b87932';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(8,-10);ctx.lineTo(15,12);ctx.stroke();
+   ctx.fillStyle='#e8c46a';ctx.fillRect(11,10,8,3);
+  }
  }
  ctx.restore();
 }
-function drawPixelDogWalker(x,y,phase,variant=0){
+function drawPixelDogWalker(x,y,phase,variant=0,chasing=false){
  drawPixelPedestrian(x,y,phase,variant,'walk');
- ctx.save();ctx.translate(Math.round(x+15),Math.round(y+2));ctx.imageSmoothingEnabled=false;
- const bounce=Math.sin(phase)*1.5;
+ ctx.save();ctx.translate(Math.round(x+(chasing?19:15)),Math.round(y+2));ctx.imageSmoothingEnabled=false;
+ const bounce=Math.sin(phase*(chasing?1.8:1))*1.5;
  ctx.fillStyle='#bd8955';ctx.fillRect(-5,-5+bounce,10,6);ctx.fillRect(3,-8+bounce,5,5);
  ctx.fillStyle='#5a3928';ctx.fillRect(6,-7+bounce,2,2);ctx.fillRect(-4,1+bounce,2,4);ctx.fillRect(2,1-bounce,2,4);
  ctx.fillStyle='#bd8955';ctx.fillRect(-7,-7+bounce,3,3);
- // leash held by the walker
  ctx.strokeStyle='#f2d18a';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-13,-10);ctx.lineTo(-3,-4+bounce);ctx.stroke();
+ ctx.restore();
+}
+function drawPixelCyclist(x,y,phase,variant=0){
+ ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.imageSmoothingEnabled=false;
+ const bob=Math.sin(phase)*1.2,shirt=['#238cf5','#ff873d','#27d889'][variant%3];
+ ctx.strokeStyle='#25202a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(-9,5,7,0,Math.PI*2);ctx.arc(10,5,7,0,Math.PI*2);ctx.stroke();
+ ctx.strokeStyle='#b9d4e8';ctx.beginPath();ctx.moveTo(-9,5);ctx.lineTo(0,-4);ctx.lineTo(10,5);ctx.lineTo(-9,5);ctx.lineTo(4,5);ctx.lineTo(0,-4);ctx.stroke();
+ ctx.fillStyle='#e9c39b';ctx.fillRect(-2,-22+bob,7,7);ctx.fillStyle='#30202a';ctx.fillRect(-3,-24+bob,8,3);
+ ctx.fillStyle=shirt;ctx.fillRect(-3,-14+bob,8,10);ctx.fillStyle='#25202a';ctx.fillRect(0,-5,3,8);
+ ctx.restore();
+}
+function drawSwingingPerson(x,y,phase,variant=0){
+ ctx.save();ctx.strokeStyle='#6a4427';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-8+x,y-34);ctx.lineTo(x+8,y-34);ctx.moveTo(x-5,y-34);ctx.lineTo(x-5+Math.sin(phase)*5,y-5);ctx.moveTo(x+5,y-34);ctx.lineTo(x+5+Math.sin(phase)*5,y-5);ctx.stroke();
+ drawPixelPedestrian(x+Math.sin(phase)*5,y,phase,variant,'sit');
  ctx.restore();
 }
 function drawRoadsidePedestrians(){
  if(settings.pedestriansOn===false)return;
- // A busier neighbourhood: walkers, couples, people resting, working and walking dogs.
+ // People are anchored to fixed roadside spots; only walking poses animate.
  const scenes=[
-  {action:'walk',variant:0},{action:'couple',variant:1},{action:'sit',variant:2},
-  {action:'work',variant:3},{action:'dog',variant:4},{action:'phone',variant:5},
-  {action:'walk',variant:6},{action:'work',variant:7},{action:'sit',variant:1},
-  {action:'couple',variant:4},{action:'dog',variant:2},{action:'walk',variant:3}
+  {x:65,worldY:105,action:'walk',variant:0},{x:296,worldY:310,action:'sit',variant:2},
+  {x:58,worldY:515,action:'dog',variant:4},{x:300,worldY:720,action:'cycle',variant:1},
+  {x:66,worldY:265,action:'sweep',variant:3},{x:296,worldY:475,action:'dance',variant:6},
+  {x:58,worldY:675,action:'swing',variant:5},{x:300,worldY:90,action:'phone',variant:7},
+  {x:64,worldY:395,action:'chase',variant:2},{x:298,worldY:590,action:'walk',variant:1}
  ];
- for(let i=0;i<scenes.length;i++){
-  const y=((i*91+worldFrame*1.05)%1092)-150;
-  const left=i%2===0,x=left?69:291,phase=worldFrame*.18+i*1.37,scene=scenes[i];
-  if(scene.action==='couple'){
-   drawPixelPedestrian(x-7,y,phase,scene.variant,'walk');
-   drawPixelPedestrian(x+7,y+2,phase+1.1,scene.variant+1,'walk');
-  }else if(scene.action==='dog'){
-   drawPixelDogWalker(x,y,phase,scene.variant);
-  }else{
-   drawPixelPedestrian(x,y,phase,scene.variant,scene.action);
-  }
- }
+ const cycle=820,offset=(worldFrame*1.1)%cycle;
+ scenes.forEach((scene,i)=>{
+  const y=((scene.worldY+offset+cycle)%cycle)-45,phase=worldFrame*.16+i*1.7;
+  if(scene.action==='dog')drawPixelDogWalker(scene.x,y,phase,scene.variant,false);
+  else if(scene.action==='chase')drawPixelDogWalker(scene.x,y,phase,scene.variant,true);
+  else if(scene.action==='cycle')drawPixelCyclist(scene.x,y,phase,scene.variant);
+  else if(scene.action==='swing')drawSwingingPerson(scene.x,y,phase,scene.variant);
+  else drawPixelPedestrian(scene.x,y,phase,scene.variant,scene.action);
+ });
 }
 function drawRoadsideHouses(){
  const type=settings.houses?.type||'spring';
- for(let i=0;i<4;i++){
-  const y=((i*205+worldFrame*1.1)%820)-130;
-  const x=i%2===0?43:317,yy=y+(i%2?70:0);
-  if(houseImage&&houseImage.complete&&houseImage.naturalWidth){ctx.drawImage(houseImage,x-21,yy-21,42,42);}
-  else drawHouseArt(ctx,x,yy,type,.76);
- }
+ const spots=[{x:43,y:15},{x:317,y:220},{x:43,y:425},{x:317,y:630}],cycle=820,offset=(worldFrame*1.1)%cycle;
+ spots.forEach((p)=>{
+  const yy=((p.y+offset+cycle)%cycle)-45;
+  if(houseImage&&houseImage.complete&&houseImage.naturalWidth)ctx.drawImage(houseImage,p.x-21,yy-21,42,42);
+  else drawHouseArt(ctx,p.x,yy,type,.76);
+ });
 }
-
 function drawRoadsideTrees(){
  const chosen=getSelectedTreeItems();if(!chosen.length)return;
- for(let i=0;i<6;i++){
-  const y=((i*132+worldFrame*1.65)%792)-105;
-  const drawOne=(item,x,yy)=>{if(item.kind==='custom'){const img=customTreeImageCache[item.id];if(img&&img.complete&&img.naturalWidth)ctx.drawImage(img,x-21,yy-29,42,50);}else drawSeasonTree(ctx,x,yy,item.type,.78);};
-  drawOne(chosen[i%chosen.length],20,y);drawOne(chosen[(i+1)%chosen.length],340,y+66);
- }
+ // Irregular clusters: singles, pairs and short rows, with some trees behind houses.
+ const spots=[
+  {x:18,y:5},{x:43,y:34},{x:340,y:120},{x:322,y:151},
+  {x:20,y:235},{x:340,y:315},{x:18,y:455},{x:43,y:483},
+  {x:340,y:555},{x:320,y:585},{x:18,y:690},{x:340,y:760}
+ ];
+ const cycle=820,offset=(worldFrame*1.65)%cycle;
+ spots.forEach((p,i)=>{
+  const item=chosen[i%chosen.length],yy=((p.y+offset+cycle)%cycle)-45;
+  if(item.kind==='custom'){const img=customTreeImageCache[item.id];if(img&&img.complete&&img.naturalWidth)ctx.drawImage(img,p.x-21,yy-29,42,50);}
+  else drawSeasonTree(ctx,p.x,yy,item.type,.78);
+ });
 }
-
-
 function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);drawLandGround();
 drawRoadsideTrees();
 drawRoadsideHouses();
