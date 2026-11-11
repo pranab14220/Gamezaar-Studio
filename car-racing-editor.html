@@ -385,9 +385,9 @@ function drawRoadsideSigns(){
  const selected=(settings.roadSigns||[]).map(id=>({type:id})).concat((settings.customRoadSigns||[]).filter(s=>s.selected!==false).map(item=>({custom:item})));
  if(!selected.length)return;
  const cycle=820,offset=(worldFrame*1.65)%cycle;
- for(let i=0;i<5;i++){
-  const y=((i*164+offset+cycle)%cycle)-45,left=i%2===0,x=left?78:282,item=selected[i%selected.length];
-  // Sign posts share the same scrolling ground layer as trees and houses
+ // Two signs per full roadside cycle, spaced well apart and kept away from the lights.
+ for(let i=0;i<2;i++){
+  const y=((i*410+offset+cycle)%cycle)-45,left=i%2===0,x=left?38:322,item=selected[i%selected.length];
   if(item.custom){let img=roadSignImageCache[item.custom.id];if(!img){img=new Image();img.onload=()=>draw();img.src=item.custom.imageData;roadSignImageCache[item.custom.id]=img;}if(img.complete&&img.naturalWidth)ctx.drawImage(img,x-19,y-27,38,54);}
   else drawRoadSignArt(ctx,x,y,item.type,.78);
  }
@@ -527,7 +527,7 @@ drawRoadsideTrees();
 drawRoadsideHouses();
 ctx.fillStyle=t.road;ctx.fillRect(78,0,204,560);if(roadImage&&roadImage.complete&&roadImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(82,0,196,560);ctx.clip();ctx.drawImage(roadImage,82,0,196,560);ctx.restore();}ctx.fillStyle=t.edge;ctx.fillRect(78,0,4,560);ctx.fillRect(278,0,4,560);
 ctx.strokeStyle=t.line;ctx.lineWidth=3;ctx.setLineDash([25,22]);ctx.lineDashOffset=-(worldFrame*4)%47;ctx.beginPath();ctx.moveTo(146,0);ctx.lineTo(146,560);ctx.moveTo(214,0);ctx.lineTo(214,560);ctx.stroke();ctx.setLineDash([]);
-drawRoadsideStreetLights();drawRoadsideSigns();
+drawRoadsideSigns();drawRoadsideStreetLights();
 drawRoadsidePedestrians();
 
 trafficCars.forEach(c=>drawTrafficShape(ctx,c.x,c.y,c.model));drawCar(player.x,player.y,settings.carColor,true,player.tilt);
