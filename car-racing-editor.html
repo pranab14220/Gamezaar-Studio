@@ -457,7 +457,7 @@ if(!hasStarted||over){
  }}
 function reset(){cancelAnimationFrame(raf);running=false;over=false;hasStarted=false;score=0;frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;setState('READY');draw();}
 function setState(s){document.getElementById('gameState').textContent=s;}
-function startGame(){if(running)return;if(over){score=0;frame=0;worldFrame=0;playerLane=1;player.x=playerLaneX[1];trafficCars=[];lastSpawn=0;over=false;}hasStarted=true;running=true;setState('RACING');draw();loop();}
+function startGame(){if(running)return;if(over){score=0;frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;over=false;}hasStarted=true;running=true;setState('RACING');draw();loop();}
 function spawn(){
  const selected=getTrafficModels().filter(v=>v.selected);if(!selected.length)return;
  const count=Math.min(5,getScoreDifficultyCount());
@@ -494,7 +494,7 @@ function spawn(){
   trafficCars.push({x:laneX[item.lane],y:-65-item.offset,color:model.color,model,speed:2+3*.65+3*.25});
  });
 }
-function loop(){if(!running)return;frame++;const steerDelta=player.targetX-player.x;player.x+=steerDelta*.19;if(Math.abs(steerDelta)<.12)player.x=player.targetX;const targetTilt=Math.max(-.13,Math.min(.13,-steerDelta*.003));player.tilt+=(targetTilt-player.tilt)*.22;const speedMultiplier=getScoreSpeedMultiplier();worldFrame+=speedMultiplier;const speed=1+3*.55;trafficCars.forEach(c=>c.y+=c.speed*speed*speedMultiplier/2);trafficCars=trafficCars.filter(c=>c.y<620);if(frame-lastSpawn>Math.max(45,Math.ceil(nextWaveDelay/speedMultiplier))){spawn();lastSpawn=frame;}
+function loop(){if(!running)return;frame++;const steerDelta=player.targetX-player.x;player.x+=steerDelta*.19;if(Math.abs(steerDelta)<.12)player.x=player.targetX;const targetTilt=Math.max(-.13,Math.min(.13,steerDelta*.003));player.tilt+=(targetTilt-player.tilt)*.22;const speedMultiplier=getScoreSpeedMultiplier();worldFrame+=speedMultiplier;const speed=1+3*.55;trafficCars.forEach(c=>c.y+=c.speed*speed*speedMultiplier/2);trafficCars=trafficCars.filter(c=>c.y<620);if(frame-lastSpawn>Math.max(45,Math.ceil(nextWaveDelay/speedMultiplier))){spawn();lastSpawn=frame;}
 for(const c of trafficCars){if(Math.abs(c.x-player.x)<(PLAYER_CAR_WIDTH+TRAFFIC_CAR_WIDTH)/2&&Math.abs(c.y-player.y)<(PLAYER_CAR_HEIGHT+TRAFFIC_CAR_HEIGHT)/2){running=false;over=true;setState('GAME OVER');draw();return;}}
 const scoreCfg=settings.scoreSystem||{};trafficCars.forEach(c=>{if(!c.passed&&c.y>player.y+35){c.passed=true;if(scoreCfg.passOn!==false)score+=Math.max(0,Number(scoreCfg.passPoints)||0);}});
 if(frame%60===0&&scoreCfg.survivalOn!==false)score+=Math.max(0,Number(scoreCfg.survivalPoints)||0);updateSpeedSystemStatus();updateDifficultySystemStatus();draw();raf=requestAnimationFrame(loop);}
