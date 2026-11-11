@@ -14,15 +14,16 @@
 .preview-fab{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:1000;display:flex;align-items:center;gap:8px;padding:13px 19px;border:1px solid #ffe0a0;border-radius:999px;background:linear-gradient(135deg,#ffe0a0,#ffb84d);color:#281c31;font-size:13px;font-weight:950;box-shadow:0 8px 24px #0008,0 0 0 3px #ffb84d22;cursor:pointer;transition:transform .18s,box-shadow .18s}
 .preview-fab:active{transform:translateY(2px) scale(.97);box-shadow:0 4px 12px #0008}
 .preview-fab .preview-fab-icon{font-size:15px}
-.preview-modal{position:fixed;inset:0;z-index:1100;display:none;align-items:center;justify-content:center;padding:14px;background:rgba(8,6,16,.82);backdrop-filter:blur(8px)}
+.preview-modal{position:fixed;inset:0;z-index:1100;display:none;align-items:stretch;justify-content:stretch;padding:0;background:rgba(8,6,16,.96);backdrop-filter:blur(8px)}
 .preview-modal.open{display:flex}
-.preview-modal-card{position:relative;width:min(520px,100%);max-height:calc(100dvh - 28px);overflow:auto;border:1px solid #806b9e;border-radius:20px;padding:5px;background:linear-gradient(145deg,#302744,#1d192d);box-shadow:0 22px 70px #000b,inset 0 1px 0 #ffffff18}
-.preview-modal-close{flex:none;width:32px;height:32px;margin:0;border:1px solid #ffcf8066;border-radius:50%;background:#211b31;color:#ffe0a0;font-size:23px;line-height:1;cursor:pointer;box-shadow:0 3px 12px #0007}
-.preview-modal-content{clear:both}
-.preview-modal .preview-panel{width:100%;max-width:none;margin:0;padding:4px;border:0;background:transparent;box-shadow:none}
-.preview-modal .panel-head{padding-right:0;margin-bottom:6px}.preview-modal .panel-head h2{font-size:14px}
-.preview-modal .game-shell{max-width:460px;padding:5px 6px}
-@media(max-width:480px){.preview-fab{right:14px;bottom:calc(14px + env(safe-area-inset-bottom));padding:12px 16px}.preview-modal{padding:8px}.preview-modal-card{max-height:calc(100dvh - 16px);padding:3px;border-radius:16px}.preview-modal .preview-panel{padding:3px}.preview-modal .game-shell{padding:4px 5px}}
+.preview-modal-card{position:relative;width:100%;height:100%;max-height:100dvh;overflow:auto;border:0;border-radius:0;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);background:linear-gradient(145deg,#302744,#171326);box-shadow:none;display:flex;flex-direction:column}
+.preview-modal-close{flex:none;width:34px;height:34px;margin:0;border:1px solid #ffcf8066;border-radius:50%;background:#211b31;color:#ffe0a0;font-size:23px;line-height:1;cursor:pointer;box-shadow:0 3px 12px #0007}
+.preview-modal-content{clear:both;flex:1;min-height:0;display:flex;flex-direction:column}
+.preview-modal .preview-panel{width:100%;max-width:none;flex:1;min-height:0;margin:0;padding:10px 8px;border:0;border-radius:0;background:transparent;box-shadow:none;display:flex;flex-direction:column}
+.preview-modal .panel-head{flex:none;padding:0 4px;margin:0 0 8px}.preview-modal .panel-head h2{font-size:15px}
+.preview-modal .game-shell{width:min(100%,calc((100dvh - 112px)*.642857));max-width:none;padding:5px 6px;margin:auto}
+.preview-modal .game-shell .stage{max-width:100%}
+@media(max-width:480px){.preview-fab{right:14px;bottom:calc(14px + env(safe-area-inset-bottom));padding:12px 16px}.preview-modal .preview-panel{padding:8px 5px}.preview-modal .game-shell{width:min(100%,calc((100dvh - 105px)*.642857));padding:4px 5px}}
 
 </style>
 </head>
