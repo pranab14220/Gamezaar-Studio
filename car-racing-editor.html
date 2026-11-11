@@ -18,15 +18,15 @@
 <section class="panel preview-panel">
 <div class="panel-head"><h2>Live game preview</h2><span class="tag" id="gameState">READY TO PLAY</span></div>
 <div class="stage"><canvas id="game" width="360" height="560" aria-label="Car racing game preview"></canvas></div>
-<div class="preview-actions"><button class="btn" id="startBtn">▶ Start race</button><button class="btn secondary" id="restartBtn">↻ Restart</button></div>
+
 <div class="mobile-controls"><button class="control" id="leftBtn" aria-label="Move left">◀</button><button class="control" id="rightBtn" aria-label="Move right">▶</button></div>
 <div class="controls"><button class="control" id="leftBtnDesk" aria-label="Move left">◀</button><button class="control" id="rightBtnDesk" aria-label="Move right">▶</button></div>
-<p class="tip">Controls: use the left/right buttons, keyboard arrow keys, or A / D keys. Avoid traffic and collect coins.</p>
+<p class="tip">Controls: use the left/right buttons or keyboard arrow keys / A-D. Avoid the traffic.</p>
 </section>
 <aside class="panel settings">
 <div class="panel-head"><h2>Game Builder</h2><span class="tag">SECTION 01</span></div>
 <div class="section-title">01 · Game Settings</div>
-<div class="field"><label for="gameName">Game name</label><input id="gameName" type="text" maxlength="40" placeholder="My Racing Game"></div>
+<div class="field"><label for="gameName">Game name</label><input id="gameName" type="text" maxlength="40" placeholder="My Racing Game"></div><div class="field"><label for="gameDescription">Game description</label><textarea id="gameDescription" rows="3" maxlength="120" placeholder="Write a short description for your game..." style="width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#171326;color:white;font:inherit;font-size:13px;resize:vertical"></textarea><div class="upload-note">This appears in the small start popup inside your game.</div></div>
 <div class="section-title">02 · Player Car</div>
 <canvas id="carPreview" class="car-preview" width="240" height="150" aria-label="Player car preview"></canvas>
 <div class="field"><label>Choose car color</label><div class="colors" id="colors">
@@ -66,9 +66,9 @@
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
 const project=JSON.parse(localStorage.getItem('gamezaar_current_project')||'{}');
 const trafficDefaults=[{id:'hatchback',name:'Hatchback',color:'#4388d8',selected:true,imageData:''},{id:'sedan',name:'Sedan',color:'#e7b849',selected:true,imageData:''},{id:'sports',name:'Sports Car',color:'#8d75c9',selected:true,imageData:''},{id:'suv',name:'SUV',color:'#52a88a',selected:true,imageData:''},{id:'taxi',name:'Taxi',color:'#e6c94d',selected:false,imageData:''},{id:'van',name:'Mini Van',color:'#d87857',selected:false,imageData:''}];
-const defaults={name:project.name||'My Racing Game',type:'Car Traffic Racing',carColor:'#ed654b',carImageData:'',trafficCars:trafficDefaults,houses:{type:'spring',imageData:''},pedestriansOn:true,streetLightsOn:true,streetLights:['classic','curved'],customStreetLights:[],scoreSystem:{passOn:true,passPoints:5,coinOn:true,coinPoints:10,survivalOn:true,survivalPoints:1},speedSystem:{enabled:false,milestones:[{score:100,speed:1.2},{score:250,speed:1.5},{score:500,speed:2}]}};
+const defaults={name:project.name||'My Racing Game',description:'',type:'Car Traffic Racing',carColor:'#ed654b',carImageData:'',trafficCars:trafficDefaults,houses:{type:'spring',imageData:''},pedestriansOn:true,streetLightsOn:true,streetLights:['classic','curved'],customStreetLights:[],scoreSystem:{passOn:true,passPoints:5,coinOn:true,coinPoints:10,survivalOn:true,survivalPoints:1},speedSystem:{enabled:false,milestones:[{score:100,speed:1.2},{score:250,speed:1.5},{score:500,speed:2}]}};
 let settings={...defaults,...JSON.parse(localStorage.getItem('gamezaar_racing_settings')||'{}')};
-let running=false,over=false,score=0,frame=0,worldFrame=0,playerLane=1,trafficCars=[],raf=0,lastSpawn=0,uploadedCarImage=null;
+let running=false,over=false,hasStarted=false,score=0,frame=0,worldFrame=0,playerLane=1,trafficCars=[],raf=0,lastSpawn=0,uploadedCarImage=null;
 let trafficImageCache={};
 const carPreview=document.getElementById('carPreview'),carPreviewCtx=carPreview.getContext('2d');
 const laneX=[108,180,252],playerLaneX=laneX,player={x:180,y:455,w:32,h:54};
@@ -443,9 +443,21 @@ drawRoadsidePedestrians();
 trafficCars.forEach(c=>drawTrafficShape(ctx,c.x,c.y,c.model));drawCar(player.x,player.y,settings.carColor,true);
 ctx.fillStyle='#171326cc';ctx.fillRect(10,10,105,34);ctx.fillStyle='#fff';ctx.font='bold 14px system-ui';ctx.fillText('SCORE '+score,20,32);
 
-if(!running){ctx.fillStyle='#100e19aa';ctx.fillRect(0,0,360,560);ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='900 24px system-ui';ctx.fillText(over?'GAME OVER':'READY TO RACE',180,255);ctx.font='13px system-ui';ctx.fillStyle='#ffe0a5';ctx.fillText(over?'Tap Restart to try again':'Press Start race',180,281);ctx.textAlign='left';}}
-function reset(){cancelAnimationFrame(raf);running=false;over=false;score=0;frame=0;worldFrame=0;playerLane=1;player.x=playerLaneX[1];trafficCars=[];lastSpawn=0;setState('READY TO PLAY');draw();}
-function setState(s){document.getElementById('gameState').textContent=s;document.getElementById('startBtn').textContent=running?'Ⅱ Pause':'▶ Start race';}
+if(!hasStarted||over){
+ ctx.fillStyle='rgba(8,7,15,.48)';ctx.fillRect(0,0,360,560);
+ const cardX=48,cardY=190,cardW=264,cardH=180;
+ ctx.shadowColor='rgba(0,0,0,.4)';ctx.shadowBlur=18;ctx.fillStyle='#302744';ctx.beginPath();ctx.roundRect(cardX,cardY,cardW,cardH,17);ctx.fill();ctx.shadowBlur=0;
+ ctx.strokeStyle='#ffca75';ctx.lineWidth=1.5;ctx.stroke();
+ ctx.textAlign='center';ctx.fillStyle='#ffcf83';ctx.font='bold 10px system-ui';ctx.fillText(over?'RACE FINISHED':'WELCOME TO',180,cardY+24);
+ const title=(settings.name||'My Racing Game').trim();ctx.fillStyle='#fff';ctx.font='900 19px system-ui';
+ const titleLines=[];let titleLine='';title.split(/\\s+/).forEach(word=>{const test=titleLine?titleLine+' '+word:word;if(ctx.measureText(test).width>220&&titleLine){titleLines.push(titleLine);titleLine=word;}else titleLine=test;});if(titleLine)titleLines.push(titleLine);
+ titleLines.slice(0,2).forEach((line,i)=>ctx.fillText(line,180,cardY+52+i*22));
+ ctx.fillStyle='#d8d0e6';ctx.font='11px system-ui';const desc=(settings.description||'').trim()||'Get ready for an exciting drive!';const words=desc.split(/\\s+/);let line='',lines=[];words.forEach(word=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>220&&line){lines.push(line);line=word;}else line=test;});if(line)lines.push(line);lines.slice(0,2).forEach((v,i)=>ctx.fillText(v,180,cardY+91+i*16));
+ const by=cardY+128;ctx.fillStyle='#ffbd59';ctx.beginPath();ctx.roundRect(113,by,134,37,10);ctx.fill();ctx.fillStyle='#281c31';ctx.font='900 13px system-ui';ctx.fillText(over?'▶ PLAY AGAIN':'▶ START GAME',180,by+24);ctx.textAlign='left';
+ }}
+function reset(){cancelAnimationFrame(raf);running=false;over=false;hasStarted=false;score=0;frame=0;worldFrame=0;playerLane=1;player.x=playerLaneX[1];trafficCars=[];lastSpawn=0;setState('READY');draw();}
+function setState(s){document.getElementById('gameState').textContent=s;}
+function startGame(){if(running)return;if(over){score=0;frame=0;worldFrame=0;playerLane=1;player.x=playerLaneX[1];trafficCars=[];lastSpawn=0;over=false;}hasStarted=true;running=true;setState('RACING');draw();loop();}
 function spawn(){
  const selected=getTrafficModels().filter(v=>v.selected);if(!selected.length)return;
  const count=Math.min(5,getScoreDifficultyCount());
@@ -488,10 +500,10 @@ const scoreCfg=settings.scoreSystem||{};trafficCars.forEach(c=>{if(!c.passed&&c.
 if(frame%60===0&&scoreCfg.survivalOn!==false)score+=Math.max(0,Number(scoreCfg.survivalPoints)||0);updateSpeedSystemStatus();updateDifficultySystemStatus();draw();raf=requestAnimationFrame(loop);}
 function move(dir){if(!running)return;playerLane=Math.max(0,Math.min(2,playerLane+dir));player.x=playerLaneX[playerLane];}
 function start(){if(over){reset();}running=!running;setState(running?'RACING':'PAUSED');if(running)loop();else cancelAnimationFrame(raf);draw();}
-document.getElementById('startBtn').addEventListener('click',start);document.getElementById('restartBtn').addEventListener('click',reset);
+canvas.addEventListener('click',e=>{if(running)return;const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)*canvas.width/rect.width,y=(e.clientY-rect.top)*canvas.height/rect.height;if(x>=105&&x<=255&&y>=300&&y<=355)startGame();});
 [['leftBtn',-1],['leftBtnDesk',-1],['rightBtn',1],['rightBtnDesk',1]].forEach(([id,d])=>document.getElementById(id).addEventListener('click',()=>move(d)));
-document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a'){e.preventDefault();move(-1)}if(e.key==='ArrowRight'||e.key.toLowerCase()==='d'){e.preventDefault();move(1)}if(e.key===' '){e.preventDefault();start()}});
-document.getElementById('gameName').addEventListener('input',e=>{settings.name=e.target.value||'My Racing Game';document.getElementById('projectTitle').textContent=settings.name;});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a'){e.preventDefault();move(-1)}if(e.key==='ArrowRight'||e.key.toLowerCase()==='d'){e.preventDefault();move(1)}if(e.key===' '&&!running){e.preventDefault();startGame();}});
+document.getElementById('gameName').value=settings.name;document.getElementById('gameDescription').value=settings.description||'';document.getElementById('gameName').addEventListener('input',e=>{settings.name=e.target.value||'My Racing Game';document.getElementById('projectTitle').textContent=settings.name;draw();});document.getElementById('gameDescription').addEventListener('input',e=>{settings.description=e.target.value.slice(0,120);draw();});
 document.querySelectorAll('.swatch').forEach(b=>b.addEventListener('click',()=>{settings.carColor=b.dataset.color;syncSettings();draw()}));
 const ASSET_GOAL_BYTES=4*1024*1024,ASSET_LIMIT_BYTES=5*1024*1024,IMAGE_UPLOAD_LIMIT_BYTES=300*1024;
 function dataUrlBytes(data){if(!data)return 0;const part=data.split(',')[1]||'';return Math.floor(part.length*3/4)-(part.endsWith('==')?2:part.endsWith('=')?1:0);}
