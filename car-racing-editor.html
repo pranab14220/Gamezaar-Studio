@@ -452,7 +452,7 @@ function drawRoadsidePedestrians(){
   {x:58,worldY:675,action:'swing',variant:5},{x:300,worldY:90,action:'phone',variant:7},
   {x:64,worldY:395,action:'chase',variant:2},{x:298,worldY:590,action:'walk',variant:1}
  ];
- const cycle=820,offset=(worldFrame*1.1)%cycle;
+ const cycle=820,offset=(worldFrame*1.65)%cycle;
  scenes.forEach((scene,i)=>{
   const y=((scene.worldY+offset+cycle)%cycle)-45,phase=worldFrame*.16+i*1.7;
   if(scene.action==='dog')drawPixelDogWalker(scene.x,y,phase,scene.variant,false);
