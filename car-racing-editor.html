@@ -103,6 +103,40 @@
   .builder-section-body{padding:1px 12px 13px}
 }
 
+
+/* Keep Game Builder heading and project asset meter in one matching card */
+.builder-overview{
+  padding:14px 15px 15px;
+  border:1px solid #ffffff20;
+  border-radius:17px;
+  background:linear-gradient(145deg,#302744,#241e36);
+  box-shadow:0 7px 18px #08061124,inset 0 1px 0 #ffffff08;
+}
+.panel.settings > .builder-overview .panel-head{
+  min-height:52px;
+  margin:0;
+  padding:0 0 13px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+.builder-overview .asset-meter{
+  margin:0;
+  padding:13px 0 0;
+  border:0;
+  border-top:1px solid #ffffff1c;
+  border-radius:0;
+  background:transparent;
+}
+.builder-overview .asset-meter-head,
+.builder-overview .meter-foot,
+.builder-overview .asset-message{color:#b9b1ca}
+.builder-overview .asset-meter-head strong{color:#ffe0a0}
+@media(max-width:760px){
+  .builder-overview{padding:13px 14px}
+  .panel.settings > .builder-overview .panel-head{padding-bottom:12px}
+  .builder-overview .asset-meter{padding-top:12px}
+}
 </style>
 </head>
 <body>
@@ -115,12 +149,14 @@
 <div class="game-shell"><div class="game-hud"><div class="hud-stat" aria-label="Score"><span class="hud-icon">🏆</span><strong id="hudScore">0000</strong></div><div class="hud-stat" aria-label="High score"><span class="hud-icon">👑</span><strong id="hudHighScore">0000</strong></div><div class="hud-stat" aria-label="Speed"><span class="hud-icon">🚗</span><strong id="hudSpeed">1x</strong></div></div><div class="stage"><canvas id="game" width="360" height="560" aria-label="Car racing game preview"></canvas></div><div class="mobile-controls control-pad"><button class="control" id="leftBtn" aria-label="Move left">◀</button><button class="control" id="rightBtn" aria-label="Move right">▶</button></div></div>
 </section>
 <aside class="panel settings">
-<div class="panel-head"><h2>Game Builder</h2><span class="tag">SECTION 01</span></div>
-<div class="asset-meter">
- <div class="asset-meter-head"><span>PROJECT ASSET SIZE</span><strong id="assetSizeText">0 KB / 5120 KB</strong></div>
- <div class="meter-track"><div class="meter-fill" id="assetMeterFill"></div></div>
- <div class="meter-foot"><span id="assetRemaining">5120 KB remaining</span><span>Goal: 4096 KB · Max: 5120 KB</span></div>
- <div class="asset-message" id="assetMessage">Recommended asset budget: 4096 KB. Total asset limit: 5120 KB. This counts uploaded assets, not the final APK runtime.</div>
+<div class="builder-overview">
+ <div class="panel-head"><h2>Game Builder</h2><span class="tag">SECTION 01</span></div>
+ <div class="asset-meter">
+  <div class="asset-meter-head"><span>PROJECT ASSET SIZE</span><strong id="assetSizeText">0 KB / 5120 KB</strong></div>
+  <div class="meter-track"><div class="meter-fill" id="assetMeterFill"></div></div>
+  <div class="meter-foot"><span id="assetRemaining">5120 KB remaining</span><span>Goal: 4096 KB · Max: 5120 KB</span></div>
+  <div class="asset-message" id="assetMessage">Recommended asset budget: 4096 KB. Total asset limit: 5120 KB. This counts uploaded assets, not the final APK runtime.</div>
+ </div>
 </div>
 <details class="builder-section" open><summary>01 · Game Settings<span class="section-chevron" aria-hidden="true">⌄</span></summary><div class="builder-section-body">
 <div class="field"><label for="gameName">Game name</label><input id="gameName" type="text" maxlength="40" placeholder="My Racing Game"></div><div class="field"><label for="gameDescription">Game description</label><textarea id="gameDescription" rows="3" maxlength="120" placeholder="Write a short description for your game..." style="width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#171326;color:white;font:inherit;font-size:13px;resize:vertical"></textarea><div class="upload-note">This appears in the small start popup inside your game.</div></div>
