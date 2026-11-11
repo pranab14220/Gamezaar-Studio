@@ -197,23 +197,25 @@ function drawLandGround(){
   ctx.save();ctx.beginPath();ctx.rect(0,0,78,560);ctx.rect(282,0,78,560);ctx.clip();
   ctx.drawImage(landImage,0,0,78,560);ctx.drawImage(landImage,282,0,78,560);ctx.restore();return;
  }
- // Layered irregular pixel patches create the vivid grassy reference look
+ // Subtle ground texture: dark rectangular patches are now very rare
  const offset=(worldFrame*1.7)%96;
  for(let y=-96+offset;y<600;y+=48){
+  const tileIndex=Math.floor((y+96-offset)/48);
   for(const side of [0,1]){
    const sx=side?284:0;
-   const patches=[[8,10,15,6],[39,28,13,5],[57,7,10,6]];
+   const patches=[[8,10,15,6],[39,28,13,5]];
    patches.forEach((v,i)=>{
-    const x=sx+v[0],yy=y+v[1],col=i%3===0?p.deep:(i%3===1?p.patch:p.light);
+    if(i===0&&tileIndex%3!==0)return;
+    const x=sx+v[0],yy=y+v[1],col=i===0?p.deep:p.patch;
     ctx.fillStyle=col;ctx.fillRect(x,yy,v[2],v[3]);
     ctx.fillStyle=p.detail;ctx.fillRect(x+2,yy+1,Math.max(2,v[2]>>2),2);
    });
-   // Tiny grass flecks and flower-like highlights
-   for(let k=0;k<6;k++){
-    const x=sx+((k*19+Math.floor(y/48)*11+7)%72),yy=y+((k*13+9)%45);
-    ctx.fillStyle=k%5===0?p.detail:(k%3===0?p.deep:p.light);
+   // Fewer small grass flecks, with no extra dark speckles
+   for(let k=0;k<4;k++){
+    const x=sx+((k*23+Math.floor(y/48)*13+7)%72),yy=y+((k*17+9)%45);
+    ctx.fillStyle=k%3===0?p.detail:p.light;
     ctx.fillRect(x,yy,k%4===0?3:2,k%4===0?3:2);
-    if(type==='summer'&&k%6===0){ctx.fillStyle='#e9ff8b';ctx.fillRect(x+2,yy-1,2,2);}
+    if(type==='summer'&&k===0){ctx.fillStyle='#e9ff8b';ctx.fillRect(x+2,yy-1,2,2);}
    }
    if(type==='spring'){ctx.fillStyle='#ff9bc8';ctx.fillRect(sx+22,y+14,3,3);ctx.fillRect(sx+61,y+31,3,3);ctx.fillStyle='#fff2a6';ctx.fillRect(sx+23,y+15,1,1);}
    if(type==='autumn'){ctx.fillStyle='#ffb64c';ctx.fillRect(sx+22,y+14,4,3);ctx.fillRect(sx+61,y+31,3,3);}
