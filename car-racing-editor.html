@@ -478,12 +478,18 @@ function drawRoadsidePedestrians(){
  ];
  const cycle=820,offset=(worldFrame*1.65)%cycle;
  scenes.forEach((scene,i)=>{
-  const y=((scene.worldY+offset+cycle)%cycle)-45,phase=worldFrame*.28+i*1.7;
-  if(scene.action==='dog')drawPixelDogWalker(scene.x,y,phase,scene.variant,false);
-  else if(scene.action==='chase')drawPixelDogWalker(scene.x,y,phase,scene.variant,true);
+  const y=((scene.worldY+offset+cycle)%cycle)-45,phase=worldFrame*.16+i*1.7;
+  // Walkers make real forward progress along the footpath instead of running in place.
+  // Keep this displacement separate from the normal scenery scroll and leave other activities unchanged.
+  const isWalking=scene.action==='walk'||scene.action==='dog'||scene.action==='chase';
+  const walkProgress=isWalking?(worldFrame*.48+i*31)%112:0;
+  const walkX=isWalking?scene.x+Math.sin(phase*.32)*2.5:scene.x;
+  const walkY=isWalking?y-walkProgress:y;
+  if(scene.action==='dog')drawPixelDogWalker(walkX,walkY,phase,scene.variant,false);
+  else if(scene.action==='chase')drawPixelDogWalker(walkX,walkY,phase,scene.variant,true);
   else if(scene.action==='cycle')drawPixelCyclist(scene.x,y,phase,scene.variant);
   else if(scene.action==='swing')drawSwingingPerson(scene.x,y,phase,scene.variant);
-  else drawPixelPedestrian(scene.x,y,phase,scene.variant,scene.action);
+  else drawPixelPedestrian(walkX,walkY,phase,scene.variant,scene.action);
  });
 }
 function drawRoadsideHouses(){
