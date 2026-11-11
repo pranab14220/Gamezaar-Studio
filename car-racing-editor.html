@@ -521,7 +521,7 @@ function drawRoadsideTrees(){
   else drawSeasonTree(ctx,p.x,yy,item.type,.78);
  });
 }
-function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);drawLandGround();
+let popupAnimRaf=0;\nfunction animatePopup(){if(running)return;draw();popupAnimRaf=requestAnimationFrame(animatePopup);}\nfunction stopPopupAnimation(){if(popupAnimRaf){cancelAnimationFrame(popupAnimRaf);popupAnimRaf=0;}}\nfunction draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);drawLandGround();
 drawRoadsideTrees();
 drawRoadsideHouses();
 ctx.fillStyle=t.road;ctx.fillRect(78,0,204,560);if(roadImage&&roadImage.complete&&roadImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(82,0,196,560);ctx.clip();ctx.drawImage(roadImage,82,0,196,560);ctx.restore();}ctx.fillStyle=t.edge;ctx.fillRect(78,0,4,560);ctx.fillRect(278,0,4,560);
@@ -536,20 +536,38 @@ document.getElementById('hudHighScore').textContent=String(highScore).padStart(4
 document.getElementById('hudSpeed').textContent=getScoreSpeedMultiplier().toFixed(1)+'x';
 
 if(!hasStarted||over){
- ctx.fillStyle='rgba(8,7,15,.48)';ctx.fillRect(0,0,360,560);
+ // Premium pixel-art popup, matched to the outer GAMEZAAR game-shell.
+ ctx.fillStyle='rgba(8,7,15,.62)';ctx.fillRect(0,0,360,560);
  const cardX=48,cardY=190,cardW=264,cardH=180;
- ctx.shadowColor='rgba(0,0,0,.4)';ctx.shadowBlur=18;ctx.fillStyle='#302744';ctx.beginPath();ctx.roundRect(cardX,cardY,cardW,cardH,17);ctx.fill();ctx.shadowBlur=0;
- ctx.strokeStyle='#ffca75';ctx.lineWidth=1.5;ctx.stroke();
- ctx.textAlign='center';ctx.fillStyle='#ffcf83';ctx.font='bold 10px system-ui';ctx.fillText(over?'RACE FINISHED':'WELCOME TO',180,cardY+24);
- const title=(settings.name||'My Racing Game').trim();ctx.fillStyle='#fff';ctx.font='900 19px system-ui';
+ // Deep layered shadow + stepped pixel frame.
+ ctx.save();ctx.shadowColor='rgba(0,0,0,.72)';ctx.shadowBlur=0;ctx.shadowOffsetX=7;ctx.shadowOffsetY=8;
+ ctx.fillStyle='#090d19';ctx.fillRect(cardX+5,cardY+5,cardW-10,cardH-10);ctx.restore();
+ ctx.fillStyle='#18243a';ctx.fillRect(cardX,cardY,cardW,cardH);
+ ctx.fillStyle='#34415d';ctx.fillRect(cardX+4,cardY+4,cardW-8,cardH-8);
+ ctx.fillStyle='#252e49';ctx.fillRect(cardX+8,cardY+8,cardW-16,cardH-16);
+ // Pixel-corner gold frame and inner highlight.
+ ctx.fillStyle='#ffca75';
+ ctx.fillRect(cardX+8,cardY,cardW-16,3);ctx.fillRect(cardX+8,cardY+cardH-3,cardW-16,3);
+ ctx.fillRect(cardX,cardY+8,3,cardH-16);ctx.fillRect(cardX+cardW-3,cardY+8,3,cardH-16);
+ ctx.fillRect(cardX+4,cardY+4,8,3);ctx.fillRect(cardX+cardW-12,cardY+4,8,3);
+ ctx.fillRect(cardX+4,cardY+cardH-7,8,3);ctx.fillRect(cardX+cardW-12,cardY+cardH-7,8,3);
+ ctx.fillStyle='#52617c';ctx.fillRect(cardX+13,cardY+13,cardW-26,1);
+ ctx.textAlign='center';ctx.fillStyle='#ffd18a';ctx.font='bold 10px monospace';ctx.shadowColor='#ffb84d88';ctx.shadowBlur=7;ctx.fillText(over?'RACE FINISHED':'WELCOME TO',180,cardY+25);ctx.shadowBlur=0;
+ const title=(settings.name||'My Racing Game').trim();ctx.fillStyle='#fff4dc';ctx.font='900 19px monospace';ctx.shadowColor='#000';ctx.shadowBlur=4;
  const titleLines=[];let titleLine='';title.split(/\\s+/).forEach(word=>{const test=titleLine?titleLine+' '+word:word;if(ctx.measureText(test).width>220&&titleLine){titleLines.push(titleLine);titleLine=word;}else titleLine=test;});if(titleLine)titleLines.push(titleLine);
- titleLines.slice(0,2).forEach((line,i)=>ctx.fillText(line,180,cardY+52+i*22));
- ctx.fillStyle='#d8d0e6';ctx.font='11px system-ui';const desc=(settings.description||'').trim()||'Get ready for an exciting drive!';const words=desc.split(/\\s+/);let line='',lines=[];words.forEach(word=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>220&&line){lines.push(line);line=word;}else line=test;});if(line)lines.push(line);lines.slice(0,2).forEach((v,i)=>ctx.fillText(v,180,cardY+91+i*16));
- const by=cardY+128;ctx.fillStyle='#ffbd59';ctx.beginPath();ctx.roundRect(113,by,134,37,10);ctx.fill();ctx.fillStyle='#281c31';ctx.font='900 13px system-ui';ctx.fillText(over?'▶ PLAY AGAIN':'▶ START GAME',180,by+24);ctx.textAlign='left';
+ titleLines.slice(0,2).forEach((line,i)=>ctx.fillText(line,180,cardY+53+i*22));ctx.shadowBlur=0;
+ ctx.fillStyle='#d5e0f2';ctx.font='11px monospace';const desc=(settings.description||'').trim()||'Get ready for an exciting drive!';const words=desc.split(/\\s+/);let line='',lines=[];words.forEach(word=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>220&&line){lines.push(line);line=word;}else line=test;});if(line)lines.push(line);lines.slice(0,2).forEach((v,i)=>ctx.fillText(v,180,cardY+91+i*16));
+ const by=cardY+128,pulse=1+Math.sin(Date.now()/230)*.035,bw=134*pulse,bh=37*pulse,bx=180-bw/2,buttonY=by+(37-bh)/2;
+ // Animated gold pixel button with a crisp offset shadow.
+ ctx.fillStyle='#0a101d';ctx.fillRect(113,by+5,134,37);
+ ctx.fillStyle='#8b572b';ctx.fillRect(bx+2,buttonY+3,bw-4,bh-3);
+ ctx.fillStyle='#ffb84d';ctx.fillRect(bx,buttonY,bw,bh);
+ ctx.fillStyle='#ffe3a8';ctx.fillRect(bx+4,buttonY+3,bw-8,3);ctx.fillRect(bx+4,buttonY+bh-4,bw-8,2);
+ ctx.fillStyle='#3a2630';ctx.font='900 13px monospace';ctx.shadowColor='#fff0c0';ctx.shadowBlur=3;ctx.fillText(over?'▶ PLAY AGAIN':'▶ START GAME',180,by+24);ctx.shadowBlur=0;ctx.textAlign='left';
  }}
-function reset(){cancelAnimationFrame(raf);running=false;over=false;hasStarted=false;score=0;frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;setState('READY');draw();}
+function reset(){cancelAnimationFrame(raf);stopPopupAnimation();running=false;over=false;hasStarted=false;score=0;frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;setState('READY');draw();animatePopup();}
 function setState(s){document.getElementById('gameState').textContent=s;}
-function startGame(){if(running)return;if(over){score=0;frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;over=false;}hasStarted=true;running=true;setState('RACING');draw();loop();}
+function startGame(){if(running)return;stopPopupAnimation();if(over){score=0;frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;over=false;}hasStarted=true;running=true;setState('RACING');draw();loop();}
 function spawn(){
  const selected=getTrafficModels().filter(v=>v.selected);if(!selected.length)return;
  const count=Math.min(5,getScoreDifficultyCount());
@@ -587,7 +605,7 @@ function spawn(){
  });
 }
 function loop(){if(!running)return;frame++;const steerDelta=player.targetX-player.x;player.x+=steerDelta*.19;if(Math.abs(steerDelta)<.12)player.x=player.targetX;const targetTilt=Math.max(-.13,Math.min(.13,steerDelta*.003));player.tilt+=(targetTilt-player.tilt)*.22;const speedMultiplier=getScoreSpeedMultiplier();worldFrame+=speedMultiplier;const speed=1+3*.55;trafficCars.forEach(c=>c.y+=c.speed*speed*speedMultiplier/2);trafficCars=trafficCars.filter(c=>c.y<620);if(frame-lastSpawn>Math.max(45,Math.ceil(nextWaveDelay/speedMultiplier))){spawn();lastSpawn=frame;}
-for(const c of trafficCars){if(Math.abs(c.x-player.x)<(PLAYER_CAR_WIDTH+TRAFFIC_CAR_WIDTH)/2&&Math.abs(c.y-player.y)<(PLAYER_CAR_HEIGHT+TRAFFIC_CAR_HEIGHT)/2){running=false;over=true;setState('GAME OVER');draw();return;}}
+for(const c of trafficCars){if(Math.abs(c.x-player.x)<(PLAYER_CAR_WIDTH+TRAFFIC_CAR_WIDTH)/2&&Math.abs(c.y-player.y)<(PLAYER_CAR_HEIGHT+TRAFFIC_CAR_HEIGHT)/2){running=false;over=true;setState('GAME OVER');draw();animatePopup();return;}}
 const scoreCfg=settings.scoreSystem||{};trafficCars.forEach(c=>{if(!c.passed&&c.y>player.y+35){c.passed=true;if(scoreCfg.passOn!==false)score+=Math.max(0,Number(scoreCfg.passPoints)||0);}});
 if(frame%60===0&&scoreCfg.survivalOn!==false)score+=Math.max(0,Number(scoreCfg.survivalPoints)||0);if(score>highScore){highScore=score;localStorage.setItem(highScoreKey,String(highScore));}updateSpeedSystemStatus();updateDifficultySystemStatus();draw();raf=requestAnimationFrame(loop);}
 function move(dir){if(!running)return;playerLane=Math.max(0,Math.min(2,playerLane+dir));player.targetX=playerLaneX[playerLane];}
