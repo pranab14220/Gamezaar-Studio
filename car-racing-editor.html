@@ -16,13 +16,13 @@
 .preview-fab .preview-fab-icon{font-size:15px}
 .preview-modal{position:fixed;inset:0;z-index:1100;display:none;align-items:center;justify-content:center;padding:14px;background:rgba(8,6,16,.82);backdrop-filter:blur(8px)}
 .preview-modal.open{display:flex}
-.preview-modal-card{position:relative;width:min(520px,100%);max-height:calc(100dvh - 28px);overflow:auto;border:1px solid #806b9e;border-radius:20px;padding:12px;background:linear-gradient(145deg,#302744,#1d192d);box-shadow:0 22px 70px #000b,inset 0 1px 0 #ffffff18}
-.preview-modal-close{position:sticky;top:0;float:right;z-index:5;width:34px;height:34px;margin:-2px -2px 5px 8px;border:1px solid #ffcf8066;border-radius:50%;background:#211b31;color:#ffe0a0;font-size:23px;line-height:1;cursor:pointer;box-shadow:0 3px 12px #0007}
+.preview-modal-card{position:relative;width:min(520px,100%);max-height:calc(100dvh - 28px);overflow:auto;border:1px solid #806b9e;border-radius:20px;padding:5px;background:linear-gradient(145deg,#302744,#1d192d);box-shadow:0 22px 70px #000b,inset 0 1px 0 #ffffff18}
+.preview-modal-close{flex:none;width:32px;height:32px;margin:0;border:1px solid #ffcf8066;border-radius:50%;background:#211b31;color:#ffe0a0;font-size:23px;line-height:1;cursor:pointer;box-shadow:0 3px 12px #0007}
 .preview-modal-content{clear:both}
-.preview-modal .preview-panel{width:100%;max-width:none;margin:0;padding:10px;border:0;background:transparent;box-shadow:none}
-.preview-modal .panel-head{padding-right:2px}
-.preview-modal .game-shell{max-width:440px}
-@media(max-width:480px){.preview-fab{right:14px;bottom:calc(14px + env(safe-area-inset-bottom));padding:12px 16px}.preview-modal{padding:8px}.preview-modal-card{max-height:calc(100dvh - 16px);padding:9px;border-radius:16px}.preview-modal .preview-panel{padding:6px}.preview-modal .game-shell{padding:7px 8px}}
+.preview-modal .preview-panel{width:100%;max-width:none;margin:0;padding:4px;border:0;background:transparent;box-shadow:none}
+.preview-modal .panel-head{padding-right:0;margin-bottom:6px}.preview-modal .panel-head h2{font-size:14px}
+.preview-modal .game-shell{max-width:460px;padding:5px 6px}
+@media(max-width:480px){.preview-fab{right:14px;bottom:calc(14px + env(safe-area-inset-bottom));padding:12px 16px}.preview-modal{padding:8px}.preview-modal-card{max-height:calc(100dvh - 16px);padding:3px;border-radius:16px}.preview-modal .preview-panel{padding:3px}.preview-modal .game-shell{padding:4px 5px}}
 
 </style>
 </head>
@@ -32,7 +32,7 @@
 <section class="top"><div class="eyebrow">TEMPLATE 01 / CAR TRAFFIC RACING</div><h1 id="projectTitle">My Racing Game</h1><p>Customize your car and road, then play the preview to test your game.</p></section>
 <div class="layout">
 <section class="panel preview-panel">
-<div class="panel-head"><h2>Live game preview</h2><span class="tag" id="gameState">READY TO PLAY</span></div>
+<div class="panel-head"><h2>Live game preview</h2><button class="preview-modal-close" id="closePreviewBtn" type="button" aria-label="Close preview">×</button></div>
 <div class="game-shell"><div class="game-hud"><div class="hud-stat" aria-label="Score"><span class="hud-icon">🏆</span><strong id="hudScore">0000</strong></div><div class="hud-stat" aria-label="High score"><span class="hud-icon">👑</span><strong id="hudHighScore">0000</strong></div><div class="hud-stat" aria-label="Speed"><span class="hud-icon">🚗</span><strong id="hudSpeed">1x</strong></div></div><div class="stage"><canvas id="game" width="360" height="560" aria-label="Car racing game preview"></canvas></div><div class="mobile-controls control-pad"><button class="control" id="leftBtn" aria-label="Move left">◀</button><button class="control" id="rightBtn" aria-label="Move right">▶</button></div></div>
 </section>
 <aside class="panel settings">
@@ -77,7 +77,6 @@
 
 <div class="preview-modal" id="previewModal" aria-hidden="true">
  <div class="preview-modal-card" role="dialog" aria-modal="true" aria-label="Live game preview">
-  <button class="preview-modal-close" id="closePreviewBtn" type="button" aria-label="Close preview">×</button>
   <div class="preview-modal-content" id="previewModalContent"></div>
  </div>
 </div>
