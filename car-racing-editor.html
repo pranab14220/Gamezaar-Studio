@@ -46,18 +46,13 @@
   background:linear-gradient(145deg,#302744,#241e36);
 }
 .builder-section{
-  display:grid;
-  grid-template-rows:auto 0fr;
+  display:block;
   margin:0;
   overflow:hidden;
   border:1px solid #ffffff22;
   border-radius:15px;
   background:linear-gradient(145deg,#302744,#241e36);
   box-shadow:0 7px 18px #08061124,inset 0 1px 0 #ffffff08;
-  transition:grid-template-rows .34s cubic-bezier(.2,.75,.25,1),box-shadow .22s ease;
-}
-.builder-section[open]{
-  grid-template-rows:auto 1fr;
 }
 .builder-section > summary{
   display:flex;
@@ -100,21 +95,12 @@
   transform:rotate(180deg);
 }
 .builder-section-body{
-  min-height:0;
-  overflow:hidden;
-  padding:0 14px;
-  opacity:0;
-  transform:translateY(-7px);
-  transition:padding .28s ease,opacity .22s ease,transform .28s ease;
-}
-.builder-section[open] .builder-section-body{
   padding:1px 14px 14px;
+  overflow:hidden;
   opacity:1;
-  transform:translateY(0);
 }
-@media(prefers-reduced-motion:reduce){
-  .builder-section,.builder-section-body,.builder-section .section-chevron{transition:none}
-}
+.builder-section:not([open]) > .builder-section-body{display:none}
+.builder-section .section-chevron{transition:transform .16s ease}
 .builder-section-body > .field:first-child{margin-top:14px}
 @media(max-width:760px){
   .panel.settings{gap:9px}
@@ -228,6 +214,51 @@
 <button class="preview-fab" id="openPreviewBtn" type="button"><span class="preview-fab-icon">▶</span> Preview</button>
 
 <script>
+// Lightweight, repeatable dropdown animation (height only; no animated grid layout).
+const sectionAnimations=new WeakMap();
+document.querySelectorAll('.builder-section > summary').forEach(summary=>{
+  summary.addEventListener('click',event=>{
+    event.preventDefault();
+    const section=summary.parentElement;
+    const body=section.querySelector('.builder-section-body');
+    const previous=sectionAnimations.get(section);
+    if(previous) previous.cancel();
+    const opening=!section.open;
+    if(opening){
+      section.open=true;
+      body.style.display='block';
+      body.style.height='0px';
+      body.style.opacity='0';
+      const target=body.scrollHeight;
+      const animation=body.animate(
+        [{height:'0px',opacity:0},{height:target+'px',opacity:1}],
+        {duration:190,easing:'cubic-bezier(.2,.7,.25,1)'}
+      );
+      sectionAnimations.set(section,animation);
+      animation.onfinish=()=>{
+        body.style.height='';
+        body.style.opacity='';
+        body.style.display='';
+        sectionAnimations.delete(section);
+      };
+    }else{
+      const current=body.getBoundingClientRect().height;
+      body.style.height=current+'px';
+      body.style.opacity='1';
+      const animation=body.animate(
+        [{height:current+'px',opacity:1},{height:'0px',opacity:0}],
+        {duration:160,easing:'cubic-bezier(.4,0,1,1)'}
+      );
+      sectionAnimations.set(section,animation);
+      animation.onfinish=()=>{
+        section.open=false;
+        body.style.height='';
+        body.style.opacity='';
+        sectionAnimations.delete(section);
+      };
+    }
+  });
+});
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
 
 const previewPanel=document.querySelector('.preview-panel');
