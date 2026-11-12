@@ -1069,20 +1069,22 @@ function drawRainfall(){
 document.querySelectorAll('[data-kerb]').forEach(btn=>{btn.classList.toggle('active',btn.dataset.kerb===settings.kerbStyle);btn.addEventListener('click',()=>{settings.kerbStyle=btn.dataset.kerb;document.querySelectorAll('[data-kerb]').forEach(b=>b.classList.toggle('active',b===btn));draw();});});
 function drawRoadsideKerbs(){
  const palette=settings.kerbStyle==='black-white'?['#f4f1e8','#17191e']:['#f0e8d1','#d88739'];
- // Match the original GAMEZAAR racing game's kerb animation:
- // 23px white + 23px accent blocks, scrolling down with the world.
+ // Original GAMEZAAR alternating kerb animation, with a slightly wider strip.
  const segment=46,block=23,offset=(worldFrame*4.45)%segment;
  ctx.save();
- ctx.fillStyle='#25232a';ctx.fillRect(80,0,5,560);ctx.fillRect(275,0,5,560);
+ ctx.fillStyle='#25232a';ctx.fillRect(79,0,6,560);ctx.fillRect(275,0,6,560);
  const first=Math.floor(-offset/segment)-1;
  const last=Math.ceil((560-offset)/segment)+1;
  for(let i=first;i<=last;i++){
   const y=i*segment+offset;
   ctx.fillStyle=palette[0];
-  ctx.fillRect(82,y,5,block+1);ctx.fillRect(273,y,5,block+1);
+  ctx.fillRect(82,y,7,block+1);ctx.fillRect(273,y,7,block+1);
   ctx.fillStyle=palette[1];
-  ctx.fillRect(82,y+block,5,block+1);ctx.fillRect(273,y+block,5,block+1);
+  ctx.fillRect(82,y+block,7,block+1);ctx.fillRect(273,y+block,7,block+1);
  }
+ // Thin white road-side edge line, kept very close to the kerb.
+ ctx.fillStyle='#fff';
+ ctx.fillRect(90,0,1,560);ctx.fillRect(269,0,1,560);
  ctx.restore();
 }
 function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);drawLandGround();
