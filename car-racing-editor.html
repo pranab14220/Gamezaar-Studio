@@ -148,6 +148,24 @@
   .panel.settings > .builder-overview .panel-head{padding-bottom:12px}
   .builder-overview .asset-meter{padding-top:12px}
 }
+
+/* Compact square selection cards for scenery sections 05–11 */
+.tree-grid,.road-grid,.house-grid,.sign-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.tree-option,.road-option,.house-option,.sign-option{
+ box-sizing:border-box;aspect-ratio:1/1;min-width:0;padding:6px 4px;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:4px;text-align:center;overflow:hidden;border-radius:9px;font-size:9px;line-height:1.2
+}
+.tree-option span,.road-option span,.house-option span,.sign-option span{
+ min-width:0;max-width:100%;text-align:center;overflow-wrap:anywhere
+}
+.tree-option input,.sign-option input{width:13px;height:13px;margin:0 2px 2px 0;vertical-align:middle}
+.tree-thumb{width:40px;height:42px;max-width:100%;object-fit:contain}
+.road-thumb{width:36px;height:44px;max-width:100%;object-fit:contain}
+.house-thumb{width:42px;height:42px;max-width:100%;object-fit:contain}
+.sign-thumb{width:36px;height:44px;max-width:100%;object-fit:contain}
+.customTreeOptions .tree-option span{width:100%}
+.tree-option .tree-use,.tree-option .tree-delete{font-size:8px!important;padding:4px 5px!important;margin:2px 1px 0!important}
 </style>
 </head>
 <body>
