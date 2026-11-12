@@ -361,6 +361,7 @@
 }
 .game-shell.touch-controls-hidden .control-pad{display:none!important}
 .splash-brand-preview{padding:17px 12px 14px;border:1px solid #ffbd5877;border-radius:13px;background:radial-gradient(ellipse at 50% 0%,#ffb84d20,transparent 65%),linear-gradient(145deg,#171326,#29203d);text-align:center;box-shadow:inset 0 1px 0 #ffffff12}.splash-brand-name{font-size:clamp(19px,5vw,25px);font-weight:1000;letter-spacing:1.6px;color:#ffc15d;text-shadow:0 2px 0 #6f431e,0 0 13px #ffb84d55}.splash-brand-tagline{margin-top:8px;color:#fff4dc;font-size:13px;font-weight:900;letter-spacing:1px}.splash-brand-tagline strong{color:#ffbd58;font-size:16px;text-shadow:0 0 8px #ffb84d55}.splash-brand-copy{margin:8px auto 0;max-width:260px;color:#d8cfe7;font-size:11px;line-height:1.5}.splash-brand-credit{margin-top:13px;padding-top:9px;border-top:1px solid #ffffff20;color:#c9bfd8;font-size:10px}.splash-brand-credit strong{color:#ffc15d;font-size:11px}.splash-free-note{margin-top:10px;padding:9px 10px;border:1px solid #68c99555;border-radius:9px;background:#68c99510;color:#bce9c8;font-size:11px;font-weight:800}.splash-premium-lock{margin-top:10px;padding:10px;border:1px solid #ffb84d44;border-radius:10px;background:#171326}.splash-premium-title{color:#ffcf83;font-size:12px;font-weight:900}
+.game-shell{position:relative;isolation:isolate}.game-splash-overlay{position:absolute;inset:0;z-index:30;display:none;align-items:center;justify-content:center;overflow:hidden;padding:22px 16px;border-radius:inherit;background:radial-gradient(ellipse at 50% 18%,#51416f 0%,#29213f 42%,#100d1c 100%);text-align:center}.game-splash-overlay.active{display:flex}.game-splash-content{width:min(100%,360px);padding:24px 15px 18px;border:1px solid #ffca7588;border-radius:18px;background:linear-gradient(150deg,#241b37ee,#11101eee);box-shadow:0 14px 38px #0009,inset 0 1px 0 #ffffff22}.game-splash-brand{font-size:clamp(27px,8vw,39px);line-height:.98;font-weight:1000;letter-spacing:2px;color:#ffc15d;text-shadow:0 3px 0 #70451e,0 0 18px #ffb84d66}.game-splash-brand span{font-size:.72em;letter-spacing:7px}.game-splash-tagline{margin-top:19px;color:#fff4dc;font-size:clamp(12px,3.4vw,15px);font-weight:950;letter-spacing:1px}.game-splash-tagline strong{color:#ffbd58;font-size:1.2em;text-shadow:0 0 10px #ffb84d88}.game-splash-copy{margin:13px auto 0;color:#e0d6ed;font-size:12px;line-height:1.65}.game-splash-credit{margin-top:19px;padding-top:12px;border-top:1px solid #ffffff24;color:#c9bfd8;font-size:10px}.game-splash-credit strong{color:#ffc15d;font-size:12px}.game-splash-countdown{margin:20px auto 0;width:38px;height:38px;display:grid;place-items:center;border:2px solid #ffbd58;border-radius:50%;color:#ffcf83;font-size:19px;font-weight:950;box-shadow:0 0 14px #ffb84d35}.game-splash-actions{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:18px}.game-splash-actions[hidden]{display:none}.game-splash-play{min-width:142px;padding:12px 22px;border:2px solid #ffe0a0;border-radius:9px;background:linear-gradient(135deg,#ffe0a0,#ffb84d);color:#281c31;font-size:13px;font-weight:1000;letter-spacing:1px;box-shadow:0 4px 0 #8b572b;cursor:pointer}.game-splash-skip{position:absolute;right:0;top:50%;transform:translateY(-50%);width:34px;height:34px;border:1px solid #ffcf8066;border-radius:50%;background:#ffffff12;color:#ffe0a0;font-size:24px;line-height:1;cursor:pointer}
 </style>
 </head>
 <body>
@@ -370,7 +371,7 @@
 <div class="layout">
 <section class="panel preview-panel">
 <div class="panel-head"><h2>Live game preview</h2><button class="preview-modal-close" id="closePreviewBtn" type="button" aria-label="Close preview">×</button></div>
-<div class="game-shell"><div class="game-hud"><div class="hud-stat" aria-label="Score"><span class="hud-icon">🏆</span><strong id="hudScore">0000</strong></div><div class="hud-stat" aria-label="High score"><span class="hud-icon">👑</span><strong id="hudHighScore">0000</strong></div><div class="hud-stat" aria-label="Speed"><span class="hud-icon">🚗</span><strong id="hudSpeed">1x</strong></div></div><div class="stage"><canvas id="game" width="360" height="560" aria-label="Car racing game preview"></canvas></div><div class="mobile-controls control-pad"><button class="control" id="leftBtn" aria-label="Move left">◀</button><button class="control" id="rightBtn" aria-label="Move right">▶</button></div></div>
+<div class="game-shell"><div class="game-splash-overlay" id="gameSplashOverlay" aria-hidden="true"><div class="game-splash-content"><div class="game-splash-brand">GAMEZAAR<br><span>STUDIO</span></div><div class="game-splash-tagline">CREATE · PLAY · SHARE · <strong>EARN</strong></div><div class="game-splash-copy">Your game. Your creativity.<br>Your earning journey starts here.</div><div class="game-splash-credit">Created with <strong>Gamezaar-Studio.in</strong></div><div class="game-splash-countdown" id="gameSplashCountdown">5</div><div class="game-splash-actions" id="gameSplashActions" hidden><button type="button" class="game-splash-play" id="gameSplashPlay">▶ PLAY</button><button type="button" class="game-splash-skip" id="gameSplashSkip" aria-label="Skip splash screen">×</button></div></div></div><div class="game-hud"><div class="hud-stat" aria-label="Score"><span class="hud-icon">🏆</span><strong id="hudScore">0000</strong></div><div class="hud-stat" aria-label="High score"><span class="hud-icon">👑</span><strong id="hudHighScore">0000</strong></div><div class="hud-stat" aria-label="Speed"><span class="hud-icon">🚗</span><strong id="hudSpeed">1x</strong></div></div><div class="stage"><canvas id="game" width="360" height="560" aria-label="Car racing game preview"></canvas></div><div class="mobile-controls control-pad"><button class="control" id="leftBtn" aria-label="Move left">◀</button><button class="control" id="rightBtn" aria-label="Move right">▶</button></div></div>
 </section>
 <aside class="panel settings">
 <div class="builder-overview">
@@ -523,8 +524,18 @@ const previewModalContent=document.getElementById('previewModalContent');
 const openPreviewBtn=document.getElementById('openPreviewBtn');
 const closePreviewBtn=document.getElementById('closePreviewBtn');
 previewModalContent.appendChild(previewPanel);
-function closePreview(){previewModal.classList.remove('open');previewModal.setAttribute('aria-hidden','true');document.body.style.overflow='';if(!running)stopPopupAnimation();openPreviewBtn.focus();}
-function openPreview(){previewModal.classList.add('open');previewModal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';draw();if(!running&&!popupAnimRaf)animatePopup();closePreviewBtn.focus();}
+const gameShell=document.querySelector('.game-shell');
+const gameSplashOverlay=document.getElementById('gameSplashOverlay');
+const gameSplashCountdown=document.getElementById('gameSplashCountdown');
+const gameSplashActions=document.getElementById('gameSplashActions');
+const gameSplashPlay=document.getElementById('gameSplashPlay');
+const gameSplashSkip=document.getElementById('gameSplashSkip');
+let gameSplashTimer=null,gameSplashInterval=null;
+function hideGameSplash(){if(gameSplashTimer){clearTimeout(gameSplashTimer);gameSplashTimer=null;}if(gameSplashInterval){clearInterval(gameSplashInterval);gameSplashInterval=null;}gameSplashOverlay.classList.remove('active');gameSplashOverlay.setAttribute('aria-hidden','true');}
+function showGameSplash(){hideGameSplash();let remaining=5;gameSplashCountdown.textContent=String(remaining);gameSplashActions.hidden=true;gameSplashOverlay.classList.add('active');gameSplashOverlay.setAttribute('aria-hidden','false');gameSplashInterval=setInterval(()=>{remaining=Math.max(0,remaining-1);gameSplashCountdown.textContent=String(remaining);if(remaining===0&&gameSplashInterval){clearInterval(gameSplashInterval);gameSplashInterval=null;}},1000);gameSplashTimer=setTimeout(()=>{gameSplashActions.hidden=false;gameSplashCountdown.style.display='none';gameSplashTimer=null;},5000);}
+gameSplashPlay.addEventListener('click',hideGameSplash);gameSplashSkip.addEventListener('click',hideGameSplash);
+function closePreview(){hideGameSplash();previewModal.classList.remove('open');previewModal.setAttribute('aria-hidden','true');document.body.style.overflow='';if(!running)stopPopupAnimation();openPreviewBtn.focus();}
+function openPreview(){previewModal.classList.add('open');previewModal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';draw();if(!running&&!popupAnimRaf)animatePopup();showGameSplash();closePreviewBtn.focus();}
 openPreviewBtn.addEventListener('click',openPreview);
 closePreviewBtn.addEventListener('click',closePreview);
 previewModal.addEventListener('click',e=>{if(e.target===previewModal)closePreview();});
@@ -1299,7 +1310,7 @@ document.getElementById('hudSpeed').textContent=getScoreSpeedMultiplier().toFixe
 if(!hasStarted||over){
  // Premium pixel-art popup, matched to the outer GAMEZAAR game-shell.
  ctx.fillStyle='rgba(8,7,15,.62)';ctx.fillRect(0,0,360,560);
- const cardX=40,cardY=145,cardW=280,cardH=270;
+ const cardX=48,cardY=190,cardW=264,cardH=180;
  // Deep layered shadow + stepped pixel frame.
  ctx.save();ctx.shadowColor='rgba(0,0,0,.72)';ctx.shadowBlur=0;ctx.shadowOffsetX=7;ctx.shadowOffsetY=8;
  ctx.fillStyle='#090d19';ctx.fillRect(cardX+5,cardY+5,cardW-10,cardH-10);ctx.restore();
@@ -1313,23 +1324,19 @@ if(!hasStarted||over){
  ctx.fillRect(cardX+4,cardY+4,8,3);ctx.fillRect(cardX+cardW-12,cardY+4,8,3);
  ctx.fillRect(cardX+4,cardY+cardH-7,8,3);ctx.fillRect(cardX+cardW-12,cardY+cardH-7,8,3);
  ctx.fillStyle='#52617c';ctx.fillRect(cardX+13,cardY+13,cardW-26,1);
- ctx.textAlign='center';ctx.fillStyle='#ffc15d';ctx.font='900 15px monospace';ctx.shadowColor='#ffb84d66';ctx.shadowBlur=5;ctx.fillText('GAMEZAAR STUDIO',180,cardY+27);ctx.shadowBlur=0;
-  ctx.fillStyle='#fff4dc';ctx.font='900 10px monospace';ctx.fillText('CREATE · PLAY · SHARE · EARN',180,cardY+45);
-  ctx.fillStyle='#ffca75';ctx.fillRect(cardX+30,cardY+56,cardW-60,2);
-  ctx.fillStyle='#ffd18a';ctx.font='bold 9px monospace';ctx.fillText(over?'RACE FINISHED':'WELCOME TO YOUR GAME',180,cardY+76);
-  const title=(settings.name||'My Racing Game').trim();ctx.fillStyle='#fff4dc';ctx.font='900 18px monospace';ctx.shadowColor='#000';ctx.shadowBlur=4;
-  const titleLines=[];let titleLine='';title.split(/\s+/).forEach(word=>{const test=titleLine?titleLine+' '+word:word;if(ctx.measureText(test).width>236&&titleLine){titleLines.push(titleLine);titleLine=word;}else titleLine=test;});if(titleLine)titleLines.push(titleLine);
-  titleLines.slice(0,2).forEach((line,i)=>ctx.fillText(line,180,cardY+105+i*21));ctx.shadowBlur=0;
-  ctx.fillStyle='#d5e0f2';ctx.font='10px monospace';const desc=(settings.description||'').trim()||'Your next exciting drive starts now!';const words=desc.split(/\s+/);let line='',lines=[];words.forEach(word=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>236&&line){lines.push(line);line=word;}else line=test;});if(line)lines.push(line);lines.slice(0,2).forEach((v,i)=>ctx.fillText(v,180,cardY+145+i*14));
-  const bw=140,bh=38,bx=180-bw/2,buttonY=323;
+ ctx.textAlign='center';ctx.fillStyle='#ffd18a';ctx.font='bold 10px monospace';ctx.shadowColor='#ffb84d88';ctx.shadowBlur=7;ctx.fillText(over?'RACE FINISHED':'WELCOME TO',180,cardY+25);ctx.shadowBlur=0;
+  const title=(settings.name||'My Racing Game').trim();ctx.fillStyle='#fff4dc';ctx.font='900 19px monospace';ctx.shadowColor='#000';ctx.shadowBlur=4;
+  const titleLines=[];let titleLine='';title.split(/\s+/).forEach(word=>{const test=titleLine?titleLine+' '+word:word;if(ctx.measureText(test).width>220&&titleLine){titleLines.push(titleLine);titleLine=word;}else titleLine=test;});if(titleLine)titleLines.push(titleLine);
+  titleLines.slice(0,2).forEach((line,i)=>ctx.fillText(line,180,cardY+53+i*22));ctx.shadowBlur=0;
+  ctx.fillStyle='#d5e0f2';ctx.font='11px monospace';const desc=(settings.description||'').trim()||'Get ready for an exciting drive!';const words=desc.split(/\s+/);let line='',lines=[];words.forEach(word=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>220&&line){lines.push(line);line=word;}else line=test;});if(line)lines.push(line);lines.slice(0,2).forEach((v,i)=>ctx.fillText(v,180,cardY+91+i*16));
+  const by=cardY+128,bw=140,bh=38,bx=180-bw/2,buttonY=by;
  // Static 32-bit HD pixel-art action button; no pulse or glow animation.
  ctx.fillStyle='#080d18';ctx.fillRect(bx+4,buttonY+5,bw-8,bh);
  ctx.fillStyle='#8b572b';ctx.fillRect(bx+2,buttonY+2,bw-4,bh-2);
  ctx.fillStyle='#ffb84d';ctx.fillRect(bx+5,buttonY,bw-10,bh-4);
  ctx.fillRect(bx,buttonY+5,5,bh-14);ctx.fillRect(bx+bw-5,buttonY+5,5,bh-14);
  ctx.fillStyle='#ffe3a8';ctx.fillRect(bx+7,buttonY+3,bw-14,3);ctx.fillRect(bx+7,buttonY+bh-5,bw-14,2);
- ctx.fillStyle='#3a2630';ctx.font='900 13px monospace';ctx.shadowBlur=0;ctx.fillText(over?'↻ START AGAIN':'▶ START RACE',180,buttonY+24);
-  ctx.fillStyle='#ffcf83';ctx.font='9px monospace';ctx.fillText('Created with Gamezaar-Studio.in',180,cardY+247);ctx.textAlign='left';
+ ctx.fillStyle='#3a2630';ctx.font='900 13px monospace';ctx.shadowBlur=0;ctx.fillText(over?'↻ START AGAIN':'▶ START RACE',180,buttonY+24);ctx.textAlign='left';
  }}
 function reset(){cancelAnimationFrame(raf);stopBackgroundMusic();stopPopupAnimation();running=false;over=false;hasStarted=false;lastFrameTime=0;survivalTick=0;score=0;frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;setState('READY');draw();animatePopup();}
 function setState(s){const stateEl=document.getElementById('gameState');if(stateEl)stateEl.textContent=s;}
@@ -1377,7 +1384,7 @@ const playerCollisionScale=graphicScale('playerCar'),trafficCollisionScale=graph
 const scoreCfg=settings.scoreSystem||{};trafficCars.forEach(c=>{if(!c.passed&&c.y>player.y+35){c.passed=true;if(scoreCfg.passOn!==false)score+=Math.max(0,Number(scoreCfg.passPoints)||0);}});
 survivalTick+=step;while(survivalTick>=60){survivalTick-=60;if(scoreCfg.survivalOn!==false)score+=Math.max(0,Number(scoreCfg.survivalPoints)||0);}if(score>highScore){highScore=score;localStorage.setItem(highScoreKey,String(highScore));}updateSpeedSystemStatus();updateDifficultySystemStatus();draw();raf=requestAnimationFrame(loop);}
 function move(dir){if(!running)return;const nextLane=Math.max(0,Math.min(2,playerLane+dir));if(nextLane!==playerLane){playerLane=nextLane;player.targetX=playerLaneX[playerLane];playGameSound('steering');}}
-canvas.addEventListener('click',e=>{if(running)return;const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)*canvas.width/rect.width,y=(e.clientY-rect.top)*canvas.height/rect.height;if(x>=105&&x<=255&&y>=323&&y<=361){playGameSound('startButton');startGame();}});
+canvas.addEventListener('click',e=>{if(running)return;const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)*canvas.width/rect.width,y=(e.clientY-rect.top)*canvas.height/rect.height;if(x>=105&&x<=255&&y>=300&&y<=355){playGameSound('startButton');startGame();}});
 [['leftBtn',-1],['rightBtn',1]].forEach(([id,d])=>document.getElementById(id).addEventListener('click',()=>move(d)));
 if(!['buttons','touch','both'].includes(settings.controlMode))settings.controlMode='buttons';
 const controlModeInputs=[...document.querySelectorAll('input[name="controlModeChoice"]')];
