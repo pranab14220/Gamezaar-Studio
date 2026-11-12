@@ -914,27 +914,41 @@ function drawRainfall(){
  if(settings.rainfallOn===false)return;
  rainAnimationFrame+=1;
  ctx.save();
- const mist=ctx.createLinearGradient(0,350,0,560);
+ // Soft rain haze near the road surface.
+ const mist=ctx.createLinearGradient(0,330,0,560);
  mist.addColorStop(0,'rgba(174,205,225,0)');
- mist.addColorStop(1,'rgba(174,205,225,.075)');
+ mist.addColorStop(1,'rgba(174,205,225,.065)');
  ctx.fillStyle=mist;ctx.fillRect(0,0,360,560);
- for(let i=0;i<112;i++){
-  const depth=(i%4)/3;
-  const speed=3.2+depth*3.1;
-  const x=((i*47+rainAnimationFrame*(1.7+depth*.9))%390)-15;
-  const y=((i*83+rainAnimationFrame*speed)%620)-30;
-  const length=7+depth*9;
-  ctx.strokeStyle=i%5===0?'rgba(224,239,250,.62)':'rgba(177,211,235,'+(0.24+depth*.27)+')';
-  ctx.lineWidth=.65+depth*.65;
-  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-3-depth*2,y+length);ctx.stroke();
+ // Deterministic scattered droplets: independent horizontal positions,
+ // vertical speeds and sizes prevent visible rows or sideways rain bands.
+ for(let i=0;i<148;i++){
+  const seed=i*127.1+19.7;
+  const rand=n=>{const v=Math.sin(seed+n*78.233)*43758.5453;return v-Math.floor(v);};
+  const x=rand(1)*360;
+  const speed=3.4+rand(2)*5.8;
+  const phase=rand(3)*620;
+  const y=((phase+rainAnimationFrame*speed)%640)-40;
+  const depth=rand(4);
+  const length=4+depth*9;
+  const width=.55+depth*.65;
+  const alpha=.18+depth*.42;
+  ctx.strokeStyle='rgba(205,225,244,'+alpha+')';
+  ctx.lineWidth=width;
+  ctx.lineCap='round';
+  // Almost vertical fall, with only a tiny natural slant.
+  const drift=(rand(5)-.5)*1.4;
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+drift,y+length);ctx.stroke();
  }
- for(let i=0;i<13;i++){
-  const x=88+((i*59)%184);
-  const y=(i*97+rainAnimationFrame*4.4)%570;
-  const pulse=(Math.sin(rainAnimationFrame*.18+i*2.1)+1)*.5;
-  ctx.strokeStyle='rgba(205,226,241,'+(0.12+pulse*.22)+')';
-  ctx.lineWidth=.7;
-  ctx.beginPath();ctx.ellipse(x,y,2+pulse*2,.7+pulse*.5,-.18,0,Math.PI*2);ctx.stroke();
+ // Sparse, irregular road splashes.
+ for(let i=0;i<17;i++){
+  const seed=i*91.7+5.3;
+  const rand=n=>{const v=Math.sin(seed+n*43.17)*24634.6345;return v-Math.floor(v);};
+  const x=82+rand(1)*196;
+  const y=(rand(2)*620+rainAnimationFrame*(2.2+rand(3)*2.5))%590-15;
+  const pulse=(Math.sin(rainAnimationFrame*.16+i*2.7)+1)*.5;
+  ctx.strokeStyle='rgba(205,226,241,'+(0.10+pulse*.20)+')';
+  ctx.lineWidth=.65;
+  ctx.beginPath();ctx.ellipse(x,y,1.5+pulse*2,.55+pulse*.45,0,0,Math.PI*2);ctx.stroke();
  }
  ctx.restore();
 }
