@@ -359,6 +359,7 @@
  border:0!important;
  box-shadow:none!important;
 }
+.game-shell.touch-controls-hidden .control-pad{display:none!important}
 </style>
 </head>
 <body>
@@ -389,6 +390,15 @@
   <label class="sign-option" style="justify-content:center;gap:8px"><input type="radio" name="worldTimeChoice" value="night"><span>🌙 Night</span></label>
  </div>
  <div class="tree-note" id="worldTimeStatus">Day mode is active for the whole game.</div>
+ </div></details>
+ <details class="builder-section" id="controlModeSection"><summary>Whole Game · Controls<span class="section-chevron" aria-hidden="true">⌄</span></summary><div class="builder-section-body">
+  <div class="tip" style="margin:0 0 10px">Choose how players control the car. Touch mode supports tapping the left or right side of the game, or sliding left and right.</div>
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px">
+   <label class="sign-option" style="justify-content:center;gap:5px;padding:9px 5px"><input type="radio" name="controlModeChoice" value="buttons"><span>🎮 Buttons</span></label>
+   <label class="sign-option" style="justify-content:center;gap:5px;padding:9px 5px"><input type="radio" name="controlModeChoice" value="touch"><span>👆 Touch</span></label>
+   <label class="sign-option" style="justify-content:center;gap:5px;padding:9px 5px"><input type="radio" name="controlModeChoice" value="both"><span>🎮 + 👆 Both</span></label>
+  </div>
+  <div class="tree-note" id="controlModeStatus">Button controls are active. Left and right buttons are shown.</div>
  </div></details>
  <details class="builder-section" open><summary>01 · Game Settings<span class="section-chevron" aria-hidden="true">⌄</span></summary><div class="builder-section-body">
 <div class="field"><label for="gameName">Game name</label><input id="gameName" type="text" maxlength="40" placeholder="My Racing Game"></div><div class="field"><label for="gameDescription">Game description</label><textarea id="gameDescription" rows="3" maxlength="120" placeholder="Write a short description for your game..." style="width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#171326;color:white;font:inherit;font-size:13px;resize:vertical"></textarea><div class="upload-note">This appears in the small start popup inside your game.</div></div>
@@ -1347,6 +1357,32 @@ survivalTick+=step;while(survivalTick>=60){survivalTick-=60;if(scoreCfg.survival
 function move(dir){if(!running)return;const nextLane=Math.max(0,Math.min(2,playerLane+dir));if(nextLane!==playerLane){playerLane=nextLane;player.targetX=playerLaneX[playerLane];playGameSound('steering');}}
 canvas.addEventListener('click',e=>{if(running)return;const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)*canvas.width/rect.width,y=(e.clientY-rect.top)*canvas.height/rect.height;if(x>=105&&x<=255&&y>=300&&y<=355){playGameSound('startButton');startGame();}});
 [['leftBtn',-1],['rightBtn',1]].forEach(([id,d])=>document.getElementById(id).addEventListener('click',()=>move(d)));
+if(!['buttons','touch','both'].includes(settings.controlMode))settings.controlMode='buttons';
+const controlModeInputs=[...document.querySelectorAll('input[name="controlModeChoice"]')];
+const gameShellForControls=document.querySelector('.game-shell');
+function syncControlMode(){
+ controlModeInputs.forEach(input=>input.checked=input.value===settings.controlMode);
+ gameShellForControls.classList.toggle('touch-controls-hidden',settings.controlMode==='touch');
+ const status=document.getElementById('controlModeStatus');
+ status.textContent=settings.controlMode==='buttons'?'Button controls are active. Left and right buttons are shown.':settings.controlMode==='touch'?'Touch controls are active. Buttons are hidden; tap the left or right side, or slide left and right.':'Both control types are active. Use the buttons or tap/slide on the game screen.';
+}
+controlModeInputs.forEach(input=>input.addEventListener('change',e=>{if(e.target.checked){settings.controlMode=e.target.value;syncControlMode();localStorage.setItem('gamezaar_racing_settings',JSON.stringify(settings));}}));
+syncControlMode();
+let touchStartPoint=null;
+canvas.addEventListener('pointerdown',e=>{
+ if(!running||!['touch','both'].includes(settings.controlMode))return;
+ const rect=canvas.getBoundingClientRect();
+ touchStartPoint={x:(e.clientX-rect.left)*canvas.width/rect.width,y:(e.clientY-rect.top)*canvas.height/rect.height,id:e.pointerId};
+});
+canvas.addEventListener('pointerup',e=>{
+ if(!touchStartPoint||!['touch','both'].includes(settings.controlMode))return;
+ const rect=canvas.getBoundingClientRect(),endX=(e.clientX-rect.left)*canvas.width/rect.width;
+ const delta=endX-touchStartPoint.x;
+ if(Math.abs(delta)>=24)move(delta<0?-1:1);
+ else move(touchStartPoint.x<canvas.width/2?-1:1);
+ touchStartPoint=null;
+});
+canvas.addEventListener('pointercancel',()=>{touchStartPoint=null;});
 document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a'){e.preventDefault();move(-1)}if(e.key==='ArrowRight'||e.key.toLowerCase()==='d'){e.preventDefault();move(1)}if(e.key===' '&&!running){e.preventDefault();startGame();}});
 document.getElementById('gameName').value=settings.name;document.getElementById('gameDescription').value=settings.description||'';document.getElementById('gameName').addEventListener('input',e=>{settings.name=e.target.value||'My Racing Game';document.getElementById('projectTitle').textContent=settings.name;draw();});document.getElementById('gameDescription').addEventListener('input',e=>{settings.description=e.target.value.slice(0,120);draw();});
 document.querySelectorAll('.swatch').forEach(b=>b.addEventListener('click',()=>{settings.carColor=b.dataset.color;syncSettings();draw()}));
