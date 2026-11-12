@@ -231,6 +231,20 @@
 
 
 .graphics-size-control{margin:12px 0 2px;padding:10px 11px;border:1px solid #ffffff1c;border-radius:10px;background:#171326}.graphics-size-control>label{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px;margin-bottom:7px}.graphics-size-control strong{color:var(--gold2);font-size:11px}.graphics-size-control input[type=range]{display:block;width:100%;margin:0;accent-color:var(--gold)}
+
+/* Keep every editor card separated consistently, including lower sections. */
+.panel.settings{
+ display:flex!important;
+ flex-direction:column!important;
+ gap:9px!important;
+ row-gap:9px!important;
+}
+.panel.settings > .builder-overview,
+.panel.settings > details.builder-section{
+ flex:0 0 auto;
+ width:100%;
+ margin:0!important;
+}
 </style>
 </head>
 <body>
