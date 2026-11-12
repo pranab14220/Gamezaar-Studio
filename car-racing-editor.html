@@ -558,7 +558,7 @@ function setupGameUiCustomization(){
  const apply=key=>{
   const v=settings.gameUi[key],chip=host.querySelector('[data-ui-preview="'+key+'"]');
   chip.style.transform='scale('+(Number(v.size)/100)+')';chip.style.color=gameUiRgba(v.color,v.colorAlpha);chip.style.background=gameUiRgba(v.bg,v.bgAlpha);
-  const img=host.querySelector('[data-ui-image-preview="'+key+'"]'),uploadLabel=img.parentElement,uploadText=uploadLabel.querySelector('span'),chip=host.querySelector('[data-ui-preview="'+key+'"]');
+  const img=host.querySelector('[data-ui-image-preview="'+key+'"]'),uploadLabel=img.parentElement,uploadText=uploadLabel.querySelector('span');
   if(v.image){img.src=v.image;img.style.display='block';uploadText.style.display='none';chip.style.backgroundImage='url("'+v.image+'")';chip.style.backgroundSize='contain';chip.style.backgroundRepeat='no-repeat';chip.textContent='';}else{img.style.display='none';uploadText.style.display='block';chip.style.backgroundImage='none';}
   if(key==='score'||key==='highScore'||key==='speed'){
    const el=document.getElementById(key==='score'?'hudScore':key==='highScore'?'hudHighScore':'hudSpeed');
