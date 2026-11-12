@@ -1068,20 +1068,22 @@ function drawRainfall(){
 }
 document.querySelectorAll('[data-kerb]').forEach(btn=>{btn.classList.toggle('active',btn.dataset.kerb===settings.kerbStyle);btn.addEventListener('click',()=>{settings.kerbStyle=btn.dataset.kerb;document.querySelectorAll('[data-kerb]').forEach(b=>b.classList.toggle('active',b===btn));draw();});});
 function drawRoadsideKerbs(){
- const palette=settings.kerbStyle==='black-white'?['#f4f1e8','#17191e']:['#f5f0e7','#d52d3b'];
- // Match road-marking speed, but scroll in the opposite direction requested:
- // each kerb stripe travels down the screen, away from the player's forward direction.
- const segment=112,roadScroll=Math.floor(worldFrame*4),offset=roadScroll%segment;
- ctx.save();ctx.fillStyle='#25232a';ctx.fillRect(80,0,9,560);ctx.fillRect(271,0,9,560);
- // Draw enough complete bands to cover the entire canvas without gaps.
+ const palette=settings.kerbStyle==='black-white'?['#f4f1e8','#17191e']:['#f0e8d1','#d88739'];
+ // Match the original GAMEZAAR racing game's kerb animation:
+ // 23px white + 23px accent blocks, scrolling down with the world.
+ const segment=46,block=23,offset=(worldFrame*4.45)%segment;
+ ctx.save();
+ ctx.fillStyle='#25232a';ctx.fillRect(80,0,5,560);ctx.fillRect(275,0,5,560);
  const first=Math.floor(-offset/segment)-1;
  const last=Math.ceil((560-offset)/segment)+1;
  for(let i=first;i<=last;i++){
-  const y=i*segment+offset,idx=((i%2)+2)%2;
-  ctx.fillStyle=palette[idx];
-  ctx.fillRect(82,y,7,segment+1);ctx.fillRect(271,y,7,segment+1);
+  const y=i*segment+offset;
+  ctx.fillStyle=palette[0];
+  ctx.fillRect(82,y,5,block+1);ctx.fillRect(273,y,5,block+1);
+  ctx.fillStyle=palette[1];
+  ctx.fillRect(82,y+block,5,block+1);ctx.fillRect(273,y+block,5,block+1);
  }
- ctx.fillStyle='#ffffff45';ctx.fillRect(82,0,1,560);ctx.fillRect(277,0,1,560);ctx.restore();
+ ctx.restore();
 }
 function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);drawLandGround();
 drawRoadsideTrees();
