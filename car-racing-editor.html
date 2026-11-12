@@ -246,6 +246,71 @@
  width:100%;
  margin:0!important;
 }
+
+/* Full Screen means the canvas itself is the complete game surface. */
+.game-shell.game-fullscreen-layout{
+ position:relative;
+ width:100%;
+ max-width:620px;
+ aspect-ratio:360 / 560;
+ height:auto;
+ padding:0!important;
+ margin:0 auto;
+ border:0!important;
+ border-radius:0!important;
+ background:transparent!important;
+ box-shadow:none!important;
+ overflow:hidden;
+}
+.game-shell.game-fullscreen-layout .stage{
+ position:absolute!important;
+ inset:0!important;
+ width:100%!important;
+ height:100%!important;
+ max-width:none!important;
+ margin:0!important;
+ padding:0!important;
+ border:0!important;
+ border-radius:0!important;
+ background:transparent!important;
+ overflow:hidden;
+}
+.game-shell.game-fullscreen-layout canvas{
+ display:block;
+ width:100%!important;
+ height:100%!important;
+ aspect-ratio:auto!important;
+ border:0!important;
+ border-radius:0!important;
+}
+.game-shell.game-fullscreen-layout .game-hud{
+ position:absolute!important;
+ z-index:5;
+ top:12px;
+ left:12px;
+ right:12px;
+ width:auto;
+ margin:0;
+ padding:7px 9px;
+ border:0;
+ border-radius:10px;
+ background:rgba(20,16,34,.58);
+ backdrop-filter:blur(3px);
+}
+.game-shell.game-fullscreen-layout .control-pad{
+ position:absolute!important;
+ z-index:6;
+ left:8%;
+ bottom:14px;
+ width:84%;
+ height:42px;
+ margin:0;
+ border:0;
+ border-radius:10px;
+ background:rgba(30,23,47,.62);
+ backdrop-filter:blur(3px);
+}
+
 </style>
 </head>
 <body>
