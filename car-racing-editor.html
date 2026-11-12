@@ -481,7 +481,7 @@ const landTypes=[{id:'spring',name:'Spring Land'},{id:'summer',name:'Summer Land
 if(!settings.land||typeof settings.land!=='object')settings.land={type:'summer',imageData:''};
 let landImage=null;
 const landPalettes={spring:{base:'#25843a',patch:'#369b43',detail:'#8bc95a',deep:'#17652f',light:'#55ad4c'},summer:{base:'#1d7832',patch:'#2b9140',detail:'#83c94c',deep:'#125d29',light:'#48a744'},autumn:{base:'#a95d2d',patch:'#c77a35',detail:'#e9ad52',deep:'#804326',light:'#df9845'},winter:{base:'#91c8d0',patch:'#b8e0dc',detail:'#f5ffff',deep:'#5b9e8e',light:'#d8f3e9'},desert:{base:'#bd8b43',patch:'#d5a957',detail:'#f0d084',deep:'#93612f',light:'#e5bd6d'}};
-function drawLandThumb(cv,type){const g=cv.getContext('2d'),p=landPalettes[type];g.fillStyle=p.base;g.fillRect(0,0,48,58);for(let i=0;i<12;i++){g.fillStyle=i%2?p.patch:p.detail;g.fillRect((i*17)%46,(i*23)%56,3,3);}if(type==='winter'){g.fillStyle='#fff';g.fillRect(4,8,8,2);g.fillRect(30,38,10,2);}if(type==='desert'){g.fillStyle='#ad814b';g.fillRect(4,42,14,3);g.fillRect(29,15,12,3);}}
+function drawLandThumb(cv,type){const g=cv.getContext('2d'),p=landPalettes[type];g.fillStyle=p.base;g.fillRect(0,0,48,58);g.fillStyle=p.patch;g.fillRect(5,13,13,5);g.fillRect(29,39,12,4);if(type==='winter'){g.fillStyle='#fff';g.fillRect(5,8,10,2);}if(type==='desert'){g.fillStyle='#ad814b';g.fillRect(29,39,12,3);}}
 function renderLandOptions(){const grid=document.getElementById('landOptions');if(!grid)return;grid.innerHTML='';landTypes.forEach(item=>{const b=document.createElement('button');b.type='button';b.className='road-option'+(settings.land.type===item.id&&!settings.land.imageData?' active':'');b.innerHTML='<canvas class="road-thumb" width="48" height="58"></canvas><span>'+item.name+'</span>';grid.appendChild(b);drawLandThumb(b.querySelector('canvas'),item.id);b.addEventListener('click',()=>{settings.land={type:item.id,imageData:''};landImage=null;document.getElementById('landUploadStatus').textContent='Using '+item.name+'.';renderLandOptions();draw();});});}
 document.getElementById('landUpload').addEventListener('change',e=>{
  const file=e.target.files&&e.target.files[0];if(!file)return;
@@ -499,30 +499,17 @@ function drawLandGround(){
   ctx.save();ctx.beginPath();ctx.rect(0,0,78,560);ctx.rect(282,0,78,560);ctx.clip();
   ctx.drawImage(landImage,0,0,78,560);ctx.drawImage(landImage,282,0,78,560);ctx.restore();return;
  }
- // Subtle ground texture: dark rectangular patches are now very rare
+ // Clean, minimal ground texture with only a few broad accents
  const offset=(worldFrame*1.7)%96;
- for(let y=-96+offset;y<600;y+=48){
-  const tileIndex=Math.floor((y+96-offset)/48);
+ for(let y=-96+offset;y<600;y+=96){
   for(const side of [0,1]){
    const sx=side?284:0;
-   const patches=[[8,10,15,6],[39,28,13,5]];
-   patches.forEach((v,i)=>{
-    if(i===0&&tileIndex%3!==0)return;
-    const x=sx+v[0],yy=y+v[1],col=i===0?p.deep:p.patch;
-    ctx.fillStyle=col;ctx.fillRect(x,yy,v[2],v[3]);
-    ctx.fillStyle=p.detail;ctx.fillRect(x+2,yy+1,Math.max(2,v[2]>>2),2);
-   });
-   // Fewer small grass flecks, with no extra dark speckles
-   for(let k=0;k<4;k++){
-    const x=sx+((k*23+Math.floor(y/48)*13+7)%72),yy=y+((k*17+9)%45);
-    ctx.fillStyle=k%3===0?p.detail:p.light;
-    ctx.fillRect(x,yy,k%4===0?3:2,k%4===0?3:2);
-    if(type==='summer'&&k===0){ctx.fillStyle='#e9ff8b';ctx.fillRect(x+2,yy-1,2,2);}
-   }
-   if(type==='spring'){ctx.fillStyle='#ff9bc8';ctx.fillRect(sx+22,y+14,3,3);ctx.fillRect(sx+61,y+31,3,3);ctx.fillStyle='#fff2a6';ctx.fillRect(sx+23,y+15,1,1);}
-   if(type==='autumn'){ctx.fillStyle='#ffb64c';ctx.fillRect(sx+22,y+14,4,3);ctx.fillRect(sx+61,y+31,3,3);}
-   if(type==='winter'){ctx.fillStyle='#fff';ctx.fillRect(sx+22,y+14,7,2);ctx.fillRect(sx+61,y+31,5,2);}
-   if(type==='desert'){ctx.fillStyle='#f7df91';ctx.fillRect(sx+22,y+14,8,2);ctx.fillRect(sx+61,y+31,6,2);}
+   const x=sx+(side?42:12), yy=y+(side?52:18);
+   ctx.fillStyle=p.patch;ctx.fillRect(x,yy,18,7);
+   if(type==='winter'){ctx.fillStyle='#fff';ctx.fillRect(x+3,yy+1,10,2);}
+   else if(type==='desert'){ctx.fillStyle=p.deep;ctx.fillRect(x+4,yy+4,12,2);}
+   else if(type==='autumn'){ctx.fillStyle=p.light;ctx.fillRect(x+5,yy+1,7,2);}
+   else if(type==='spring'){ctx.fillStyle=p.light;ctx.fillRect(x+7,yy+1,4,2);}
   }
  }
 }
