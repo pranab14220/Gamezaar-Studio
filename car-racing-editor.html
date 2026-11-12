@@ -1073,19 +1073,34 @@ function drawRainfall(){
 document.querySelectorAll('[data-kerb]').forEach(btn=>{btn.classList.toggle('active',btn.dataset.kerb===settings.kerbStyle);btn.addEventListener('click',()=>{settings.kerbStyle=btn.dataset.kerb;document.querySelectorAll('[data-kerb]').forEach(b=>b.classList.toggle('active',b===btn));draw();});});
 function drawRoadsideKerbs(){
  const palette=settings.kerbStyle==='black-white'?['#f4f1e8','#17191e']:['#f0e8d1','#d88739'];
- const segment=46,block=23,offset=(worldFrame*4.45)%segment;
- const kerbScale=graphicScale('kerbs');
- const leftX=82,rightX=273,leftDark=79,rightDark=275,leftLine=90,rightLine=269;
- const strip=7*kerbScale,dark=6*kerbScale;
- ctx.save();ctx.translate(0,280);ctx.scale(1,kerbScale);ctx.translate(0,-280);
- ctx.fillStyle='#25232a';ctx.fillRect(leftDark,0,dark,560);ctx.fillRect(rightDark,0,dark,560);
- const first=Math.floor(-offset/segment)-1,last=Math.ceil((560-offset)/segment)+1;
+ const scale=graphicScale('kerbs');
+ // Scale each kerb block, not the whole 560px strip. This keeps both sides
+ // continuous from top to bottom at every slider value.
+ const block=Math.max(8,Math.round(23*scale));
+ const segment=block*2;
+ const offset=(worldFrame*4.45*scale)%segment;
+ const leftX=82,rightX=273,leftDark=79,rightDark=275;
+ const strip=Math.max(3,Math.round(7*scale));
+ const dark=Math.max(3,Math.round(6*scale));
+ ctx.save();
+ ctx.fillStyle='#25232a';
+ ctx.fillRect(leftDark,0,dark,560);
+ ctx.fillRect(rightDark,0,dark,560);
+ const first=Math.floor(-offset/segment)-1;
+ const last=Math.ceil((560-offset)/segment)+1;
  for(let i=first;i<=last;i++){
   const y=i*segment+offset;
-  ctx.fillStyle=palette[0];ctx.fillRect(leftX,y,strip,block+1);ctx.fillRect(rightX,y,strip,block+1);
-  ctx.fillStyle=palette[1];ctx.fillRect(leftX,y+block,strip,block+1);ctx.fillRect(rightX,y+block,strip,block+1);
+  ctx.fillStyle=palette[0];
+  ctx.fillRect(leftX,y,strip,block+1);
+  ctx.fillRect(rightX,y,strip,block+1);
+  ctx.fillStyle=palette[1];
+  ctx.fillRect(leftX,y+block,strip,block+1);
+  ctx.fillRect(rightX,y+block,strip,block+1);
  }
- ctx.fillStyle='#fff';ctx.fillRect(leftLine,0,1,560);ctx.fillRect(rightLine,0,1,560);
+ // Edge lines stay fixed and continuous beside the kerbs.
+ ctx.fillStyle='#fff';
+ ctx.fillRect(90,0,1,560);
+ ctx.fillRect(272,0,1,560);
  ctx.restore();
 }
 function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);drawLandGround();
