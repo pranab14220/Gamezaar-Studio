@@ -311,6 +311,9 @@
  backdrop-filter:blur(3px);
 }
 
+
+/* Game UI customization controls and live previews */
+.game-ui-row{display:grid;grid-template-columns:minmax(0,1fr) 58px;gap:9px;align-items:start;padding:10px 0;border-bottom:1px solid #ffffff18}.game-ui-row:last-child{border-bottom:0}.game-ui-title{font-size:12px;font-weight:800;color:#ffe0a0;margin-bottom:7px}.game-ui-fields{display:grid;grid-template-columns:1fr 1fr;gap:7px}.game-ui-field{min-width:0;display:flex;flex-direction:column;gap:4px;font-size:10px;color:#c9c1d7}.game-ui-field input[type=color]{width:100%;height:27px;padding:2px;border:1px solid #ffffff35;border-radius:6px;background:#201a30}.game-ui-field input[type=range]{width:100%;accent-color:#ffbd5a}.game-ui-field input[type=file]{display:none}.game-ui-upload{width:58px;height:58px;border:1px dashed #e9b65e88;border-radius:8px;background:#171326;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;color:#ffd18a;font-size:9px;text-align:center;cursor:pointer}.game-ui-upload img{width:100%;height:100%;object-fit:cover}.game-ui-upload span{position:absolute;bottom:2px;left:0;right:0;background:#100d1bd9;padding:2px}.game-ui-preview{grid-column:1/-1;display:flex;align-items:center;gap:7px;margin-top:5px}.game-ui-preview-chip{min-width:42px;min-height:23px;padding:4px 8px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;box-shadow:0 2px 5px #0005}.game-ui-preview small{font-size:9px;color:#a9a0b8}
 </style>
 </head>
 <body>
@@ -332,6 +335,10 @@
   <div class="asset-message" id="assetMessage">Recommended asset budget: 4096 KB. Total asset limit: 5120 KB. This counts uploaded assets, not the final APK runtime.</div>
  </div>
 </div>
+<details class="builder-section" id="gameUiCustomization"><summary>Game UI Customization · Size & Appearance<span class="section-chevron" aria-hidden="true">⌄</span></summary><div class="builder-section-body">
+ <div class="tip" style="margin:0 0 10px">Customize each on-screen game element separately. Changes appear in the live preview.</div>
+ <div id="gameUiRows"></div>
+</div></details>
 <details class="builder-section" id="gameLayoutSection"><summary>Game Layout · Full Screen / Box<span class="section-chevron" aria-hidden="true">⌄</span></summary><div class="builder-section-body"><div class="tip" style="margin:0 0 10px">Choose how the game screen is arranged. Full Screen keeps the canvas as the game area and overlays score, speed and controls on it. Box keeps the current layout with score and controls outside the canvas.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px"><label class="sign-option" style="justify-content:center;gap:8px"><input type="radio" name="gameLayoutChoice" value="fullscreen"><span>📱 Full Screen</span></label><label class="sign-option" style="justify-content:center;gap:8px"><input type="radio" name="gameLayoutChoice" value="box"><span>▣ Box Container</span></label></div><div class="tree-note" id="gameLayoutStatus">Box Container layout is active.</div></div></details>
 <details class="builder-section"><summary>Whole Game · Day / Night<span class="section-chevron" aria-hidden="true">⌄</span></summary><div class="builder-section-body">
  <div class="tip" style="margin:0 0 10px">Choose one time setting for the complete game world. This controls the road, land, trees, houses and roadside atmosphere together.</div>
@@ -457,6 +464,17 @@ const project=JSON.parse(localStorage.getItem('gamezaar_current_project')||'{}')
 const trafficDefaults=[{id:'hatchback',name:'Hatchback',color:'#4388d8',selected:true,imageData:''},{id:'sedan',name:'Sedan',color:'#e7b849',selected:true,imageData:''},{id:'sports',name:'Sports Car',color:'#8d75c9',selected:true,imageData:''},{id:'suv',name:'SUV',color:'#52a88a',selected:true,imageData:''},{id:'taxi',name:'Taxi',color:'#e6c94d',selected:false,imageData:''},{id:'van',name:'Mini Van',color:'#d87857',selected:false,imageData:''}];
 const defaults={name:project.name||'My Racing Game',description:'',type:'Car Traffic Racing',carColor:'#ed654b',carImageData:'',trafficCars:trafficDefaults,houses:{type:'spring',imageData:''},pedestriansOn:true,streetLightsOn:true,streetLights:['classic','curved'],customStreetLights:[],scoreSystem:{passOn:true,passPoints:5,coinOn:true,coinPoints:10,survivalOn:true,survivalPoints:1},speedSystem:{enabled:false,milestones:[{score:100,speed:1.2},{score:250,speed:1.5},{score:500,speed:2}]},soundSystem:{startButton:true,raceStart:true,steering:true,gameOver:true,music:true}};
 let settings={...defaults,...JSON.parse(localStorage.getItem('gamezaar_racing_settings')||'{}')};
+const gameUiDefaults={
+ score:{size:100,color:'#fff4dc',colorAlpha:100,bg:'#342b49',bgAlpha:0,image:''},
+ highScore:{size:100,color:'#fff4dc',colorAlpha:100,bg:'#342b49',bgAlpha:0,image:''},
+ speed:{size:100,color:'#fff4dc',colorAlpha:100,bg:'#342b49',bgAlpha:0,image:''},
+ popup:{size:100,color:'#fff4dc',colorAlpha:100,bg:'#252e49',bgAlpha:96,image:''},
+ start:{size:100,color:'#3a2630',colorAlpha:100,bg:'#ffb84d',bgAlpha:100,image:''},
+ restart:{size:100,color:'#3a2630',colorAlpha:100,bg:'#ffb84d',bgAlpha:100,image:''}
+};
+settings.gameUi={...gameUiDefaults,...(settings.gameUi||{})};
+Object.keys(gameUiDefaults).forEach(k=>settings.gameUi[k]={...gameUiDefaults[k],...(settings.gameUi[k]||{})});
+
 if(!['red-white','black-white'].includes(settings.kerbStyle))settings.kerbStyle='red-white';
 
 let gameAudioContext=null,musicTimer=0,musicStep=0,musicNodes=[],customSoundPlayers={};
@@ -529,7 +547,34 @@ const carPreview=document.getElementById('carPreview'),carPreviewCtx=carPreview.
 const laneX=[108,180,252],playerLaneX=laneX,player={x:180,targetX:180,tilt:0,y:455,w:32,h:54};
 let spawnPatternHistory=[],nextWaveDelay=70;
 const themes={spring:{grass:'#78965c',road:'#655d5b',edge:'#f6c5d8',line:'#fff0f5'},summer:{grass:'#416b4b',road:'#42434b',edge:'#e6d7b0',line:'#eee3c6'},autumn:{grass:'#a96d3f',road:'#51413c',edge:'#e9a45a',line:'#f5d19a'},winter:{grass:'#c8d7dc',road:'#626b78',edge:'#f3f5f7',line:'#f7fbff'},desert:{grass:'#c49a59',road:'#51463f',edge:'#f0d39c',line:'#f3dfb5'}};
-function syncSettings(){document.getElementById('gameName').value=settings.name;document.getElementById('projectTitle').textContent=settings.name;document.querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active',b.dataset.color===settings.carColor));drawCarPreview();}
+
+function gameUiRgba(hex,alpha){const h=(hex||'#000000').replace('#','');const n=parseInt(h.length===3?h.split('').map(x=>x+x).join(''):h,16)||0;return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+(Math.max(0,Math.min(100,Number(alpha)||0))/100)+')';}
+function setupGameUiCustomization(){
+ const labels=[['score','Score'],['highScore','High Score'],['speed','Speed'],['popup','Popup Card'],['start','Start Button'],['restart','Restart Button']];
+ const host=document.getElementById('gameUiRows');
+ host.innerHTML=labels.map(([key,label])=>{const v=settings.gameUi[key];return '<div class="game-ui-row" data-ui-row="'+key+'"><div><div class="game-ui-title">'+label+'</div><div class="game-ui-fields"><label class="game-ui-field">Size <b data-ui-value="'+key+'-size">'+v.size+'%</b><input type="range" min="50" max="160" value="'+v.size+'" data-ui="'+key+'" data-prop="size"></label><label class="game-ui-field">Text / icon color<input type="color" value="'+v.color+'" data-ui="'+key+'" data-prop="color"></label><label class="game-ui-field">Color transparency <b data-ui-value="'+key+'-colorAlpha">'+v.colorAlpha+'%</b><input type="range" min="0" max="100" value="'+v.colorAlpha+'" data-ui="'+key+'" data-prop="colorAlpha"></label><label class="game-ui-field">Background color<input type="color" value="'+v.bg+'" data-ui="'+key+'" data-prop="bg"></label><label class="game-ui-field">Background transparency <b data-ui-value="'+key+'-bgAlpha">'+v.bgAlpha+'%</b><input type="range" min="0" max="100" value="'+v.bgAlpha+'" data-ui="'+key+'" data-prop="bgAlpha"></label></div><div class="game-ui-preview"><span class="game-ui-preview-chip" data-ui-preview="'+key+'">'+(key==='popup'?'POPUP':key==='start'?'START':key==='restart'?'RESTART':label.toUpperCase())+'</span><small>Live style preview</small></div></div><label class="game-ui-upload" title="Upload your own image"><span>＋ Upload</span><input type="file" accept="image/*" data-ui-upload="'+key+'"><img data-ui-image-preview="'+key+'" style="display:none"></label></div>';}).join('');
+ const apply=key=>{
+  const v=settings.gameUi[key],chip=host.querySelector('[data-ui-preview="'+key+'"]');
+  chip.style.transform='scale('+(Number(v.size)/100)+')';chip.style.color=gameUiRgba(v.color,v.colorAlpha);chip.style.background=gameUiRgba(v.bg,v.bgAlpha);
+  const img=host.querySelector('[data-ui-image-preview="'+key+'"]');if(v.image){img.src=v.image;img.style.display='block';img.previousElementSibling.style.display='none';}else{img.style.display='none';img.previousElementSibling.style.display='block';}
+  if(key==='score'||key==='highScore'||key==='speed'){
+   const el=document.getElementById(key==='score'?'hudScore':key==='highScore'?'hudHighScore':'hudSpeed');
+   if(el){el.style.fontSize=(14*Number(v.size)/100)+'px';el.style.color=gameUiRgba(v.color,v.colorAlpha);const box=el.parentElement;box.style.background=gameUiRgba(v.bg,v.bgAlpha);box.style.backgroundImage=v.image?'url("'+v.image+'")':'none';box.style.backgroundSize='cover';box.style.backgroundPosition='center';}
+  }
+ };
+ host.querySelectorAll('[data-ui][data-prop]').forEach(input=>input.addEventListener('input',()=>{
+  const key=input.dataset.ui,prop=input.dataset.prop;settings.gameUi[key][prop]=prop==='size'||prop.endsWith('Alpha')?Number(input.value):input.value;
+  const value=host.querySelector('[data-ui-value="'+key+'-'+prop+'"]');if(value)value.textContent=input.value+(prop==='size'||prop.endsWith('Alpha')?'%':'');
+  apply(key);draw();
+ }));
+ host.querySelectorAll('[data-ui-upload]').forEach(input=>input.addEventListener('change',()=>{
+  const file=input.files&&input.files[0];if(!file)return;if(!file.type.startsWith('image/')){input.value='';return;}if(file.size>100*1024){alert('Image must be 100 KB or smaller.');input.value='';return;}
+  const reader=new FileReader();reader.onload=()=>{settings.gameUi[input.dataset.ui].image=String(reader.result);apply(input.dataset.ui);draw();};reader.readAsDataURL(file);
+ }));
+ labels.forEach(([key])=>apply(key));
+}
+function syncSettings(){setupGameUiCustomization();
+document.getElementById('gameName').value=settings.name;document.getElementById('projectTitle').textContent=settings.name;document.querySelectorAll('.swatch').forEach(b=>b.classList.toggle('active',b.dataset.color===settings.carColor));drawCarPreview();}
 function rounded(x,y,w,h,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
 const PLAYER_CAR_WIDTH=24,PLAYER_CAR_HEIGHT=40,TRAFFIC_CAR_WIDTH=26,TRAFFIC_CAR_HEIGHT=42;
 function drawCar(x,y,color,playerCar=false,tilt=0){ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.scale(graphicScale('playerCar'),graphicScale('playerCar'));if(playerCar){ctx.fillStyle='rgba(0,0,0,.28)';ctx.fillRect(-13,17,26,8);ctx.fillStyle='#10121b';ctx.fillRect(-15,-17,4,12);ctx.fillRect(11,-17,4,12);ctx.fillRect(-15,8,4,12);ctx.fillRect(11,8,4,12);}ctx.rotate(tilt);if(playerCar&&uploadedCarImage){ctx.drawImage(uploadedCarImage,-PLAYER_CAR_WIDTH/2,-PLAYER_CAR_HEIGHT/2,PLAYER_CAR_WIDTH,PLAYER_CAR_HEIGHT);ctx.restore();return;}ctx.scale(.8,.8);ctx.fillStyle='#171820';ctx.fillRect(-18,-22,5,13);ctx.fillRect(13,-22,5,13);ctx.fillRect(-18,10,5,13);ctx.fillRect(13,10,5,13);ctx.fillStyle='#080b12';ctx.fillRect(-13,-27,26,55);ctx.fillStyle=color;ctx.fillRect(-14,-25,28,49);ctx.fillStyle='rgba(255,255,255,.22)';ctx.fillRect(-11,-22,5,38);ctx.fillStyle=color;ctx.fillRect(-9,-27,18,5);ctx.fillRect(-9,22,18,4);ctx.fillStyle='#bdeaf4';ctx.fillRect(-10,-17,20,13);ctx.fillStyle='#e5fbff';ctx.fillRect(-8,-15,5,3);ctx.fillRect(3,-15,5,3);ctx.fillStyle='#243748';ctx.fillRect(-10,2,20,12);ctx.fillStyle='rgba(255,255,255,.16)';ctx.fillRect(-7,4,4,7);ctx.fillStyle='#fff1bd';ctx.fillRect(-11,-25,6,3);ctx.fillRect(5,-25,6,3);ctx.fillStyle='#f05d50';ctx.fillRect(-11,20,5,3);ctx.fillRect(6,20,5,3);ctx.restore();}
@@ -1215,13 +1260,15 @@ document.getElementById('hudSpeed').textContent=getScoreSpeedMultiplier().toFixe
 if(!hasStarted||over){
  // Premium pixel-art popup, matched to the outer GAMEZAAR game-shell.
  ctx.fillStyle='rgba(8,7,15,.62)';ctx.fillRect(0,0,360,560);
+ const uiPopup=settings.gameUi.popup,uiButton=over?settings.gameUi.restart:settings.gameUi.start;
+
  const cardX=48,cardY=190,cardW=264,cardH=180;
  // Deep layered shadow + stepped pixel frame.
  ctx.save();ctx.shadowColor='rgba(0,0,0,.72)';ctx.shadowBlur=0;ctx.shadowOffsetX=7;ctx.shadowOffsetY=8;
  ctx.fillStyle='#090d19';ctx.fillRect(cardX+5,cardY+5,cardW-10,cardH-10);ctx.restore();
  ctx.fillStyle='#18243a';ctx.fillRect(cardX,cardY,cardW,cardH);
  ctx.fillStyle='#34415d';ctx.fillRect(cardX+4,cardY+4,cardW-8,cardH-8);
- ctx.fillStyle='#252e49';ctx.fillRect(cardX+8,cardY+8,cardW-16,cardH-16);
+ ctx.fillStyle=gameUiRgba(uiPopup.bg,uiPopup.bgAlpha);ctx.fillRect(cardX+8,cardY+8,cardW-16,cardH-16);
  // Pixel-corner gold frame and inner highlight.
  ctx.fillStyle='#ffca75';
  ctx.fillRect(cardX+8,cardY,cardW-16,3);ctx.fillRect(cardX+8,cardY+cardH-3,cardW-16,3);
@@ -1230,17 +1277,17 @@ if(!hasStarted||over){
  ctx.fillRect(cardX+4,cardY+cardH-7,8,3);ctx.fillRect(cardX+cardW-12,cardY+cardH-7,8,3);
  ctx.fillStyle='#52617c';ctx.fillRect(cardX+13,cardY+13,cardW-26,1);
  ctx.textAlign='center';ctx.fillStyle='#ffd18a';ctx.font='bold 10px monospace';ctx.shadowColor='#ffb84d88';ctx.shadowBlur=7;ctx.fillText(over?'RACE FINISHED':'WELCOME TO',180,cardY+25);ctx.shadowBlur=0;
- const title=(settings.name||'My Racing Game').trim();ctx.fillStyle='#fff4dc';ctx.font='900 19px monospace';ctx.shadowColor='#000';ctx.shadowBlur=4;
+ const title=(settings.name||'My Racing Game').trim();ctx.fillStyle=gameUiRgba(uiPopup.color,uiPopup.colorAlpha);ctx.font=(900*Number(uiPopup.size)/100)+' 19px monospace';ctx.shadowColor='#000';ctx.shadowBlur=4;
  const titleLines=[];let titleLine='';title.split(/\\s+/).forEach(word=>{const test=titleLine?titleLine+' '+word:word;if(ctx.measureText(test).width>220&&titleLine){titleLines.push(titleLine);titleLine=word;}else titleLine=test;});if(titleLine)titleLines.push(titleLine);
  titleLines.slice(0,2).forEach((line,i)=>ctx.fillText(line,180,cardY+53+i*22));ctx.shadowBlur=0;
- ctx.fillStyle='#d5e0f2';ctx.font='11px monospace';const desc=(settings.description||'').trim()||'Get ready for an exciting drive!';const words=desc.split(/\\s+/);let line='',lines=[];words.forEach(word=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>220&&line){lines.push(line);line=word;}else line=test;});if(line)lines.push(line);lines.slice(0,2).forEach((v,i)=>ctx.fillText(v,180,cardY+91+i*16));
+ ctx.fillStyle=gameUiRgba(uiPopup.color,uiPopup.colorAlpha);ctx.font=(11*Number(uiPopup.size)/100)+'px monospace';const desc=(settings.description||'').trim()||'Get ready for an exciting drive!';const words=desc.split(/\\s+/);let line='',lines=[];words.forEach(word=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>220&&line){lines.push(line);line=word;}else line=test;});if(line)lines.push(line);lines.slice(0,2).forEach((v,i)=>ctx.fillText(v,180,cardY+91+i*16));
  const by=cardY+128,pulse=1+Math.sin(Date.now()/230)*.035,bw=134*pulse,bh=37*pulse,bx=180-bw/2,buttonY=by+(37-bh)/2;
  // Animated gold pixel button with a crisp offset shadow.
- ctx.fillStyle='#0a101d';ctx.fillRect(113,by+5,134,37);
+ ctx.fillStyle=gameUiRgba(uiButton.bg,uiButton.bgAlpha);ctx.fillRect(113,by+5,134,37);
  ctx.fillStyle='#8b572b';ctx.fillRect(bx+2,buttonY+3,bw-4,bh-3);
- ctx.fillStyle='#ffb84d';ctx.fillRect(bx,buttonY,bw,bh);
+ ctx.fillStyle=gameUiRgba(uiButton.bg,uiButton.bgAlpha);ctx.fillRect(bx,buttonY,bw,bh);
  ctx.fillStyle='#ffe3a8';ctx.fillRect(bx+4,buttonY+3,bw-8,3);ctx.fillRect(bx+4,buttonY+bh-4,bw-8,2);
- ctx.fillStyle='#3a2630';ctx.font='900 13px monospace';ctx.shadowColor='#fff0c0';ctx.shadowBlur=3;ctx.fillText(over?'▶ PLAY AGAIN':'▶ START GAME',180,by+24);ctx.shadowBlur=0;ctx.textAlign='left';
+ ctx.fillStyle=gameUiRgba(uiButton.color,uiButton.colorAlpha);ctx.font=(900*Number(uiButton.size)/100)+' 13px monospace';ctx.shadowColor='#fff0c0';ctx.shadowBlur=3;ctx.fillText(over?'▶ PLAY AGAIN':'▶ START GAME',180,by+24);ctx.shadowBlur=0;ctx.textAlign='left';
  }}
 function reset(){cancelAnimationFrame(raf);stopBackgroundMusic();stopPopupAnimation();running=false;over=false;hasStarted=false;lastFrameTime=0;survivalTick=0;score=0;frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;setState('READY');draw();animatePopup();}
 function setState(s){const stateEl=document.getElementById('gameState');if(stateEl)stateEl.textContent=s;}
