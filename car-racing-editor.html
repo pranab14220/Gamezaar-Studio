@@ -1235,9 +1235,11 @@ function drawRoadsideKerbs(){
  ctx.fillRect(272,0,1,560);
  ctx.restore();
 }
-function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);drawLandGround();
-drawRoadsideTrees();
+function safeGameLayer(layer){try{layer();}catch(error){console.error('GAMEZAAR render layer error:',error);}}
+function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);safeGameLayer(drawLandGround);
+
 ctx.fillStyle=t.road;ctx.fillRect(78,0,204,560);
+safeGameLayer(drawRoadsideTrees);
 if(roadImage&&roadImage.complete&&roadImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(82,0,196,560);ctx.clip();ctx.drawImage(roadImage,82,0,196,560);ctx.restore();}
 ctx.fillStyle=t.edge;ctx.fillRect(78,0,4,560);ctx.fillRect(278,0,4,560);drawRoadsideKerbs();
 ctx.strokeStyle=t.line;ctx.lineWidth=4.5;ctx.setLineDash([30,34]);ctx.lineDashOffset=-(Math.floor(worldFrame*4)%64);ctx.beginPath();ctx.moveTo(146,0);ctx.lineTo(146,560);ctx.moveTo(214,0);ctx.lineTo(214,560);ctx.stroke();ctx.setLineDash([]);
@@ -1247,14 +1249,14 @@ if(settings.worldTime==='night'){
  ctx.fillStyle='rgba(95,139,205,.10)';ctx.fillRect(0,0,360,560);ctx.restore();
 }
 // Draw houses after the night tint so their warm windows and glow remain visible.
-drawRoadsideHouses();
-drawRoadsideSigns();drawRoadsideStreetLights();
-drawRoadsidePedestrians();
-drawButterflies();
-drawFireflies();
+safeGameLayer(drawRoadsideHouses);
+safeGameLayer(drawRoadsideSigns);safeGameLayer(drawRoadsideStreetLights);
+safeGameLayer(drawRoadsidePedestrians);
+safeGameLayer(drawButterflies);
+safeGameLayer(drawFireflies);
 
-trafficCars.forEach(c=>drawTrafficShape(ctx,c.x,c.y,c.model));drawCar(player.x,player.y,settings.carColor,true,player.tilt);
-if(settings.rainfallOn!==false)drawRainfall();
+safeGameLayer(()=>trafficCars.forEach(c=>drawTrafficShape(ctx,c.x,c.y,c.model)));safeGameLayer(()=>drawCar(player.x,player.y,settings.carColor,true,player.tilt));
+if(settings.rainfallOn!==false)safeGameLayer(drawRainfall);
 // Keep score, best score and speed in the outer game container, outside the play screen.
 document.getElementById('hudScore').textContent=String(score).padStart(4,'0');
 document.getElementById('hudHighScore').textContent=String(highScore).padStart(4,'0');
