@@ -588,7 +588,7 @@ function drawLandGround(){
  ctx.fillStyle=grad;ctx.fillRect(0,0,360,560);
  if(landImage&&landImage.complete&&landImage.naturalWidth){
   ctx.save();ctx.beginPath();ctx.rect(0,0,78,560);ctx.rect(282,0,78,560);ctx.clip();
-  ctx.drawImage(landImage,0,0,78,560);ctx.drawImage(landImage,282,0,78,560);ctx.restore();return;
+  const sc=graphicScale('land');ctx.save();ctx.translate(39,280);ctx.scale(sc,sc);ctx.translate(-39,-280);ctx.drawImage(landImage,0,0,78,560);ctx.restore();ctx.save();ctx.translate(321,280);ctx.scale(sc,sc);ctx.translate(-321,-280);ctx.drawImage(landImage,282,0,78,560);ctx.restore();ctx.restore();return;
  }
  // Clean, minimal ground texture with only a few broad accents
  const offset=(worldFrame*1.7)%96;
@@ -1073,7 +1073,7 @@ function drawRoadsideKerbs(){
  const palette=settings.kerbStyle==='black-white'?['#f4f1e8','#17191e']:['#f0e8d1','#d88739'];
  // Original GAMEZAAR alternating kerb animation, with a slightly wider strip.
  const segment=46,block=23,offset=(worldFrame*4.45)%segment;
- ctx.save();
+ ctx.save();ctx.translate(180,280);ctx.scale(graphicScale('kerbs'),graphicScale('kerbs'));ctx.translate(-180,-280);
  ctx.fillStyle='#25232a';ctx.fillRect(79,0,6,560);ctx.fillRect(275,0,6,560);
  const first=Math.floor(-offset/segment)-1;
  const last=Math.ceil((560-offset)/segment)+1;
@@ -1091,7 +1091,7 @@ function drawRoadsideKerbs(){
 }
 function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);drawLandGround();
 drawRoadsideTrees();
-ctx.fillStyle=t.road;ctx.fillRect(78,0,204,560);if(roadImage&&roadImage.complete&&roadImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(82,0,196,560);ctx.clip();ctx.drawImage(roadImage,82,0,196,560);ctx.restore();}ctx.fillStyle=t.edge;ctx.fillRect(78,0,4,560);ctx.fillRect(278,0,4,560);drawRoadsideKerbs();
+ctx.fillStyle=t.road;ctx.fillRect(78,0,204,560);if(roadImage&&roadImage.complete&&roadImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(82,0,196,560);ctx.clip();const sc=graphicScale('road');ctx.translate(180,280);ctx.scale(sc,sc);ctx.translate(-180,-280);ctx.drawImage(roadImage,82,0,196,560);ctx.restore();}ctx.fillStyle=t.edge;ctx.fillRect(78,0,4,560);ctx.fillRect(278,0,4,560);drawRoadsideKerbs();
 ctx.strokeStyle=t.line;ctx.lineWidth=4.5;ctx.setLineDash([30,34]);ctx.lineDashOffset=-(Math.floor(worldFrame*4)%64);ctx.beginPath();ctx.moveTo(146,0);ctx.lineTo(146,560);ctx.moveTo(214,0);ctx.lineTo(214,560);ctx.stroke();ctx.setLineDash([]);
 
 if(settings.worldTime==='night'){
