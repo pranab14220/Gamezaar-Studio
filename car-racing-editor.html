@@ -589,7 +589,7 @@ function renderHouseOptions(){
   grid.appendChild(b);drawHouseThumb(b.querySelector('canvas'),item.id);
   b.addEventListener('click',()=>{
    const existing=settings.houses.items.find(x=>x.id===item.id);
-   if(existing){existing.selected=!existing.selected;}
+   if(existing){if(!existing.selected&&houseSelectedCount()>=3){document.getElementById('houseUploadStatus').textContent='Maximum 3 houses. Remove one selection first.';return;}existing.selected=!existing.selected;}
    else{if(houseSelectedCount()>=3){document.getElementById('houseUploadStatus').textContent='Maximum 3 houses. Remove one selection first.';return;}settings.houses.items.push({id:item.id,type:item.id,name:item.name,imageData:'',selected:true});}
    renderHouseOptions();draw();
   });
@@ -610,13 +610,17 @@ function renderHouseOptions(){
 if(typeof settings.houseGlowOn!=='boolean')settings.houseGlowOn=true;const houseGlowToggle=document.getElementById('houseGlowToggle');houseGlowToggle.checked=settings.houseGlowOn;houseGlowToggle.addEventListener('change',e=>{settings.houseGlowOn=e.target.checked;draw();});
 document.getElementById('houseUpload').addEventListener('change',e=>{
  const files=[...(e.target.files||[])];if(!files.length)return;
+ const existingUploads=settings.houses.items.filter(x=>x.imageData).length;
+ const allowed=files.slice(0,Math.max(0,3-existingUploads));
+ if(!allowed.length){document.getElementById('houseUploadStatus').textContent='Maximum 3 uploaded house images. Remove one first.';e.target.value='';return;}
+ if(allowed.length<files.length)document.getElementById('houseUploadStatus').textContent='Only 3 uploaded house images are allowed.';
  let added=0,processed=0;
- const finish=()=>{processed++;if(processed===files.length){document.getElementById('houseUploadStatus').textContent=added?'✓ '+added+' house image(s) uploaded. Maximum 3 active houses total.':'No new house image added.';renderHouseOptions();draw();}};
- files.forEach(file=>{
-  if(settings.houses.items.filter(x=>x.imageData).length>=3||settings.houses.items.length>=3){document.getElementById('houseUploadStatus').textContent='Maximum 3 houses total. Remove one first.';finish();return;}
+ const finish=()=>{processed++;if(processed===allowed.length){document.getElementById('houseUploadStatus').textContent=added?'✓ '+added+' house image(s) uploaded. Maximum 3 active houses total.':'No new house image added.';renderHouseOptions();draw();}};
+ allowed.forEach(file=>{
   loadBoundedImage(file,128,96,data=>{
    const id='custom-house-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
-   settings.houses.items.push({id,type:'spring',name:'Uploaded House '+(settings.houses.items.filter(x=>x.imageData).length+1),imageData:data,selected:houseSelectedCount()<3});
+   const selected=houseSelectedCount()<3;
+   settings.houses.items.push({id,type:'spring',name:'Uploaded House '+(settings.houses.items.filter(x=>x.imageData).length+1),imageData:data,selected});
    const img=new Image();img.onload=()=>draw();img.src=data;houseImages[id]=img;added++;finish();
   },msg=>{document.getElementById('houseUploadStatus').textContent=msg;finish();});
  });
