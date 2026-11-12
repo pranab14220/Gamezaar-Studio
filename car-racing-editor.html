@@ -1280,17 +1280,17 @@ if(!hasStarted||over){
  ctx.fillRect(cardX+4,cardY+cardH-7,8,3);ctx.fillRect(cardX+cardW-12,cardY+cardH-7,8,3);
  ctx.fillStyle='#52617c';ctx.fillRect(cardX+13,cardY+13,cardW-26,1);
  ctx.textAlign='center';ctx.fillStyle='#ffd18a';ctx.font='bold 10px monospace';ctx.shadowColor='#ffb84d88';ctx.shadowBlur=7;ctx.fillText(over?'RACE FINISHED':'WELCOME TO',180,cardY+25);ctx.shadowBlur=0;
- const title=(settings.name||'My Racing Game').trim();ctx.fillStyle=gameUiRgba(uiPopup.color,uiPopup.colorAlpha);ctx.font=(900*Number(uiPopup.size)/100)+' 19px monospace';ctx.shadowColor='#000';ctx.shadowBlur=4;
+ const title=(settings.name||'My Racing Game').trim();ctx.fillStyle=gameUiRgba(uiPopup.color,uiPopup.colorAlpha);ctx.font='900 19px monospace';ctx.shadowColor='#000';ctx.shadowBlur=4;
  const titleLines=[];let titleLine='';title.split(/\\s+/).forEach(word=>{const test=titleLine?titleLine+' '+word:word;if(ctx.measureText(test).width>220&&titleLine){titleLines.push(titleLine);titleLine=word;}else titleLine=test;});if(titleLine)titleLines.push(titleLine);
  titleLines.slice(0,2).forEach((line,i)=>ctx.fillText(line,180,cardY+53+i*22));ctx.shadowBlur=0;
- ctx.fillStyle=gameUiRgba(uiPopup.color,uiPopup.colorAlpha);ctx.font=(11*Number(uiPopup.size)/100)+'px monospace';const desc=(settings.description||'').trim()||'Get ready for an exciting drive!';const words=desc.split(/\\s+/);let line='',lines=[];words.forEach(word=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>220&&line){lines.push(line);line=word;}else line=test;});if(line)lines.push(line);lines.slice(0,2).forEach((v,i)=>ctx.fillText(v,180,cardY+91+i*16));
+ ctx.fillStyle=gameUiRgba(uiPopup.color,uiPopup.colorAlpha);ctx.font='11px monospace';const desc=(settings.description||'').trim()||'Get ready for an exciting drive!';const words=desc.split(/\\s+/);let line='',lines=[];words.forEach(word=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>220&&line){lines.push(line);line=word;}else line=test;});if(line)lines.push(line);lines.slice(0,2).forEach((v,i)=>ctx.fillText(v,180,cardY+91+i*16));
  const buttonSize=Number(uiButton.size)/100,by=cardY+128,pulse=1+Math.sin(Date.now()/230)*.035,bw=134*pulse*buttonSize,bh=37*pulse*buttonSize,bx=180-bw/2,buttonY=by+(37*buttonSize-bh)/2;
  // Animated gold pixel button with a crisp offset shadow.
  ctx.fillStyle=gameUiRgba(uiButton.bg,uiButton.bgAlpha);ctx.fillRect(113,by+5,134,37);
  ctx.fillStyle='#8b572b';ctx.fillRect(bx+2,buttonY+3,bw-4,bh-3);
  ctx.fillStyle=gameUiRgba(uiButton.bg,uiButton.bgAlpha);ctx.fillRect(bx,buttonY,bw,bh);drawGameUiImage(over?'restart':'start',bx,buttonY,bw,bh);
  ctx.fillStyle='#ffe3a8';ctx.fillRect(bx+4,buttonY+3,bw-8,3);ctx.fillRect(bx+4,buttonY+bh-4,bw-8,2);
- ctx.fillStyle=gameUiRgba(uiButton.color,uiButton.colorAlpha);ctx.font=(900*Number(uiButton.size)/100)+' 13px monospace';ctx.shadowColor='#fff0c0';ctx.shadowBlur=3;ctx.fillText(over?'▶ PLAY AGAIN':'▶ START GAME',180,by+24*buttonSize);ctx.shadowBlur=0;ctx.textAlign='left';ctx.restore();
+ ctx.fillStyle=gameUiRgba(uiButton.color,uiButton.colorAlpha);ctx.font='900 13px monospace';ctx.shadowColor='#fff0c0';ctx.shadowBlur=3;ctx.fillText(over?'▶ PLAY AGAIN':'▶ START GAME',180,by+24*buttonSize);ctx.shadowBlur=0;ctx.textAlign='left';ctx.restore();
  }}
 function reset(){cancelAnimationFrame(raf);stopBackgroundMusic();stopPopupAnimation();running=false;over=false;hasStarted=false;lastFrameTime=0;survivalTick=0;score=0;frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;setState('READY');draw();animatePopup();}
 function setState(s){const stateEl=document.getElementById('gameState');if(stateEl)stateEl.textContent=s;}
