@@ -1069,21 +1069,23 @@ function drawRainfall(){
 document.querySelectorAll('[data-kerb]').forEach(btn=>{btn.classList.toggle('active',btn.dataset.kerb===settings.kerbStyle);btn.addEventListener('click',()=>{settings.kerbStyle=btn.dataset.kerb;document.querySelectorAll('[data-kerb]').forEach(b=>b.classList.toggle('active',b===btn));draw();});});
 function drawRoadsideKerbs(){
  const palette=settings.kerbStyle==='black-white'?['#f4f1e8','#17191e']:['#f5f0e7','#d52d3b'];
- // Kerbs share the road's scroll speed. Integer-pixel movement prevents shimmer,
- // and longer colour blocks prevent rapid red/white or black/white changes.
- const segment=168,offset=Math.floor((worldFrame*4)%segment);
+ // Use the exact same integer scroll distance as the lane markings.
+ // Draw continuous, overlapping bands so no gaps expose the road edge mid-stripe.
+ const segment=168,roadScroll=Math.floor(worldFrame*4),offset=roadScroll%segment;
  ctx.save();ctx.fillStyle='#25232a';ctx.fillRect(80,0,5,560);ctx.fillRect(275,0,5,560);
- for(let i=-1;i<5;i++){
+ const first=Math.floor(-offset/segment)-1;
+ const last=Math.ceil((560-offset)/segment)+1;
+ for(let i=first;i<=last;i++){
   const y=i*segment+offset,idx=((i%2)+2)%2;
   ctx.fillStyle=palette[idx];
-  ctx.fillRect(82,y,5,segment-1);ctx.fillRect(273,y,5,segment-1);
+  ctx.fillRect(82,y,5,segment+1);ctx.fillRect(273,y,5,segment+1);
  }
  ctx.fillStyle='#ffffff35';ctx.fillRect(82,0,1,560);ctx.fillRect(277,0,1,560);ctx.restore();
 }
 function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);drawLandGround();
 drawRoadsideTrees();
 ctx.fillStyle=t.road;ctx.fillRect(78,0,204,560);if(roadImage&&roadImage.complete&&roadImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(82,0,196,560);ctx.clip();ctx.drawImage(roadImage,82,0,196,560);ctx.restore();}ctx.fillStyle=t.edge;ctx.fillRect(78,0,4,560);ctx.fillRect(278,0,4,560);drawRoadsideKerbs();
-ctx.strokeStyle=t.line;ctx.lineWidth=4.5;ctx.setLineDash([30,34]);ctx.lineDashOffset=-(worldFrame*4)%64;ctx.beginPath();ctx.moveTo(146,0);ctx.lineTo(146,560);ctx.moveTo(214,0);ctx.lineTo(214,560);ctx.stroke();ctx.setLineDash([]);
+ctx.strokeStyle=t.line;ctx.lineWidth=4.5;ctx.setLineDash([30,34]);ctx.lineDashOffset=-(Math.floor(worldFrame*4)%64);ctx.beginPath();ctx.moveTo(146,0);ctx.lineTo(146,560);ctx.moveTo(214,0);ctx.lineTo(214,560);ctx.stroke();ctx.setLineDash([]);
 
 if(settings.worldTime==='night'){
  ctx.save();ctx.fillStyle='rgba(5,12,30,.43)';ctx.fillRect(0,0,360,560);
