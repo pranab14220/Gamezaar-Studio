@@ -862,6 +862,7 @@ function drawButterfly(x,y,phase,colorA,colorB){
 function drawFireflies(){
  if(settings.firefliesOn===false)return;
  const cycle=820,offset=(worldFrame*1.65)%cycle;
+ // Tiny scattered firefly dots; each blinks independently without a halo.
  const clusters=[
   {x:25,y:98,count:5,spread:13,seed:2},
   {x:334,y:348,count:4,spread:12,seed:11},
@@ -871,19 +872,17 @@ function drawFireflies(){
  const colors=['#ffe58a','#caff83','#9ff7ed','#ffd36b'];
  clusters.forEach((group,g)=>{
   for(let i=0;i<group.count;i++){
-   const seed=group.seed+i*2.41,phase=worldFrame*.035+seed;
-   const x=group.x+Math.sin(phase*.73)*group.spread+(i-(group.count-1)/2)*2;
-   const y=((group.y+Math.cos(phase*.61)*group.spread+offset+cycle)%cycle)-28;
-   const pulse=.45+.55*(Math.sin(phase*1.8)+1)/2;
+   const seed=group.seed+i*2.41;
+   const x=group.x+Math.sin(seed*2.13)*group.spread+(i-(group.count-1)/2)*2;
+   const y=((group.y+Math.cos(seed*1.71)*group.spread+offset+cycle)%cycle)-28;
+   const blink=(Math.sin(worldFrame*(.075+(i%3)*.027)+seed*4.7)+1)*.5;
    const color=colors[(g+i)%colors.length];
    ctx.save();
-   ctx.globalCompositeOperation='lighter';
-   ctx.globalAlpha=.16+pulse*.2;
-   ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,5+pulse*2,0,Math.PI*2);ctx.fill();
-   ctx.globalAlpha=.55+pulse*.4;
-   ctx.beginPath();ctx.arc(x,y,1.1+pulse*.45,0,Math.PI*2);ctx.fill();
-   ctx.globalAlpha=.55;
-   ctx.fillRect(x-3,y+1,1,1);ctx.fillRect(x+2,y-2,1,1);
+   ctx.globalAlpha=.12+blink*.88;
+   ctx.fillStyle=color;
+   ctx.beginPath();
+   ctx.arc(x,y,.65+blink*.38,0,Math.PI*2);
+   ctx.fill();
    ctx.restore();
   }
  });
