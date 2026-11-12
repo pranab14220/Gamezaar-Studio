@@ -705,7 +705,7 @@ const landTypes=[{id:'spring',name:'Spring Land'},{id:'summer',name:'Summer Land
 if(!settings.land||typeof settings.land!=='object')settings.land={type:'summer',imageData:''};
 let landImage=null;
 const landPalettes={spring:{base:'#25843a',patch:'#369b43',detail:'#8bc95a',deep:'#17652f',light:'#55ad4c'},summer:{base:'#1d7832',patch:'#2b9140',detail:'#83c94c',deep:'#125d29',light:'#48a744'},autumn:{base:'#a95d2d',patch:'#c77a35',detail:'#e9ad52',deep:'#804326',light:'#df9845'},winter:{base:'#91c8d0',patch:'#b8e0dc',detail:'#f5ffff',deep:'#5b9e8e',light:'#d8f3e9'},desert:{base:'#bd8b43',patch:'#d5a957',detail:'#f0d084',deep:'#93612f',light:'#e5bd6d'}};
-function drawLandThumb(cv,type){const g=cv.getContext('2d'),p=landPalettes[type];g.fillStyle=p.base;g.fillRect(0,0,48,58);g.fillStyle=p.patch;g.fillRect(5,13,13,5);g.fillRect(29,39,12,4);if(type==='winter'){g.fillStyle='#fff';g.fillRect(5,8,10,2);}if(type==='desert'){g.fillStyle='#ad814b';g.fillRect(29,39,12,3);}}
+function drawLandThumb(cv,type){const g=cv.getContext('2d'),p=landPalettes[type];g.fillStyle=p.base;g.fillRect(0,0,48,58);g.fillStyle=p.patch;g.fillRect(5,13,13,5);g.fillRect(29,39,12,4);g.fillStyle=p.deep;g.fillRect(9,25,8,3);g.fillStyle=p.light;g.fillRect(31,10,7,3);if(type==='winter'){g.fillStyle='#fff';g.fillRect(5,8,10,2);}if(type==='desert'){g.fillStyle='#ad814b';g.fillRect(29,39,12,3);}}
 function renderLandOptions(){const grid=document.getElementById('landOptions');if(!grid)return;grid.innerHTML='';landTypes.forEach(item=>{const b=document.createElement('button');b.type='button';b.className='road-option'+(settings.land.type===item.id&&!settings.land.imageData?' active':'');b.innerHTML='<canvas class="road-thumb" width="48" height="58"></canvas><span>'+item.name+'</span>';grid.appendChild(b);drawLandThumb(b.querySelector('canvas'),item.id);b.addEventListener('click',()=>{settings.land={type:item.id,imageData:''};landImage=null;document.getElementById('landUploadStatus').textContent='Using '+item.name+'.';renderLandOptions();draw();});});}
 document.getElementById('landUpload').addEventListener('change',e=>{
  const file=e.target.files&&e.target.files[0];if(!file)return;
@@ -730,9 +730,12 @@ function drawLandGround(){
    const sx=side?284:0;
    const x=sx+(side?42:12), yy=y+(side?52:18);
    ctx.save();ctx.translate(x,yy);
+   // Main ground patch plus two extra details in contrasting seasonal shades.
    ctx.fillStyle=p.patch;ctx.fillRect(0,0,18,7);
-   if(type==='winter'){ctx.fillStyle='#fff';ctx.fillRect(3,1,10,2);}
-   else if(type==='desert'){ctx.fillStyle=p.deep;ctx.fillRect(4,4,12,2);}
+   ctx.fillStyle=p.deep;ctx.fillRect(side?7:3,11,9,3);
+   ctx.fillStyle=p.light;ctx.fillRect(side?1:12,20,7,3);
+   if(type==='winter'){ctx.fillStyle='#fff';ctx.fillRect(3,1,10,2);ctx.fillRect(side?7:3,11,9,3);}
+   else if(type==='desert'){ctx.fillStyle=p.deep;ctx.fillRect(4,4,12,2);ctx.fillStyle=p.light;ctx.fillRect(side?1:12,20,7,3);}
    else if(type==='autumn'){ctx.fillStyle=p.light;ctx.fillRect(5,1,7,2);}
    else if(type==='spring'){ctx.fillStyle=p.light;ctx.fillRect(7,1,4,2);}
    ctx.restore();
