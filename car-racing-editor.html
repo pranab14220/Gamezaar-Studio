@@ -1077,7 +1077,7 @@ function drawRoadsideKerbs(){
 function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);drawLandGround();
 drawRoadsideTrees();
 ctx.fillStyle=t.road;ctx.fillRect(78,0,204,560);if(roadImage&&roadImage.complete&&roadImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(82,0,196,560);ctx.clip();ctx.drawImage(roadImage,82,0,196,560);ctx.restore();}ctx.fillStyle=t.edge;ctx.fillRect(78,0,4,560);ctx.fillRect(278,0,4,560);drawRoadsideKerbs();
-ctx.strokeStyle=t.line;ctx.lineWidth=3;ctx.setLineDash([25,22]);ctx.lineDashOffset=-(worldFrame*4)%47;ctx.beginPath();ctx.moveTo(146,0);ctx.lineTo(146,560);ctx.moveTo(214,0);ctx.lineTo(214,560);ctx.stroke();ctx.setLineDash([]);
+ctx.strokeStyle=t.line;ctx.lineWidth=4.5;ctx.setLineDash([30,34]);ctx.lineDashOffset=-(worldFrame*4)%64;ctx.beginPath();ctx.moveTo(146,0);ctx.lineTo(146,560);ctx.moveTo(214,0);ctx.lineTo(214,560);ctx.stroke();ctx.setLineDash([]);
 
 if(settings.worldTime==='night'){
  ctx.save();ctx.fillStyle='rgba(5,12,30,.43)';ctx.fillRect(0,0,360,560);
