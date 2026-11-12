@@ -590,17 +590,19 @@ function drawLandGround(){
   ctx.save();ctx.beginPath();ctx.rect(0,0,78,560);ctx.rect(282,0,78,560);ctx.clip();
   const sc=graphicScale('land');ctx.save();ctx.translate(39,280);ctx.scale(sc,sc);ctx.translate(-39,-280);ctx.drawImage(landImage,0,0,78,560);ctx.restore();ctx.save();ctx.translate(321,280);ctx.scale(sc,sc);ctx.translate(-321,-280);ctx.drawImage(landImage,282,0,78,560);ctx.restore();ctx.restore();return;
  }
- // Clean, minimal ground texture with only a few broad accents
- const offset=(worldFrame*1.7)%96;
+ // Preset land details scale visibly with the Land size slider.
+ const landScale=graphicScale('land'),offset=(worldFrame*1.7)%96;
  for(let y=-96+offset;y<600;y+=96){
   for(const side of [0,1]){
    const sx=side?284:0;
    const x=sx+(side?42:12), yy=y+(side?52:18);
-   ctx.fillStyle=p.patch;ctx.fillRect(x,yy,18,7);
-   if(type==='winter'){ctx.fillStyle='#fff';ctx.fillRect(x+3,yy+1,10,2);}
-   else if(type==='desert'){ctx.fillStyle=p.deep;ctx.fillRect(x+4,yy+4,12,2);}
-   else if(type==='autumn'){ctx.fillStyle=p.light;ctx.fillRect(x+5,yy+1,7,2);}
-   else if(type==='spring'){ctx.fillStyle=p.light;ctx.fillRect(x+7,yy+1,4,2);}
+   ctx.save();ctx.translate(x+9,yy+3.5);ctx.scale(landScale,landScale);ctx.translate(-9,-3.5);
+   ctx.fillStyle=p.patch;ctx.fillRect(0,0,18,7);
+   if(type==='winter'){ctx.fillStyle='#fff';ctx.fillRect(3,1,10,2);}
+   else if(type==='desert'){ctx.fillStyle=p.deep;ctx.fillRect(4,4,12,2);}
+   else if(type==='autumn'){ctx.fillStyle=p.light;ctx.fillRect(5,1,7,2);}
+   else if(type==='spring'){ctx.fillStyle=p.light;ctx.fillRect(7,1,4,2);}
+   ctx.restore();
   }
  }
  
@@ -1073,7 +1075,9 @@ function drawRoadsideKerbs(){
  const palette=settings.kerbStyle==='black-white'?['#f4f1e8','#17191e']:['#f0e8d1','#d88739'];
  // Original GAMEZAAR alternating kerb animation, with a slightly wider strip.
  const segment=46,block=23,offset=(worldFrame*4.45)%segment;
- ctx.save();ctx.translate(180,280);ctx.scale(graphicScale('kerbs'),graphicScale('kerbs'));ctx.translate(-180,-280);
+ const roadScale=graphicScale('road'),kerbScale=graphicScale('kerbs');
+ ctx.save();ctx.translate(180,0);ctx.scale(roadScale,1);ctx.translate(-180,0);
+ ctx.save();ctx.translate(180,280);ctx.scale(kerbScale/roadScale,kerbScale);ctx.translate(-180,-280);
  ctx.fillStyle='#25232a';ctx.fillRect(79,0,6,560);ctx.fillRect(275,0,6,560);
  const first=Math.floor(-offset/segment)-1;
  const last=Math.ceil((560-offset)/segment)+1;
@@ -1087,12 +1091,17 @@ function drawRoadsideKerbs(){
  // Thin white road-side edge line, kept very close to the kerb.
  ctx.fillStyle='#fff';
  ctx.fillRect(90,0,1,560);ctx.fillRect(269,0,1,560);
- ctx.restore();
+ ctx.restore();ctx.restore();
 }
 function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);drawLandGround();
 drawRoadsideTrees();
-ctx.fillStyle=t.road;ctx.fillRect(78,0,204,560);if(roadImage&&roadImage.complete&&roadImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(82,0,196,560);ctx.clip();const sc=graphicScale('road');ctx.translate(180,280);ctx.scale(sc,sc);ctx.translate(-180,-280);ctx.drawImage(roadImage,82,0,196,560);ctx.restore();}ctx.fillStyle=t.edge;ctx.fillRect(78,0,4,560);ctx.fillRect(278,0,4,560);drawRoadsideKerbs();
+const roadScale=graphicScale('road');
+ctx.save();ctx.translate(180,0);ctx.scale(roadScale,1);ctx.translate(-180,0);
+ctx.fillStyle=t.road;ctx.fillRect(78,0,204,560);
+if(roadImage&&roadImage.complete&&roadImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(82,0,196,560);ctx.clip();ctx.drawImage(roadImage,82,0,196,560);ctx.restore();}
+ctx.fillStyle=t.edge;ctx.fillRect(78,0,4,560);ctx.fillRect(278,0,4,560);drawRoadsideKerbs();
 ctx.strokeStyle=t.line;ctx.lineWidth=4.5;ctx.setLineDash([30,34]);ctx.lineDashOffset=-(Math.floor(worldFrame*4)%64);ctx.beginPath();ctx.moveTo(146,0);ctx.lineTo(146,560);ctx.moveTo(214,0);ctx.lineTo(214,560);ctx.stroke();ctx.setLineDash([]);
+ctx.restore();
 
 if(settings.worldTime==='night'){
  ctx.save();ctx.fillStyle='rgba(5,12,30,.43)';ctx.fillRect(0,0,360,560);
