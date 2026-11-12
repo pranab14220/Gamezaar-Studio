@@ -548,6 +548,8 @@ const laneX=[108,180,252],playerLaneX=laneX,player={x:180,targetX:180,tilt:0,y:4
 let spawnPatternHistory=[],nextWaveDelay=70;
 const themes={spring:{grass:'#78965c',road:'#655d5b',edge:'#f6c5d8',line:'#fff0f5'},summer:{grass:'#416b4b',road:'#42434b',edge:'#e6d7b0',line:'#eee3c6'},autumn:{grass:'#a96d3f',road:'#51413c',edge:'#e9a45a',line:'#f5d19a'},winter:{grass:'#c8d7dc',road:'#626b78',edge:'#f3f5f7',line:'#f7fbff'},desert:{grass:'#c49a59',road:'#51463f',edge:'#f0d39c',line:'#f3dfb5'}};
 
+const gameUiImages={};
+function drawGameUiImage(key,x,y,w,h){const src=settings.gameUi[key]?.image;if(!src)return;if(!gameUiImages[key]||gameUiImages[key]._src!==src){const im=new Image();im._src=src;im.onload=()=>draw();im.src=src;gameUiImages[key]=im;}const im=gameUiImages[key];if(im.complete&&im.naturalWidth){ctx.save();ctx.globalAlpha=Math.max(0,Math.min(100,Number(settings.gameUi[key].bgAlpha)||0))/100;ctx.drawImage(im,x,y,w,h);ctx.restore();}}
 function gameUiRgba(hex,alpha){const h=(hex||'#000000').replace('#','');const n=parseInt(h.length===3?h.split('').map(x=>x+x).join(''):h,16)||0;return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+(Math.max(0,Math.min(100,Number(alpha)||0))/100)+')';}
 function setupGameUiCustomization(){
  const labels=[['score','Score'],['highScore','High Score'],['speed','Speed'],['popup','Popup Card'],['start','Start Button'],['restart','Restart Button']];
@@ -1262,13 +1264,14 @@ if(!hasStarted||over){
  ctx.fillStyle='rgba(8,7,15,.62)';ctx.fillRect(0,0,360,560);
  const uiPopup=settings.gameUi.popup,uiButton=over?settings.gameUi.restart:settings.gameUi.start;
 
+ ctx.save();ctx.translate(180,280);ctx.scale(Number(uiPopup.size)/100,Number(uiPopup.size)/100);ctx.translate(-180,-280);
  const cardX=48,cardY=190,cardW=264,cardH=180;
  // Deep layered shadow + stepped pixel frame.
  ctx.save();ctx.shadowColor='rgba(0,0,0,.72)';ctx.shadowBlur=0;ctx.shadowOffsetX=7;ctx.shadowOffsetY=8;
  ctx.fillStyle='#090d19';ctx.fillRect(cardX+5,cardY+5,cardW-10,cardH-10);ctx.restore();
  ctx.fillStyle='#18243a';ctx.fillRect(cardX,cardY,cardW,cardH);
  ctx.fillStyle='#34415d';ctx.fillRect(cardX+4,cardY+4,cardW-8,cardH-8);
- ctx.fillStyle=gameUiRgba(uiPopup.bg,uiPopup.bgAlpha);ctx.fillRect(cardX+8,cardY+8,cardW-16,cardH-16);
+ ctx.fillStyle=gameUiRgba(uiPopup.bg,uiPopup.bgAlpha);ctx.fillRect(cardX+8,cardY+8,cardW-16,cardH-16);drawGameUiImage('popup',cardX+8,cardY+8,cardW-16,cardH-16);
  // Pixel-corner gold frame and inner highlight.
  ctx.fillStyle='#ffca75';
  ctx.fillRect(cardX+8,cardY,cardW-16,3);ctx.fillRect(cardX+8,cardY+cardH-3,cardW-16,3);
@@ -1281,13 +1284,13 @@ if(!hasStarted||over){
  const titleLines=[];let titleLine='';title.split(/\\s+/).forEach(word=>{const test=titleLine?titleLine+' '+word:word;if(ctx.measureText(test).width>220&&titleLine){titleLines.push(titleLine);titleLine=word;}else titleLine=test;});if(titleLine)titleLines.push(titleLine);
  titleLines.slice(0,2).forEach((line,i)=>ctx.fillText(line,180,cardY+53+i*22));ctx.shadowBlur=0;
  ctx.fillStyle=gameUiRgba(uiPopup.color,uiPopup.colorAlpha);ctx.font=(11*Number(uiPopup.size)/100)+'px monospace';const desc=(settings.description||'').trim()||'Get ready for an exciting drive!';const words=desc.split(/\\s+/);let line='',lines=[];words.forEach(word=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>220&&line){lines.push(line);line=word;}else line=test;});if(line)lines.push(line);lines.slice(0,2).forEach((v,i)=>ctx.fillText(v,180,cardY+91+i*16));
- const by=cardY+128,pulse=1+Math.sin(Date.now()/230)*.035,bw=134*pulse,bh=37*pulse,bx=180-bw/2,buttonY=by+(37-bh)/2;
+ const buttonSize=Number(uiButton.size)/100,by=cardY+128,pulse=1+Math.sin(Date.now()/230)*.035,bw=134*pulse*buttonSize,bh=37*pulse*buttonSize,bx=180-bw/2,buttonY=by+(37*buttonSize-bh)/2;
  // Animated gold pixel button with a crisp offset shadow.
  ctx.fillStyle=gameUiRgba(uiButton.bg,uiButton.bgAlpha);ctx.fillRect(113,by+5,134,37);
  ctx.fillStyle='#8b572b';ctx.fillRect(bx+2,buttonY+3,bw-4,bh-3);
- ctx.fillStyle=gameUiRgba(uiButton.bg,uiButton.bgAlpha);ctx.fillRect(bx,buttonY,bw,bh);
+ ctx.fillStyle=gameUiRgba(uiButton.bg,uiButton.bgAlpha);ctx.fillRect(bx,buttonY,bw,bh);drawGameUiImage(over?'restart':'start',bx,buttonY,bw,bh);
  ctx.fillStyle='#ffe3a8';ctx.fillRect(bx+4,buttonY+3,bw-8,3);ctx.fillRect(bx+4,buttonY+bh-4,bw-8,2);
- ctx.fillStyle=gameUiRgba(uiButton.color,uiButton.colorAlpha);ctx.font=(900*Number(uiButton.size)/100)+' 13px monospace';ctx.shadowColor='#fff0c0';ctx.shadowBlur=3;ctx.fillText(over?'▶ PLAY AGAIN':'▶ START GAME',180,by+24);ctx.shadowBlur=0;ctx.textAlign='left';
+ ctx.fillStyle=gameUiRgba(uiButton.color,uiButton.colorAlpha);ctx.font=(900*Number(uiButton.size)/100)+' 13px monospace';ctx.shadowColor='#fff0c0';ctx.shadowBlur=3;ctx.fillText(over?'▶ PLAY AGAIN':'▶ START GAME',180,by+24*buttonSize);ctx.shadowBlur=0;ctx.textAlign='left';ctx.restore();
  }}
 function reset(){cancelAnimationFrame(raf);stopBackgroundMusic();stopPopupAnimation();running=false;over=false;hasStarted=false;lastFrameTime=0;survivalTick=0;score=0;frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;setState('READY');draw();animatePopup();}
 function setState(s){const stateEl=document.getElementById('gameState');if(stateEl)stateEl.textContent=s;}
