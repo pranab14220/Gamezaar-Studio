@@ -322,6 +322,43 @@
 .panel.settings > details.builder-section + details.builder-section{
  margin-top:0!important;
 }
+
+/* Matching static 32-bit HD pixel-art styling for race action and steering buttons. */
+.game-shell .control-pad{
+ gap:6px!important;
+ padding:0!important;
+ overflow:visible!important;
+ border:0!important;
+ border-radius:0!important;
+ background:transparent!important;
+ box-shadow:none!important;
+}
+.game-shell .control{
+ border:2px solid #ffca75!important;
+ border-radius:0!important;
+ background:#18243a!important;
+ color:#ffe0a0!important;
+ box-shadow:inset 0 0 0 2px #52617c, 3px 4px 0 #080d18!important;
+ font-family:monospace!important;
+ font-size:24px!important;
+ font-weight:900!important;
+ text-shadow:none!important;
+ transition:none!important;
+ clip-path:polygon(0 5px,5px 5px,5px 0,calc(100% - 5px) 0,calc(100% - 5px) 5px,100% 5px,100% calc(100% - 5px),calc(100% - 5px) calc(100% - 5px),calc(100% - 5px) 100%,5px 100%,5px calc(100% - 5px),0 calc(100% - 5px))!important;
+}
+.game-shell .control:first-child:after{display:none!important}
+.game-shell .control:active{
+ background:#34415d!important;
+ color:#fff4dc!important;
+ transform:translateY(2px)!important;
+ box-shadow:inset 0 0 0 2px #ffca75,1px 2px 0 #080d18!important;
+}
+.game-shell.game-fullscreen-layout .control-pad{
+ gap:6px!important;
+ background:transparent!important;
+ border:0!important;
+ box-shadow:none!important;
+}
 </style>
 </head>
 <body>
@@ -1250,13 +1287,14 @@ if(!hasStarted||over){
  const titleLines=[];let titleLine='';title.split(/\\s+/).forEach(word=>{const test=titleLine?titleLine+' '+word:word;if(ctx.measureText(test).width>220&&titleLine){titleLines.push(titleLine);titleLine=word;}else titleLine=test;});if(titleLine)titleLines.push(titleLine);
  titleLines.slice(0,2).forEach((line,i)=>ctx.fillText(line,180,cardY+53+i*22));ctx.shadowBlur=0;
  ctx.fillStyle='#d5e0f2';ctx.font='11px monospace';const desc=(settings.description||'').trim()||'Get ready for an exciting drive!';const words=desc.split(/\\s+/);let line='',lines=[];words.forEach(word=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>220&&line){lines.push(line);line=word;}else line=test;});if(line)lines.push(line);lines.slice(0,2).forEach((v,i)=>ctx.fillText(v,180,cardY+91+i*16));
- const by=cardY+128,pulse=1+Math.sin(Date.now()/230)*.035,bw=134*pulse,bh=37*pulse,bx=180-bw/2,buttonY=by+(37-bh)/2;
- // Animated gold pixel button with a crisp offset shadow.
- ctx.fillStyle='#0a101d';ctx.fillRect(113,by+5,134,37);
- ctx.fillStyle='#8b572b';ctx.fillRect(bx+2,buttonY+3,bw-4,bh-3);
- ctx.fillStyle='#ffb84d';ctx.fillRect(bx,buttonY,bw,bh);
- ctx.fillStyle='#ffe3a8';ctx.fillRect(bx+4,buttonY+3,bw-8,3);ctx.fillRect(bx+4,buttonY+bh-4,bw-8,2);
- ctx.fillStyle='#3a2630';ctx.font='900 13px monospace';ctx.shadowColor='#fff0c0';ctx.shadowBlur=3;ctx.fillText(over?'▶ PLAY AGAIN':'▶ START GAME',180,by+24);ctx.shadowBlur=0;ctx.textAlign='left';
+ const by=cardY+128,bw=140,bh=38,bx=180-bw/2,buttonY=by;
+ // Static 32-bit HD pixel-art action button; no pulse or glow animation.
+ ctx.fillStyle='#080d18';ctx.fillRect(bx+4,buttonY+5,bw-8,bh);
+ ctx.fillStyle='#8b572b';ctx.fillRect(bx+2,buttonY+2,bw-4,bh-2);
+ ctx.fillStyle='#ffb84d';ctx.fillRect(bx+5,buttonY,bw-10,bh-4);
+ ctx.fillRect(bx,buttonY+5,5,bh-14);ctx.fillRect(bx+bw-5,buttonY+5,5,bh-14);
+ ctx.fillStyle='#ffe3a8';ctx.fillRect(bx+7,buttonY+3,bw-14,3);ctx.fillRect(bx+7,buttonY+bh-5,bw-14,2);
+ ctx.fillStyle='#3a2630';ctx.font='900 13px monospace';ctx.shadowBlur=0;ctx.fillText(over?'↻ START AGAIN':'▶ START RACE',180,buttonY+24);ctx.textAlign='left';
  }}
 function reset(){cancelAnimationFrame(raf);stopBackgroundMusic();stopPopupAnimation();running=false;over=false;hasStarted=false;lastFrameTime=0;survivalTick=0;score=0;frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;setState('READY');draw();animatePopup();}
 function setState(s){const stateEl=document.getElementById('gameState');if(stateEl)stateEl.textContent=s;}
