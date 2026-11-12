@@ -524,7 +524,6 @@ const previewModalContent=document.getElementById('previewModalContent');
 const openPreviewBtn=document.getElementById('openPreviewBtn');
 const closePreviewBtn=document.getElementById('closePreviewBtn');
 previewModalContent.appendChild(previewPanel);
-const gameShell=document.querySelector('.game-shell');
 const gameSplashOverlay=document.getElementById('gameSplashOverlay');
 const gameSplashCountdown=document.getElementById('gameSplashCountdown');
 const gameSplashActions=document.getElementById('gameSplashActions');
@@ -532,7 +531,7 @@ const gameSplashPlay=document.getElementById('gameSplashPlay');
 const gameSplashSkip=document.getElementById('gameSplashSkip');
 let gameSplashTimer=null,gameSplashInterval=null;
 function hideGameSplash(){if(gameSplashTimer){clearTimeout(gameSplashTimer);gameSplashTimer=null;}if(gameSplashInterval){clearInterval(gameSplashInterval);gameSplashInterval=null;}gameSplashOverlay.classList.remove('active');gameSplashOverlay.setAttribute('aria-hidden','true');}
-function showGameSplash(){hideGameSplash();let remaining=5;gameSplashCountdown.textContent=String(remaining);gameSplashActions.hidden=true;gameSplashOverlay.classList.add('active');gameSplashOverlay.setAttribute('aria-hidden','false');gameSplashInterval=setInterval(()=>{remaining=Math.max(0,remaining-1);gameSplashCountdown.textContent=String(remaining);if(remaining===0&&gameSplashInterval){clearInterval(gameSplashInterval);gameSplashInterval=null;}},1000);gameSplashTimer=setTimeout(()=>{gameSplashActions.hidden=false;gameSplashCountdown.style.display='none';gameSplashTimer=null;},5000);}
+function showGameSplash(){hideGameSplash();gameSplashCountdown.style.display='grid';let remaining=5;gameSplashCountdown.textContent=String(remaining);gameSplashActions.hidden=true;gameSplashOverlay.classList.add('active');gameSplashOverlay.setAttribute('aria-hidden','false');gameSplashInterval=setInterval(()=>{remaining=Math.max(0,remaining-1);gameSplashCountdown.textContent=String(remaining);if(remaining===0&&gameSplashInterval){clearInterval(gameSplashInterval);gameSplashInterval=null;}},1000);gameSplashTimer=setTimeout(()=>{gameSplashActions.hidden=false;gameSplashCountdown.style.display='none';gameSplashTimer=null;},5000);}
 gameSplashPlay.addEventListener('click',hideGameSplash);gameSplashSkip.addEventListener('click',hideGameSplash);
 function closePreview(){hideGameSplash();previewModal.classList.remove('open');previewModal.setAttribute('aria-hidden','true');document.body.style.overflow='';if(!running)stopPopupAnimation();openPreviewBtn.focus();}
 function openPreview(){previewModal.classList.add('open');previewModal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';draw();if(!running&&!popupAnimRaf)animatePopup();showGameSplash();closePreviewBtn.focus();}
