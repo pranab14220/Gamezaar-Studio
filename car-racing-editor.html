@@ -1072,11 +1072,12 @@ function drawRoadsideKerbs(){
  // Use the exact same integer scroll distance as the lane markings.
  // Draw continuous, overlapping bands so no gaps expose the road edge mid-stripe.
  const segment=168,roadScroll=Math.floor(worldFrame*4),offset=roadScroll%segment;
+ // Lane markings move upward as lineDashOffset decreases; kerbs must use the same direction.
  ctx.save();ctx.fillStyle='#25232a';ctx.fillRect(80,0,5,560);ctx.fillRect(275,0,5,560);
- const first=Math.floor(-offset/segment)-1;
- const last=Math.ceil((560-offset)/segment)+1;
+ const first=Math.floor((offset-560)/segment)-1;
+ const last=Math.ceil(offset/segment)+1;
  for(let i=first;i<=last;i++){
-  const y=i*segment+offset,idx=((i%2)+2)%2;
+  const y=i*segment-offset,idx=((i%2)+2)%2;
   ctx.fillStyle=palette[idx];
   ctx.fillRect(82,y,5,segment+1);ctx.fillRect(273,y,5,segment+1);
  }
