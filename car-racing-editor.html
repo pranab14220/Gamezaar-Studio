@@ -1073,25 +1073,22 @@ function drawRainfall(){
 document.querySelectorAll('[data-kerb]').forEach(btn=>{btn.classList.toggle('active',btn.dataset.kerb===settings.kerbStyle);btn.addEventListener('click',()=>{settings.kerbStyle=btn.dataset.kerb;document.querySelectorAll('[data-kerb]').forEach(b=>b.classList.toggle('active',b===btn));draw();});});
 function drawRoadsideKerbs(){
  const palette=settings.kerbStyle==='black-white'?['#f4f1e8','#17191e']:['#f0e8d1','#d88739'];
- // Original GAMEZAAR alternating kerb animation, with a slightly wider strip.
  const segment=46,block=23,offset=(worldFrame*4.45)%segment;
  const roadScale=graphicScale('road'),kerbScale=graphicScale('kerbs');
- ctx.save();ctx.translate(180,0);ctx.scale(roadScale,1);ctx.translate(-180,0);
- ctx.save();ctx.translate(180,280);ctx.scale(kerbScale/roadScale,kerbScale);ctx.translate(-180,-280);
- ctx.fillStyle='#25232a';ctx.fillRect(79,0,6,560);ctx.fillRect(275,0,6,560);
- const first=Math.floor(-offset/segment)-1;
- const last=Math.ceil((560-offset)/segment)+1;
+ const leftX=180+(82-180)*roadScale,rightX=180+(273-180)*roadScale;
+ const leftDark=180+(79-180)*roadScale,rightDark=180+(275-180)*roadScale;
+ const leftLine=180+(90-180)*roadScale,rightLine=180+(269-180)*roadScale;
+ const strip=7*kerbScale,dark=6*kerbScale;
+ ctx.save();ctx.translate(0,280);ctx.scale(1,kerbScale);ctx.translate(0,-280);
+ ctx.fillStyle='#25232a';ctx.fillRect(leftDark,0,dark,560);ctx.fillRect(rightDark,0,dark,560);
+ const first=Math.floor(-offset/segment)-1,last=Math.ceil((560-offset)/segment)+1;
  for(let i=first;i<=last;i++){
   const y=i*segment+offset;
-  ctx.fillStyle=palette[0];
-  ctx.fillRect(82,y,7,block+1);ctx.fillRect(273,y,7,block+1);
-  ctx.fillStyle=palette[1];
-  ctx.fillRect(82,y+block,7,block+1);ctx.fillRect(273,y+block,7,block+1);
+  ctx.fillStyle=palette[0];ctx.fillRect(leftX,y,strip,block+1);ctx.fillRect(rightX,y,strip,block+1);
+  ctx.fillStyle=palette[1];ctx.fillRect(leftX,y+block,strip,block+1);ctx.fillRect(rightX,y+block,strip,block+1);
  }
- // Thin white road-side edge line, kept very close to the kerb.
- ctx.fillStyle='#fff';
- ctx.fillRect(90,0,1,560);ctx.fillRect(269,0,1,560);
- ctx.restore();ctx.restore();
+ ctx.fillStyle='#fff';ctx.fillRect(leftLine,0,1,560);ctx.fillRect(rightLine,0,1,560);
+ ctx.restore();
 }
 function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);drawLandGround();
 drawRoadsideTrees();
