@@ -841,7 +841,7 @@ function drawRoadsideTrees(){
  });
 }
 let popupAnimRaf=0;
-function animatePopup(){if(running)return;draw();popupAnimRaf=requestAnimationFrame(animatePopup);}
+function animatePopup(){if(running)return;worldFrame+=1;draw();popupAnimRaf=requestAnimationFrame(animatePopup);}
 function stopPopupAnimation(){if(popupAnimRaf){cancelAnimationFrame(popupAnimRaf);popupAnimRaf=0;}}
 function drawButterfly(x,y,phase,colorA,colorB){
  ctx.save();
