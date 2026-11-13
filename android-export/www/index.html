@@ -1389,7 +1389,7 @@ function drawRoadsideKerbs(){
  // continuous from top to bottom at every slider value.
  const block=Math.max(8,Math.round(23*scale));
  const segment=block*2;
- const offset=(worldFrame*4.45*scale)%segment;
+ const offset=(worldFrame*4)%segment;
  const leftX=82,rightX=273,leftDark=79,rightDark=275;
  const strip=Math.max(3,Math.round(7*scale));
  const dark=Math.max(3,Math.round(6*scale));
