@@ -887,11 +887,11 @@ function drawLandGround(){
  ctx.fillStyle=grad;ctx.fillRect(0,0,360,GAME_H);
  if(landImage&&landImage.complete&&landImage.naturalWidth){
   ctx.save();ctx.beginPath();ctx.rect(0,0,78,GAME_H);ctx.rect(282,0,78,GAME_H);ctx.clip();
-  ctx.drawImage(landImage,0,0,78,560);ctx.drawImage(landImage,282,0,78,560);ctx.restore();return;
+  ctx.drawImage(landImage,0,0,78,GAME_H);ctx.drawImage(landImage,282,0,78,GAME_H);ctx.restore();return;
  }
  // Preset land texture details.
  const offset=(worldFrame*1.7)%96;
- for(let y=-96+offset;y<600;y+=96){
+ for(let y=-96+offset;y<GAME_H+96;y+=96){
   for(const side of [0,1]){
    const sx=side?284:0;
    const x=sx+(side?42:12), yy=y+(side?52:18);
@@ -1337,10 +1337,10 @@ function drawRainfall(){
  rainAnimationFrame+=1;
  ctx.save();
  // Soft rain haze near the road surface.
- const mist=ctx.createLinearGradient(0,330,0,560);
+ const mist=ctx.createLinearGradient(0,Math.max(0,GAME_H-230),0,GAME_H);
  mist.addColorStop(0,'rgba(174,205,225,0)');
  mist.addColorStop(1,'rgba(174,205,225,.065)');
- ctx.fillStyle=mist;ctx.fillRect(0,0,360,560);
+ ctx.fillStyle=mist;ctx.fillRect(0,0,360,GAME_H);
  // Deterministic scattered droplets: independent horizontal positions,
  // vertical speeds and sizes prevent visible rows or sideways rain bands.
  for(let i=0;i<148;i++){
@@ -1349,7 +1349,7 @@ function drawRainfall(){
   const x=rand(1)*360;
   const speed=3.4+rand(2)*5.8;
   const phase=rand(3)*620;
-  const y=((phase+rainAnimationFrame*speed)%640)-40;
+  const y=((phase+rainAnimationFrame*speed)%(GAME_H+80))-40;
   const depth=rand(4);
   const length=4+depth*9;
   const width=.55+depth*.65;
@@ -1366,7 +1366,7 @@ function drawRainfall(){
   const seed=i*91.7+5.3;
   const rand=n=>{const v=Math.sin(seed+n*43.17)*24634.6345;return v-Math.floor(v);};
   const x=82+rand(1)*196;
-  const y=(rand(2)*620+rainAnimationFrame*(2.2+rand(3)*2.5))%590-15;
+  const y=(rand(2)*(GAME_H+60)+rainAnimationFrame*(2.2+rand(3)*2.5))%(GAME_H+30)-15;
   const pulse=(Math.sin(rainAnimationFrame*.16+i*2.7)+1)*.5;
   ctx.strokeStyle='rgba(205,226,241,'+(0.10+pulse*.20)+')';
   ctx.lineWidth=.65;
@@ -1446,8 +1446,8 @@ ctx.strokeStyle=t.line;ctx.lineWidth=4.5;ctx.setLineDash([30,34]);ctx.lineDashOf
 ctx.save();ctx.translate(0,GAME_OFFSET_Y);
 safeGameLayer(drawRoadsideTrees);
 if(settings.worldTime==='night'){
- ctx.save();ctx.fillStyle='rgba(5,12,30,.43)';ctx.fillRect(0,0,360,560);
- ctx.fillStyle='rgba(95,139,205,.10)';ctx.fillRect(0,0,360,560);ctx.restore();
+ ctx.save();ctx.fillStyle='rgba(5,12,30,.43)';ctx.fillRect(0,-GAME_OFFSET_Y,360,GAME_H);
+ ctx.fillStyle='rgba(95,139,205,.10)';ctx.fillRect(0,-GAME_OFFSET_Y,360,GAME_H);ctx.restore();
 }
 safeGameLayer(drawRoadsideHouses);safeGameLayer(drawRoadsideSigns);safeGameLayer(drawRoadsideStreetLights);
 safeGameLayer(drawRoadsidePedestrians);safeGameLayer(drawButterflies);safeGameLayer(drawFireflies);
@@ -1455,7 +1455,7 @@ safeGameLayer(()=>trafficCars.forEach(c=>drawTrafficShape(ctx,c.x,c.y,c.model)))
 safeGameLayer(()=>coinItems.forEach(drawCoinItem));
 if(crashBlast)safeGameLayer(drawCrashBlast);else if(!over)safeGameLayer(()=>drawCar(player.x,player.y,settings.carColor,true,player.tilt));
 if(!hasStarted||over){
- ctx.fillStyle='rgba(8,7,15,.62)';ctx.fillRect(0,0,360,560);
+ ctx.fillStyle='rgba(8,7,15,.62)';ctx.fillRect(0,-GAME_OFFSET_Y,360,GAME_H);
  const cardX=48,cardY=190,cardW=264,cardH=180;
  ctx.save();ctx.shadowColor='rgba(0,0,0,.72)';ctx.shadowBlur=0;ctx.shadowOffsetX=7;ctx.shadowOffsetY=8;
  ctx.fillStyle='#090d19';ctx.fillRect(cardX+5,cardY+5,cardW-10,cardH-10);ctx.restore();
@@ -1469,9 +1469,9 @@ if(!hasStarted||over){
  ctx.fillStyle='#52617c';ctx.fillRect(cardX+13,cardY+13,cardW-26,1);
  ctx.textAlign='center';ctx.fillStyle='#ffd18a';ctx.font='bold 10px monospace';ctx.shadowColor='#ffb84d88';ctx.shadowBlur=7;ctx.fillText(over?'RACE FINISHED':'WELCOME TO',180,cardY+25);ctx.shadowBlur=0;
  const title=(settings.name||'My Racing Game').trim();ctx.fillStyle='#fff4dc';ctx.font='900 19px monospace';ctx.shadowColor='#000';ctx.shadowBlur=4;
- const titleLines=[];let titleLine='';title.split(/\\s+/).forEach(word=>{const test=titleLine?titleLine+' '+word:word;if(ctx.measureText(test).width>220&&titleLine){titleLines.push(titleLine);titleLine=word;}else titleLine=test;});if(titleLine)titleLines.push(titleLine);
+ const titleLines=[];let titleLine='';title.split(/\s+/).forEach(word=>{const test=titleLine?titleLine+' '+word:word;if(ctx.measureText(test).width>220&&titleLine){titleLines.push(titleLine);titleLine=word;}else titleLine=test;});if(titleLine)titleLines.push(titleLine);
  titleLines.slice(0,2).forEach((line,i)=>ctx.fillText(line,180,cardY+53+i*22));ctx.shadowBlur=0;
- ctx.fillStyle='#d5e0f2';ctx.font='11px monospace';const desc=(settings.description||'').trim()||'Get ready for an exciting drive!';const words=desc.split(/\\s+/);let line='',lines=[];words.forEach(word=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>220&&line){lines.push(line);line=word;}else line=test;});if(line)lines.push(line);lines.slice(0,2).forEach((v,i)=>ctx.fillText(v,180,cardY+91+i*16));
+ ctx.fillStyle='#d5e0f2';ctx.font='11px monospace';const desc=(settings.description||'').trim()||'Get ready for an exciting drive!';const words=desc.split(/\s+/);let line='',lines=[];words.forEach(word=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>220&&line){lines.push(line);line=word;}else line=test;});if(line)lines.push(line);lines.slice(0,2).forEach((v,i)=>ctx.fillText(v,180,cardY+91+i*16));
  const by=cardY+128,bw=140,bh=38,bx=180-bw/2,buttonY=by;
  ctx.fillStyle='#080d18';ctx.fillRect(bx+4,buttonY+5,bw-8,bh);ctx.fillStyle='#8b572b';ctx.fillRect(bx+2,buttonY+2,bw-4,bh-2);
  ctx.fillStyle='#ffb84d';ctx.fillRect(bx+5,buttonY,bw-10,bh-4);ctx.fillRect(bx,buttonY+5,5,bh-14);ctx.fillRect(bx+bw-5,buttonY+5,5,bh-14);
