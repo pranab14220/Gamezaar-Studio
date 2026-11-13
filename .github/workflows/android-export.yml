@@ -44,6 +44,41 @@ jobs:
         working-directory: android-export
         run: npx cap add android
 
+      - name: Enable immersive full-screen Android display
+        working-directory: android-export
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          roots = list(Path("android/app/src/main/java").rglob("MainActivity.java"))
+          if not roots:
+              raise SystemExit("Capacitor MainActivity.java not found")
+          p = roots[0]
+          s = p.read_text()
+          if "SYSTEM_UI_FLAG_IMMERSIVE_STICKY" not in s:
+              s = re.sub(r'^(package [^;]+;)', r'\\1\\n\\nimport android.view.View;', s, count=1, flags=re.M)
+              method = """
+              @Override
+              public void onWindowFocusChanged(boolean hasFocus) {
+                  super.onWindowFocusChanged(hasFocus);
+                  if (hasFocus) {
+                      getWindow().getDecorView().setSystemUiVisibility(
+                          View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                          | View.SYSTEM_UI_FLAG_FULLSCREEN
+                          | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                          | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                          | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                          | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                      );
+                  }
+              }
+              """
+              pos = s.rfind("}")
+              s = s[:pos] + method + "\\n" + s[pos:]
+              p.write_text(s)
+          print("Immersive full-screen enabled in", p)
+          PY
+
       - name: Sync web package
         working-directory: android-export
         run: npx cap sync android
