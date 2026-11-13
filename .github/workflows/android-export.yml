@@ -2,6 +2,10 @@ name: GAMEZAAR Android Export
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'android-export/**'
+      - '.github/workflows/android-export.yml'
 
 permissions:
   contents: read
