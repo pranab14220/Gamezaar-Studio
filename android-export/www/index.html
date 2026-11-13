@@ -1447,7 +1447,7 @@ ctx.save();ctx.translate(GAME_OFFSET_X,GAME_OFFSET_Y);
 safeGameLayer(drawRoadsideTrees);
 if(settings.worldTime==='night'){
  ctx.save();ctx.fillStyle='rgba(5,12,30,.43)';ctx.fillRect(-GAME_OFFSET_X,-GAME_OFFSET_Y,GAME_W,GAME_H);
- ctx.fillStyle='rgba(95,139,205,.10)';ctx.fillRect(0,-GAME_OFFSET_Y,360,GAME_H);ctx.restore();
+ ctx.fillStyle='rgba(95,139,205,.10)';ctx.fillRect(-GAME_OFFSET_X,-GAME_OFFSET_Y,GAME_W,GAME_H);ctx.restore();
 }
 safeGameLayer(drawRoadsideHouses);safeGameLayer(drawRoadsideSigns);safeGameLayer(drawRoadsideStreetLights);
 safeGameLayer(drawRoadsidePedestrians);safeGameLayer(drawButterflies);safeGameLayer(drawFireflies);
