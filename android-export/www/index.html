@@ -402,8 +402,14 @@ html,body,#previewModal,#previewModal .preview-modal-card,#previewModal .preview
  width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;
  margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#111a2d!important;
 }
+#previewModal .game-shell:not(.game-fullscreen-layout) .stage{
+ display:flex!important;align-items:center!important;justify-content:center!important;
+}
 #previewModal .game-shell:not(.game-fullscreen-layout) .stage canvas{
- width:100%!important;height:100%!important;max-height:100%!important;aspect-ratio:auto!important;object-fit:fill!important;
+ display:block!important;width:auto!important;height:auto!important;
+ max-width:100%!important;max-height:100%!important;
+ aspect-ratio:360 / 560!important;object-fit:contain!important;
+ flex:0 1 auto!important;
 }
 #previewModal .game-shell:not(.game-fullscreen-layout) .control-pad{
  position:relative!important;inset:auto!important;order:2!important;flex:0 0 64px!important;
@@ -419,7 +425,8 @@ html,body,#previewModal,#previewModal .preview-modal-card,#previewModal .preview
  min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;
 }
 #previewModal .game-shell.game-fullscreen-layout .stage canvas{
- width:100%!important;height:100%!important;aspect-ratio:auto!important;object-fit:fill!important;
+ display:block!important;width:100%!important;height:100%!important;
+ aspect-ratio:360 / 560!important;object-fit:cover!important;object-position:center center!important;
 }
 #previewModal .game-shell.game-fullscreen-layout .game-hud{
  position:absolute!important;z-index:5!important;top:12px!important;left:12px!important;right:12px!important;
