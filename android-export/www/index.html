@@ -439,70 +439,42 @@ html,body,#previewModal,#previewModal .preview-modal-card,#previewModal .preview
 </style>
 
 <style>
-/* GAMEZAAR: keep the 360x560 virtual playfield at its authored size.
-   Device viewport expands around it; only smaller screens may constrain it to fit. */
-#previewModal .game-shell .stage{
-  background:#111a2d!important;
+/* Responsive full-screen playfield: world expands vertically without scaling game assets. */
+#previewModal .preview-modal-card,#previewModal .preview-modal-content,#previewModal .preview-panel{
+ width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-height:100dvh!important;
+ margin:0!important;padding:0!important;overflow:hidden!important;box-sizing:border-box!important;
 }
-#previewModal .game-shell .stage canvas{
-  display:block!important;
-  width:360px!important;
-  height:560px!important;
-  max-width:100%!important;
-  max-height:100%!important;
-  aspect-ratio:360 / 560!important;
-  object-fit:contain!important;
-  object-position:center center!important;
-  flex:0 1 auto!important;
-}
+#previewModal .preview-modal-card{display:flex!important;flex-direction:column!important;padding:0!important}
+#previewModal .preview-panel{display:block!important;position:relative!important;background:#111a2d!important}
+#previewModal .preview-panel>.panel-head{display:none!important}
 #previewModal .game-shell.game-fullscreen-layout{
-  width:100vw!important;
-  height:100dvh!important;
-  min-height:100dvh!important;
-  max-width:none!important;
-  max-height:none!important;
-  aspect-ratio:auto!important;
-  display:block!important;
-  position:relative!important;
-  overflow:hidden!important;
-  background:#111a2d!important;
+ position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;
+ max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;
+ border-radius:0!important;overflow:hidden!important;box-sizing:border-box!important;background:#111a2d!important;
 }
 #previewModal .game-shell.game-fullscreen-layout .stage{
-  position:absolute!important;
-  inset:0!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  width:100%!important;
-  height:100%!important;
-  min-height:0!important;
-  padding:0!important;
-  border:0!important;
-  background:#111a2d!important;
+ position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important;
+ margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#111a2d!important;overflow:hidden!important;
 }
 #previewModal .game-shell.game-fullscreen-layout .stage canvas{
-  width:360px!important;
-  height:560px!important;
-  max-width:100vw!important;
-  max-height:100dvh!important;
-  aspect-ratio:360 / 560!important;
-  object-fit:contain!important;
+ display:block!important;position:absolute!important;inset:0!important;width:100vw!important;height:100dvh!important;
+ max-width:none!important;max-height:none!important;aspect-ratio:auto!important;object-fit:fill!important;
+ border:0!important;border-radius:0!important;image-rendering:pixelated!important;touch-action:none!important;
 }
 #previewModal .game-shell.game-fullscreen-layout .game-hud{
-  position:absolute!important;
-  z-index:5!important;
-  top:12px!important;
-  left:12px!important;
-  right:12px!important;
-  width:auto!important;
+ position:absolute!important;z-index:10!important;top:calc(12px + env(safe-area-inset-top))!important;
+ left:12px!important;right:12px!important;width:auto!important;margin:0!important;padding:10px 8px!important;
+ border:1px solid #ffcf8066!important;border-radius:15px!important;background:rgba(20,16,34,.76)!important;
+ backdrop-filter:blur(4px)!important;
 }
 #previewModal .game-shell.game-fullscreen-layout .control-pad{
-  position:absolute!important;
-  z-index:6!important;
-  left:8%!important;
-  bottom:14px!important;
-  width:84%!important;
+ position:absolute!important;z-index:11!important;left:8%!important;bottom:calc(16px + env(safe-area-inset-bottom))!important;
+ width:84%!important;height:54px!important;margin:0!important;border:1px solid #ffbf6088!important;
+ border-radius:13px!important;background:rgba(30,23,47,.84)!important;backdrop-filter:blur(4px)!important;
 }
+#previewModal .game-shell.game-fullscreen-layout .game-splash-overlay{position:absolute!important;inset:0!important;z-index:20!important}
+#previewModal .game-shell.game-fullscreen-layout .game-splash-content{max-width:90vw!important}
+#previewModal .game-shell:not(.game-fullscreen-layout){max-height:100dvh!important;overflow:auto!important}
 </style>
 </head>
 <body>
@@ -659,6 +631,15 @@ document.querySelectorAll('.builder-section > summary').forEach(summary=>{
   });
 });
 const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+let GAME_H=560,GAME_OFFSET_Y=0;
+function resizeGameViewport(){
+ const fullscreen=settings.gameLayout==='fullscreen';
+ if(fullscreen){GAME_H=Math.max(560,Math.round(360*(window.innerHeight/Math.max(1,window.innerWidth))));GAME_OFFSET_Y=Math.round((GAME_H-560)/2);canvas.width=360;canvas.height=GAME_H;canvas.style.width='100vw';canvas.style.height='100dvh';}
+ else{GAME_H=560;GAME_OFFSET_Y=0;canvas.width=360;canvas.height=560;canvas.style.width='100%';canvas.style.height='auto';}
+ ctx.imageSmoothingEnabled=false;
+ if(typeof draw==='function')draw();
+}
+window.addEventListener('resize',()=>{resizeGameViewport();});
 
 const previewPanel=document.querySelector('.preview-panel');
 const previewModal=document.getElementById('previewModal');
@@ -903,9 +884,9 @@ function drawLandGround(){
  // Rich, sunlit pixel-art ground on both sides of the road
  const grad=ctx.createLinearGradient(0,0,360,0);
  grad.addColorStop(0,p.patch);grad.addColorStop(.22,p.base);grad.addColorStop(.5,p.patch);grad.addColorStop(.78,p.base);grad.addColorStop(1,p.patch);
- ctx.fillStyle=grad;ctx.fillRect(0,0,360,560);
+ ctx.fillStyle=grad;ctx.fillRect(0,0,360,GAME_H);
  if(landImage&&landImage.complete&&landImage.naturalWidth){
-  ctx.save();ctx.beginPath();ctx.rect(0,0,78,560);ctx.rect(282,0,78,560);ctx.clip();
+  ctx.save();ctx.beginPath();ctx.rect(0,0,78,GAME_H);ctx.rect(282,0,78,GAME_H);ctx.clip();
   ctx.drawImage(landImage,0,0,78,560);ctx.drawImage(landImage,282,0,78,560);ctx.restore();return;
  }
  // Preset land texture details.
@@ -1407,10 +1388,10 @@ function drawRoadsideKerbs(){
  const dark=Math.max(3,Math.round(6*scale));
  ctx.save();
  ctx.fillStyle='#25232a';
- ctx.fillRect(leftDark,0,dark,560);
- ctx.fillRect(rightDark,0,dark,560);
+ ctx.fillRect(leftDark,0,dark,GAME_H);
+ ctx.fillRect(rightDark,0,dark,GAME_H);
  const first=Math.floor(-offset/segment)-1;
- const last=Math.ceil((560-offset)/segment)+1;
+ const last=Math.ceil((GAME_H-offset)/segment)+1;
  for(let i=first;i<=last;i++){
   const y=i*segment+offset;
   ctx.fillStyle=palette[0];
@@ -1422,8 +1403,8 @@ function drawRoadsideKerbs(){
  }
  // Edge lines stay fixed and continuous beside the kerbs.
  ctx.fillStyle='#fff';
- ctx.fillRect(90,0,1,560);
- ctx.fillRect(272,0,1,560);
+ ctx.fillRect(90,0,1,GAME_H);
+ ctx.fillRect(272,0,1,GAME_H);
  ctx.restore();
 }
 let crashBlast=null;
@@ -1454,63 +1435,55 @@ function drawCrashBlast(){
  ctx.restore();
 }
 function safeGameLayer(layer){try{layer();}catch(error){console.error('GAMEZAAR render layer error:',error);}}
-function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);safeGameLayer(drawLandGround);
-
-ctx.fillStyle=t.road;ctx.fillRect(78,0,204,560);
+function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;
+ctx.clearRect(0,0,360,GAME_H);
+safeGameLayer(drawLandGround);
+ctx.fillStyle=t.road;ctx.fillRect(78,0,204,GAME_H);
+if(roadImage&&roadImage.complete&&roadImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(82,0,196,GAME_H);ctx.clip();ctx.drawImage(roadImage,82,0,196,GAME_H);ctx.restore();}
+ctx.fillStyle=t.edge;ctx.fillRect(78,0,4,GAME_H);ctx.fillRect(278,0,4,GAME_H);
+safeGameLayer(drawRoadsideKerbs);
+ctx.strokeStyle=t.line;ctx.lineWidth=4.5;ctx.setLineDash([30,34]);ctx.lineDashOffset=-(Math.floor(worldFrame*4)%64);ctx.beginPath();ctx.moveTo(146,0);ctx.lineTo(146,GAME_H);ctx.moveTo(214,0);ctx.lineTo(214,GAME_H);ctx.stroke();ctx.setLineDash([]);
+ctx.save();ctx.translate(0,GAME_OFFSET_Y);
 safeGameLayer(drawRoadsideTrees);
-if(roadImage&&roadImage.complete&&roadImage.naturalWidth){ctx.save();ctx.beginPath();ctx.rect(82,0,196,560);ctx.clip();ctx.drawImage(roadImage,82,0,196,560);ctx.restore();}
-ctx.fillStyle=t.edge;ctx.fillRect(78,0,4,560);ctx.fillRect(278,0,4,560);drawRoadsideKerbs();
-ctx.strokeStyle=t.line;ctx.lineWidth=4.5;ctx.setLineDash([30,34]);ctx.lineDashOffset=-(Math.floor(worldFrame*4)%64);ctx.beginPath();ctx.moveTo(146,0);ctx.lineTo(146,560);ctx.moveTo(214,0);ctx.lineTo(214,560);ctx.stroke();ctx.setLineDash([]);
-
 if(settings.worldTime==='night'){
  ctx.save();ctx.fillStyle='rgba(5,12,30,.43)';ctx.fillRect(0,0,360,560);
  ctx.fillStyle='rgba(95,139,205,.10)';ctx.fillRect(0,0,360,560);ctx.restore();
 }
-// Draw houses after the night tint so their warm windows and glow remain visible.
-safeGameLayer(drawRoadsideHouses);
-safeGameLayer(drawRoadsideSigns);safeGameLayer(drawRoadsideStreetLights);
-safeGameLayer(drawRoadsidePedestrians);
-safeGameLayer(drawButterflies);
-safeGameLayer(drawFireflies);
-
-safeGameLayer(()=>trafficCars.forEach(c=>drawTrafficShape(ctx,c.x,c.y,c.model)));safeGameLayer(()=>coinItems.forEach(drawCoinItem));if(crashBlast)safeGameLayer(drawCrashBlast);else if(!over)safeGameLayer(()=>drawCar(player.x,player.y,settings.carColor,true,player.tilt));
-if(settings.rainfallOn!==false)safeGameLayer(drawRainfall);
-// Keep score, best score and speed in the outer game container, outside the play screen.
-document.getElementById('hudScore').textContent=String(score).padStart(4,'0');
-document.getElementById('hudHighScore').textContent=String(highScore).padStart(4,'0');
-document.getElementById('hudSpeed').textContent=getScoreSpeedMultiplier().toFixed(1)+'x';document.getElementById('hudCoins').textContent=String(coinsCollected);
-
+safeGameLayer(drawRoadsideHouses);safeGameLayer(drawRoadsideSigns);safeGameLayer(drawRoadsideStreetLights);
+safeGameLayer(drawRoadsidePedestrians);safeGameLayer(drawButterflies);safeGameLayer(drawFireflies);
+safeGameLayer(()=>trafficCars.forEach(c=>drawTrafficShape(ctx,c.x,c.y,c.model)));
+safeGameLayer(()=>coinItems.forEach(drawCoinItem));
+if(crashBlast)safeGameLayer(drawCrashBlast);else if(!over)safeGameLayer(()=>drawCar(player.x,player.y,settings.carColor,true,player.tilt));
 if(!hasStarted||over){
- // Premium pixel-art popup, matched to the outer GAMEZAAR game-shell.
  ctx.fillStyle='rgba(8,7,15,.62)';ctx.fillRect(0,0,360,560);
  const cardX=48,cardY=190,cardW=264,cardH=180;
- // Deep layered shadow + stepped pixel frame.
  ctx.save();ctx.shadowColor='rgba(0,0,0,.72)';ctx.shadowBlur=0;ctx.shadowOffsetX=7;ctx.shadowOffsetY=8;
  ctx.fillStyle='#090d19';ctx.fillRect(cardX+5,cardY+5,cardW-10,cardH-10);ctx.restore();
  ctx.fillStyle='#18243a';ctx.fillRect(cardX,cardY,cardW,cardH);
  ctx.fillStyle='#34415d';ctx.fillRect(cardX+4,cardY+4,cardW-8,cardH-8);
  ctx.fillStyle='#252e49';ctx.fillRect(cardX+8,cardY+8,cardW-16,cardH-16);
- // Pixel-corner gold frame and inner highlight.
- ctx.fillStyle='#ffca75';
- ctx.fillRect(cardX+8,cardY,cardW-16,3);ctx.fillRect(cardX+8,cardY+cardH-3,cardW-16,3);
+ ctx.fillStyle='#ffca75';ctx.fillRect(cardX+8,cardY,cardW-16,3);ctx.fillRect(cardX+8,cardY+cardH-3,cardW-16,3);
  ctx.fillRect(cardX,cardY+8,3,cardH-16);ctx.fillRect(cardX+cardW-3,cardY+8,3,cardH-16);
  ctx.fillRect(cardX+4,cardY+4,8,3);ctx.fillRect(cardX+cardW-12,cardY+4,8,3);
  ctx.fillRect(cardX+4,cardY+cardH-7,8,3);ctx.fillRect(cardX+cardW-12,cardY+cardH-7,8,3);
  ctx.fillStyle='#52617c';ctx.fillRect(cardX+13,cardY+13,cardW-26,1);
  ctx.textAlign='center';ctx.fillStyle='#ffd18a';ctx.font='bold 10px monospace';ctx.shadowColor='#ffb84d88';ctx.shadowBlur=7;ctx.fillText(over?'RACE FINISHED':'WELCOME TO',180,cardY+25);ctx.shadowBlur=0;
-  const title=(settings.name||'My Racing Game').trim();ctx.fillStyle='#fff4dc';ctx.font='900 19px monospace';ctx.shadowColor='#000';ctx.shadowBlur=4;
-  const titleLines=[];let titleLine='';title.split(/\s+/).forEach(word=>{const test=titleLine?titleLine+' '+word:word;if(ctx.measureText(test).width>220&&titleLine){titleLines.push(titleLine);titleLine=word;}else titleLine=test;});if(titleLine)titleLines.push(titleLine);
-  titleLines.slice(0,2).forEach((line,i)=>ctx.fillText(line,180,cardY+53+i*22));ctx.shadowBlur=0;
-  ctx.fillStyle='#d5e0f2';ctx.font='11px monospace';const desc=(settings.description||'').trim()||'Get ready for an exciting drive!';const words=desc.split(/\s+/);let line='',lines=[];words.forEach(word=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>220&&line){lines.push(line);line=word;}else line=test;});if(line)lines.push(line);lines.slice(0,2).forEach((v,i)=>ctx.fillText(v,180,cardY+91+i*16));
-  const by=cardY+128,bw=140,bh=38,bx=180-bw/2,buttonY=by;
- // Static 32-bit HD pixel-art action button; no pulse or glow animation.
- ctx.fillStyle='#080d18';ctx.fillRect(bx+4,buttonY+5,bw-8,bh);
- ctx.fillStyle='#8b572b';ctx.fillRect(bx+2,buttonY+2,bw-4,bh-2);
- ctx.fillStyle='#ffb84d';ctx.fillRect(bx+5,buttonY,bw-10,bh-4);
- ctx.fillRect(bx,buttonY+5,5,bh-14);ctx.fillRect(bx+bw-5,buttonY+5,5,bh-14);
+ const title=(settings.name||'My Racing Game').trim();ctx.fillStyle='#fff4dc';ctx.font='900 19px monospace';ctx.shadowColor='#000';ctx.shadowBlur=4;
+ const titleLines=[];let titleLine='';title.split(/\\s+/).forEach(word=>{const test=titleLine?titleLine+' '+word:word;if(ctx.measureText(test).width>220&&titleLine){titleLines.push(titleLine);titleLine=word;}else titleLine=test;});if(titleLine)titleLines.push(titleLine);
+ titleLines.slice(0,2).forEach((line,i)=>ctx.fillText(line,180,cardY+53+i*22));ctx.shadowBlur=0;
+ ctx.fillStyle='#d5e0f2';ctx.font='11px monospace';const desc=(settings.description||'').trim()||'Get ready for an exciting drive!';const words=desc.split(/\\s+/);let line='',lines=[];words.forEach(word=>{const test=line?line+' '+word:word;if(ctx.measureText(test).width>220&&line){lines.push(line);line=word;}else line=test;});if(line)lines.push(line);lines.slice(0,2).forEach((v,i)=>ctx.fillText(v,180,cardY+91+i*16));
+ const by=cardY+128,bw=140,bh=38,bx=180-bw/2,buttonY=by;
+ ctx.fillStyle='#080d18';ctx.fillRect(bx+4,buttonY+5,bw-8,bh);ctx.fillStyle='#8b572b';ctx.fillRect(bx+2,buttonY+2,bw-4,bh-2);
+ ctx.fillStyle='#ffb84d';ctx.fillRect(bx+5,buttonY,bw-10,bh-4);ctx.fillRect(bx,buttonY+5,5,bh-14);ctx.fillRect(bx+bw-5,buttonY+5,5,bh-14);
  ctx.fillStyle='#ffe3a8';ctx.fillRect(bx+7,buttonY+3,bw-14,3);ctx.fillRect(bx+7,buttonY+bh-5,bw-14,2);
  ctx.fillStyle='#3a2630';ctx.font='900 13px monospace';ctx.shadowBlur=0;ctx.fillText(over?'↻ START AGAIN':'▶ START RACE',180,buttonY+24);ctx.textAlign='left';
- }}
+}
+ctx.restore();
+safeGameLayer(drawRainfall);
+document.getElementById('hudScore').textContent=String(score).padStart(4,'0');
+document.getElementById('hudHighScore').textContent=String(highScore).padStart(4,'0');
+document.getElementById('hudSpeed').textContent=getScoreSpeedMultiplier().toFixed(1)+'x';document.getElementById('hudCoins').textContent=String(coinsCollected);
+}
 function reset(){cancelAnimationFrame(raf);stopBackgroundMusic();stopPopupAnimation();crashBlast=null;running=false;over=false;hasStarted=false;lastFrameTime=0;survivalTick=0;score=0;coinsCollected=0;coinSpawnSeconds=0;coinItems=[];frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;setState('READY');draw();animatePopup();}
 function setState(s){const stateEl=document.getElementById('gameState');if(stateEl)stateEl.textContent=s;}
 function startGame(){if(running)return;stopPopupAnimation();lastFrameTime=0;survivalTick=0;if(over){score=0;coinsCollected=0;coinSpawnSeconds=0;coinItems=[];frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;over=false;}hasStarted=true;running=true;playGameSound('raceStart');startBackgroundMusic();setState('RACING');draw();loop();}
@@ -1557,7 +1530,7 @@ const playerCollisionScale=graphicScale('playerCar'),trafficCollisionScale=graph
 const scoreCfg=settings.scoreSystem||{};coinItems=coinItems.filter(c=>{const hit=Math.abs(c.x-player.x)<(13*graphicScale('playerCar')+12*(Number(settings.coinSystem?.size)||100)/100)&&Math.abs(c.y-player.y)<(20*graphicScale('playerCar')+12*(Number(settings.coinSystem?.size)||100)/100);if(hit){coinsCollected++;score+=Math.max(0,Number(scoreCfg.coinPoints??10)||0);return false;}return true;});trafficCars.forEach(c=>{if(!c.passed&&c.y>player.y+35){c.passed=true;if(scoreCfg.passOn!==false)score+=Math.max(0,Number(scoreCfg.passPoints)||0);}});
 survivalTick+=step;while(survivalTick>=60){survivalTick-=60;if(scoreCfg.survivalOn!==false)score+=Math.max(0,Number(scoreCfg.survivalPoints)||0);}if(score>highScore){highScore=score;localStorage.setItem(highScoreKey,String(highScore));}updateSpeedSystemStatus();updateDifficultySystemStatus();draw();raf=requestAnimationFrame(loop);}
 function move(dir){if(!running)return;const nextLane=Math.max(0,Math.min(2,playerLane+dir));if(nextLane!==playerLane){playerLane=nextLane;player.targetX=playerLaneX[playerLane];playGameSound('steering');}}
-canvas.addEventListener('click',e=>{if(running)return;const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)*canvas.width/rect.width,y=(e.clientY-rect.top)*canvas.height/rect.height;if(x>=105&&x<=255&&y>=300&&y<=355){playGameSound('startButton');startGame();}});
+canvas.addEventListener('click',e=>{if(running)return;const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)*canvas.width/rect.width,y=(e.clientY-rect.top)*canvas.height/rect.height;if(x>=105&&x<=255&&y>=300+GAME_OFFSET_Y&&y<=355+GAME_OFFSET_Y){playGameSound('startButton');startGame();}});
 [['leftBtn',-1],['rightBtn',1]].forEach(([id,d])=>document.getElementById(id).addEventListener('click',()=>move(d)));
 if(!['buttons','touch','both'].includes(settings.controlMode))settings.controlMode='buttons';
 const controlModeInputs=[...document.querySelectorAll('input[name="controlModeChoice"]')];
@@ -1718,7 +1691,7 @@ function syncWorldTimeChoice(){worldTimeToggle.checked=settings.worldTime==='nig
 worldTimeToggle.addEventListener('change',e=>{settings.worldTime=e.target.checked?'night':'day';syncWorldTimeChoice();draw();localStorage.setItem('gamezaar_racing_settings',JSON.stringify(settings));});
 syncWorldTimeChoice();
 const gameLayoutToggle=document.getElementById('gameLayoutToggle');const gameShell=document.querySelector('.game-shell');if(!['fullscreen','box'].includes(settings.gameLayout))settings.gameLayout='box';
-function syncGameLayout(){gameLayoutToggle.checked=settings.gameLayout==='fullscreen';gameShell.classList.toggle('game-fullscreen-layout',settings.gameLayout==='fullscreen');document.getElementById('gameLayoutToggleLabel').textContent=settings.gameLayout==='fullscreen'?'📱 Full Screen':'▣ Box Container';document.getElementById('gameLayoutStatus').textContent=settings.gameLayout==='fullscreen'?'Full Screen layout is active. Score, high score, speed and steering buttons appear over the canvas.':'Box Container layout is active. Score and speed stay above the canvas; steering buttons stay below it.';}
+function syncGameLayout(){gameLayoutToggle.checked=settings.gameLayout==='fullscreen';gameShell.classList.toggle('game-fullscreen-layout',settings.gameLayout==='fullscreen');resizeGameViewport();document.getElementById('gameLayoutToggleLabel').textContent=settings.gameLayout==='fullscreen'?'📱 Full Screen':'▣ Box Container';document.getElementById('gameLayoutStatus').textContent=settings.gameLayout==='fullscreen'?'Full Screen layout is active. Score, high score, speed and steering buttons appear over the canvas.':'Box Container layout is active. Score and speed stay above the canvas; steering buttons stay below it.';}
 gameLayoutToggle.addEventListener('change',e=>{settings.gameLayout=e.target.checked?'fullscreen':'box';syncGameLayout();localStorage.setItem('gamezaar_racing_settings',JSON.stringify(settings));});syncGameLayout();
 
 const GRAPHIC_SIZE_DEFAULTS={playerCar:100,trafficCars:100,trees:100,road:100,land:100,houses:100,signs:100,kerbs:100,streetLights:100};if(!settings.graphicsSize||typeof settings.graphicsSize!=='object')settings.graphicsSize={};Object.entries(GRAPHIC_SIZE_DEFAULTS).forEach(([key,value])=>{settings.graphicsSize[key]=Math.max(50,Math.min(150,Number(settings.graphicsSize[key])||value));});function graphicScale(key){return (settings.graphicsSize?.[key]||100)/100;}function refreshSectionAssetPreview(key){if(key==='playerCar'&&typeof drawCarPreview==='function')drawCarPreview();if(key==='trafficCars'&&typeof renderTrafficCards==='function')renderTrafficCards();if(key==='trees'&&typeof renderTreeOptions==='function')renderTreeOptions();if(key==='houses'&&typeof renderHouseOptions==='function')renderHouseOptions();if(key==='signs'&&typeof renderRoadSignOptions==='function')renderRoadSignOptions();if(key==='streetLights'&&typeof renderStreetLightOptions==='function')renderStreetLightOptions();const selectors={trees:'.tree-thumb',houses:'.house-thumb',signs:'.sign-thumb',streetLights:'.sign-thumb'};if(selectors[key])document.querySelectorAll(selectors[key]+'[src], .custom-'+key+'-preview').forEach(el=>{el.style.transform='scale('+graphicScale(key)+')';el.style.transformOrigin='center';});}document.querySelectorAll('[data-graphics-size]').forEach(input=>{const key=input.dataset.graphicsSize,value=document.getElementById('size-'+key+'-value');input.value=settings.graphicsSize[key];value.textContent=input.value+'%';input.addEventListener('input',()=>{settings.graphicsSize[key]=Number(input.value);value.textContent=input.value+'%';refreshSectionAssetPreview(key);draw();});});
