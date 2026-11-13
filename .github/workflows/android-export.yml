@@ -49,15 +49,16 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
-          roots = list(Path("android/app/src/main/java").rglob("MainActivity.java"))
-          if not roots:
+          p = next(Path("android/app/src/main/java").rglob("MainActivity.java"), None)
+          if p is None:
               raise SystemExit("Capacitor MainActivity.java not found")
-          p = roots[0]
           s = p.read_text()
           if "SYSTEM_UI_FLAG_IMMERSIVE_STICKY" not in s:
-              s = re.sub(r'^(package [^;]+;)', r'\\1\\n\\nimport android.view.View;', s, count=1, flags=re.M)
-              method = """
+              lines = s.splitlines()
+              lines.insert(1, "")
+              lines.insert(2, "import android.view.View;")
+              s = "\n".join(lines)
+              method = '''
               @Override
               public void onWindowFocusChanged(boolean hasFocus) {
                   super.onWindowFocusChanged(hasFocus);
@@ -72,9 +73,9 @@ jobs:
                       );
                   }
               }
-              """
+              '''
               pos = s.rfind("}")
-              s = s[:pos] + method + "\\n" + s[pos:]
+              s = s[:pos] + method + "\n" + s[pos:]
               p.write_text(s)
           print("Immersive full-screen enabled in", p)
           PY
