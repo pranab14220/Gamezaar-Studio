@@ -1284,6 +1284,33 @@ function drawRoadsideKerbs(){
  ctx.fillRect(272,0,1,560);
  ctx.restore();
 }
+let crashBlast=null;
+function drawCrashBlast(){
+ if(!crashBlast)return;
+ const elapsed=performance.now()-crashBlast.started,duration=760,p=Math.min(1,elapsed/duration),fade=1-p;
+ if(p>=1){crashBlast=null;return;}
+ ctx.save();ctx.translate(crashBlast.x,crashBlast.y);ctx.scale(crashBlast.scale,crashBlast.scale);
+ const radius=7+p*31;
+ // Expanding pixel-art fireball with a bright core and flying sparks.
+ ctx.globalAlpha=fade;
+ ctx.fillStyle='#a92720';ctx.fillRect(-radius*.72,-radius*.34,radius*1.44,radius*.68);
+ ctx.fillRect(-radius*.34,-radius*.72,radius*.68,radius*1.44);
+ ctx.fillStyle='#f04a24';ctx.fillRect(-radius*.58,-radius*.58,radius*1.16,radius*1.16);
+ ctx.fillRect(-radius*.9,-radius*.16,radius*1.8,radius*.32);
+ ctx.fillRect(-radius*.16,-radius*.9,radius*.32,radius*1.8);
+ ctx.fillStyle='#ff9b28';ctx.fillRect(-radius*.48,-radius*.48,radius*.96,radius*.96);
+ ctx.fillRect(-radius*.68,-radius*.12,radius*1.36,radius*.24);
+ ctx.fillRect(-radius*.12,-radius*.68,radius*.24,radius*1.36);
+ ctx.fillStyle='#ffe36b';ctx.fillRect(-radius*.29,-radius*.29,radius*.58,radius*.58);
+ ctx.fillStyle='#fff7c4';ctx.fillRect(-radius*.12,-radius*.12,radius*.24,radius*.24);
+ const sparks=8;
+ for(let i=0;i<sparks;i++){
+  const a=(Math.PI*2*i/sparks)+.18,dist=radius*(.72+p*.42),sx=Math.cos(a)*dist,sy=Math.sin(a)*dist;
+  ctx.fillStyle=i%2?'#ffbd45':'#fff0a1';
+  ctx.fillRect(Math.round(sx)-2,Math.round(sy)-2,4,4);
+ }
+ ctx.restore();
+}
 function safeGameLayer(layer){try{layer();}catch(error){console.error('GAMEZAAR render layer error:',error);}}
 function draw(){const t=themes[settings.road?.type||'summer']||themes.summer;ctx.clearRect(0,0,360,560);safeGameLayer(drawLandGround);
 
@@ -1304,7 +1331,7 @@ safeGameLayer(drawRoadsidePedestrians);
 safeGameLayer(drawButterflies);
 safeGameLayer(drawFireflies);
 
-safeGameLayer(()=>trafficCars.forEach(c=>drawTrafficShape(ctx,c.x,c.y,c.model)));safeGameLayer(()=>coinItems.forEach(drawCoinItem));safeGameLayer(()=>drawCar(player.x,player.y,settings.carColor,true,player.tilt));
+safeGameLayer(()=>trafficCars.forEach(c=>drawTrafficShape(ctx,c.x,c.y,c.model)));safeGameLayer(()=>coinItems.forEach(drawCoinItem));if(crashBlast)safeGameLayer(drawCrashBlast);else if(!over)safeGameLayer(()=>drawCar(player.x,player.y,settings.carColor,true,player.tilt));
 if(settings.rainfallOn!==false)safeGameLayer(drawRainfall);
 // Keep score, best score and speed in the outer game container, outside the play screen.
 document.getElementById('hudScore').textContent=String(score).padStart(4,'0');
@@ -1342,7 +1369,7 @@ if(!hasStarted||over){
  ctx.fillStyle='#ffe3a8';ctx.fillRect(bx+7,buttonY+3,bw-14,3);ctx.fillRect(bx+7,buttonY+bh-5,bw-14,2);
  ctx.fillStyle='#3a2630';ctx.font='900 13px monospace';ctx.shadowBlur=0;ctx.fillText(over?'↻ START AGAIN':'▶ START RACE',180,buttonY+24);ctx.textAlign='left';
  }}
-function reset(){cancelAnimationFrame(raf);stopBackgroundMusic();stopPopupAnimation();running=false;over=false;hasStarted=false;lastFrameTime=0;survivalTick=0;score=0;coinsCollected=0;coinSpawnSeconds=0;coinItems=[];frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;setState('READY');draw();animatePopup();}
+function reset(){cancelAnimationFrame(raf);stopBackgroundMusic();stopPopupAnimation();crashBlast=null;running=false;over=false;hasStarted=false;lastFrameTime=0;survivalTick=0;score=0;coinsCollected=0;coinSpawnSeconds=0;coinItems=[];frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;setState('READY');draw();animatePopup();}
 function setState(s){const stateEl=document.getElementById('gameState');if(stateEl)stateEl.textContent=s;}
 function startGame(){if(running)return;stopPopupAnimation();lastFrameTime=0;survivalTick=0;if(over){score=0;coinsCollected=0;coinSpawnSeconds=0;coinItems=[];frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;over=false;}hasStarted=true;running=true;playGameSound('raceStart');startBackgroundMusic();setState('RACING');draw();loop();}
 function spawn(){
@@ -1384,7 +1411,7 @@ function spawn(){
 }
 let lastFrameTime=0,survivalTick=0;
 function loop(timestamp){if(!running)return;const elapsed=lastFrameTime?Math.max(0,timestamp-lastFrameTime):1000/60;lastFrameTime=timestamp;const step=Math.min(4,elapsed/(1000/60));frame+=step;const steerDelta=player.targetX-player.x;player.x+=steerDelta*(1-Math.pow(1-.19,step));if(Math.abs(steerDelta)<.12)player.x=player.targetX;const targetTilt=Math.max(-.13,Math.min(.13,steerDelta*.003));player.tilt+=(targetTilt-player.tilt)*(1-Math.pow(1-.22,step));const speedMultiplier=getScoreSpeedMultiplier();worldFrame+=speedMultiplier*step;const speed=1+3*.55;trafficCars.forEach(c=>c.y+=c.speed*speed*speedMultiplier/2*step);trafficCars=trafficCars.filter(c=>c.y<620);coinSpawnSeconds+=step/60;const coinInterval=Math.max(1,Number(settings.coinSystem?.intervalMinutes)||1)*60;while(coinSpawnSeconds>=coinInterval){coinSpawnSeconds-=coinInterval;spawnCoinBatch();}coinItems.forEach(c=>c.y+=speedMultiplier*step);coinItems=coinItems.filter(c=>c.y<620);if(frame-lastSpawn>Math.max(45,Math.ceil(nextWaveDelay/speedMultiplier))){spawn();lastSpawn=frame;}
-const playerCollisionScale=graphicScale('playerCar'),trafficCollisionScale=graphicScale('trafficCars');for(const c of trafficCars){const collisionWidth=(PLAYER_CAR_WIDTH*playerCollisionScale+TRAFFIC_CAR_WIDTH*trafficCollisionScale)/2;const collisionHeight=(PLAYER_CAR_HEIGHT*playerCollisionScale+TRAFFIC_CAR_HEIGHT*trafficCollisionScale)/2;if(Math.abs(c.x-player.x)<collisionWidth&&Math.abs(c.y-player.y)<collisionHeight){running=false;over=true;stopBackgroundMusic();playGameSound('gameOver');setState('GAME OVER');draw();animatePopup();return;}}
+const playerCollisionScale=graphicScale('playerCar'),trafficCollisionScale=graphicScale('trafficCars');for(const c of trafficCars){const collisionWidth=(PLAYER_CAR_WIDTH*playerCollisionScale+TRAFFIC_CAR_WIDTH*trafficCollisionScale)/2;const collisionHeight=(PLAYER_CAR_HEIGHT*playerCollisionScale+TRAFFIC_CAR_HEIGHT*trafficCollisionScale)/2;if(Math.abs(c.x-player.x)<collisionWidth&&Math.abs(c.y-player.y)<collisionHeight){crashBlast={x:(c.x+player.x)/2,y:(c.y+player.y)/2,started:performance.now(),scale:(playerCollisionScale+trafficCollisionScale)/2};running=false;over=true;stopBackgroundMusic();playGameSound('gameOver');setState('GAME OVER');draw();animatePopup();return;}}
 const scoreCfg=settings.scoreSystem||{};coinItems=coinItems.filter(c=>{const hit=Math.abs(c.x-player.x)<(13*graphicScale('playerCar')+12*(Number(settings.coinSystem?.size)||100)/100)&&Math.abs(c.y-player.y)<(20*graphicScale('playerCar')+12*(Number(settings.coinSystem?.size)||100)/100);if(hit){coinsCollected++;score+=Math.max(0,Number(scoreCfg.coinPoints??10)||0);return false;}return true;});trafficCars.forEach(c=>{if(!c.passed&&c.y>player.y+35){c.passed=true;if(scoreCfg.passOn!==false)score+=Math.max(0,Number(scoreCfg.passPoints)||0);}});
 survivalTick+=step;while(survivalTick>=60){survivalTick-=60;if(scoreCfg.survivalOn!==false)score+=Math.max(0,Number(scoreCfg.survivalPoints)||0);}if(score>highScore){highScore=score;localStorage.setItem(highScoreKey,String(highScore));}updateSpeedSystemStatus();updateDifficultySystemStatus();draw();raf=requestAnimationFrame(loop);}
 function move(dir){if(!running)return;const nextLane=Math.max(0,Math.min(2,playerLane+dir));if(nextLane!==playerLane){playerLane=nextLane;player.targetX=playerLaneX[playerLane];playGameSound('steering');}}
