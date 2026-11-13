@@ -2,6 +2,15 @@ name: GAMEZAAR Android Export
 
 on:
   workflow_dispatch:
+    inputs:
+      job_id:
+        description: 'Supabase export job ID'
+        required: false
+        type: string
+      project_id:
+        description: 'GAMEZAAR project ID'
+        required: false
+        type: string
   push:
     paths:
       - 'android-export/**'
