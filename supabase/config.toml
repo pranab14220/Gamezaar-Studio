@@ -1,0 +1,4 @@
+project_id = "gamezaar-studio"
+
+[functions.create-export-job]
+verify_jwt = true
