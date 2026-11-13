@@ -1,0 +1,19 @@
+{
+  "name": "gamezaar-android-export",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Android packaging foundation for GAMEZAAR Studio game exports",
+  "scripts": {
+    "android:add": "cap add android",
+    "android:sync": "cap sync android",
+    "android:apk": "cd android && ./gradlew assembleDebug",
+    "android:aab": "cd android && ./gradlew bundleRelease"
+  },
+  "dependencies": {
+    "@capacitor/core": "7.4.3"
+  },
+  "devDependencies": {
+    "@capacitor/android": "7.4.3",
+    "@capacitor/cli": "7.4.3"
+  }
+}
