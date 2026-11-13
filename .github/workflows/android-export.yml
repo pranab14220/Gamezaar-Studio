@@ -31,10 +31,10 @@ jobs:
       - name: Install Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: |
-            platform-tools
-            platforms;android-35
-            build-tools;35.0.0
+          packages: platform-tools
+
+      - name: Install Android build packages
+        run: yes | sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
       - name: Install Capacitor dependencies
         working-directory: android-export
