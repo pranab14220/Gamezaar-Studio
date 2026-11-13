@@ -362,6 +362,24 @@
 .game-shell.touch-controls-hidden .control-pad{display:none!important}
 .splash-brand-preview{padding:17px 12px 14px;border:1px solid #ffbd5877;border-radius:13px;background:radial-gradient(ellipse at 50% 0%,#ffb84d20,transparent 65%),linear-gradient(145deg,#171326,#29203d);text-align:center;box-shadow:inset 0 1px 0 #ffffff12}.splash-brand-name{font-size:clamp(19px,5vw,25px);font-weight:1000;letter-spacing:1.6px;color:#ffc15d;text-shadow:0 2px 0 #6f431e,0 0 13px #ffb84d55}.splash-brand-tagline{margin-top:8px;color:#fff4dc;font-size:13px;font-weight:900;letter-spacing:1px}.splash-brand-tagline strong{color:#ffbd58;font-size:16px;text-shadow:0 0 8px #ffb84d55}.splash-brand-copy{margin:8px auto 0;max-width:260px;color:#d8cfe7;font-size:11px;line-height:1.5}.splash-brand-credit{margin-top:13px;padding-top:9px;border-top:1px solid #ffffff20;color:#c9bfd8;font-size:10px}.splash-brand-credit strong{color:#ffc15d;font-size:11px}.splash-free-note{margin-top:10px;padding:9px 10px;border:1px solid #68c99555;border-radius:9px;background:#68c99510;color:#bce9c8;font-size:11px;font-weight:800}.splash-premium-lock{margin-top:10px;padding:10px;border:1px solid #ffb84d44;border-radius:10px;background:#171326}.splash-premium-title{color:#ffcf83;font-size:12px;font-weight:900}
 .game-shell{position:relative;isolation:isolate}.game-splash-overlay{position:absolute;inset:0;z-index:30;display:none;align-items:center;justify-content:center;overflow:hidden;padding:22px 16px;border-radius:inherit;background:radial-gradient(ellipse at 50% 18%,#51416f 0%,#29213f 42%,#100d1c 100%);text-align:center}.game-splash-overlay.active{display:flex}.game-splash-content{width:min(100%,360px);padding:24px 15px 18px;border:1px solid #ffca7588;border-radius:18px;background:linear-gradient(150deg,#241b37ee,#11101eee);box-shadow:0 14px 38px #0009,inset 0 1px 0 #ffffff22}.game-splash-brand{font-size:clamp(27px,8vw,39px);line-height:.98;font-weight:1000;letter-spacing:2px;color:#ffc15d;text-shadow:0 3px 0 #70451e,0 0 18px #ffb84d66}.game-splash-brand span{font-size:.72em;letter-spacing:7px}.game-splash-tagline{margin-top:19px;color:#fff4dc;font-size:clamp(12px,3.4vw,15px);font-weight:950;letter-spacing:1px}.game-splash-tagline strong{color:#ffbd58;font-size:1.2em;text-shadow:0 0 10px #ffb84d88}.game-splash-copy{margin:13px auto 0;color:#e0d6ed;font-size:12px;line-height:1.65}.game-splash-credit{margin-top:19px;padding-top:12px;border-top:1px solid #ffffff24;color:#c9bfd8;font-size:10px}.game-splash-credit strong{color:#ffc15d;font-size:12px}.game-splash-countdown{margin:20px auto 0;width:38px;height:38px;display:grid;place-items:center;border:2px solid #ffbd58;border-radius:50%;color:#ffcf83;font-size:19px;font-weight:950;box-shadow:0 0 14px #ffb84d35}.game-splash-actions{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:18px}.game-splash-actions[hidden]{display:none}.game-splash-play{min-width:142px;padding:12px 22px;border:2px solid #ffe0a0;border-radius:9px;background:linear-gradient(135deg,#ffe0a0,#ffb84d);color:#281c31;font-size:13px;font-weight:1000;letter-spacing:1px;box-shadow:0 4px 0 #8b572b;cursor:pointer}.game-splash-skip{position:absolute;right:0;top:50%;transform:translateY(-50%);width:34px;height:34px;border:1px solid #ffcf8066;border-radius:50%;background:#ffffff12;color:#ffe0a0;font-size:24px;line-height:1;cursor:pointer}
+
+
+/* Android export section */
+.export-panel{margin:22px 0 42px;padding:18px;background:linear-gradient(145deg,#302744,#241e36);border:1px solid var(--line);border-radius:17px}
+.export-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.export-head h2{margin:0;font-size:18px;color:var(--gold2)}
+.export-head p{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.6}
+.export-ready{padding:5px 9px;border-radius:20px;background:#61c98b18;color:#a9e9bd;border:1px solid #61c98b44;font-size:10px;font-weight:800;white-space:nowrap}
+.export-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin:14px 0}
+.export-option{padding:13px;border:1px solid var(--line);border-radius:13px;background:#17132680}
+.export-option strong{display:block;font-size:13px;color:var(--text)}
+.export-option span{display:block;margin-top:5px;font-size:11px;color:var(--muted);line-height:1.5}
+.export-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.export-link{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:11px 16px;border-radius:10px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#281c31;text-decoration:none;font-size:12px;font-weight:900}
+.export-link.secondary{background:#ffffff12;border:1px solid var(--line);color:var(--text)}
+.export-note{margin-top:13px;padding:11px 12px;border:1px solid #ffb84d38;border-radius:10px;background:#ffb84d0b;color:#d9cba9;font-size:10px;line-height:1.6}
+@media(max-width:520px){.export-options{grid-template-columns:1fr}.export-panel{padding:14px}}
+
 </style>
 </head>
 <body>
@@ -462,6 +480,32 @@
 </div></details></aside>
 </div>
 <div class="savebar"><button class="btn" id="saveBtn">Save project</button><span class="status" id="saveStatus"></span></div>
+
+<section class="export-panel" id="exportSystem">
+ <div class="export-head">
+  <div>
+   <div class="eyebrow">FINAL STEP</div>
+   <h2>Export System</h2>
+   <p>Build your Android game package and download it after the build finishes.</p>
+  </div>
+  <span class="export-ready">APK + AAB BUILD</span>
+ </div>
+ <div class="export-options">
+  <div class="export-option">
+   <strong>📱 Android APK</strong>
+   <span>Install the APK directly on an Android phone for testing or distribution.</span>
+  </div>
+  <div class="export-option">
+   <strong>🏪 Android AAB</strong>
+   <span>App Bundle package for supported Android app stores, including Google Play.</span>
+  </div>
+ </div>
+ <div class="export-actions">
+  <a class="export-link" href="https://github.com/pranab14220/Gamezaar-Studio/actions/workflows/android-export.yml" target="_blank" rel="noopener">⚙ Build APK + AAB</a>
+  <a class="export-link secondary" href="https://github.com/pranab14220/Gamezaar-Studio/actions" target="_blank" rel="noopener">View build history</a>
+ </div>
+ <div class="export-note"><strong>How to export:</strong> Open Build APK + AAB → sign in to GitHub with access to this project → tap <strong>Run workflow</strong> → wait for a successful build → open that run's <strong>Artifacts</strong> and download <strong>gamezaar-android-builds</strong>. The ZIP contains both APK and AAB files.<br><strong>Current limitation:</strong> This connected export pipeline packages the currently published Car Racing game. Sending each creator's individual editor settings and uploaded assets into a separate APK is a next integration step; this panel does not claim that customization transfer is already active.</div>
+</section>
 </main>
 
 <div class="preview-modal" id="previewModal" aria-hidden="true">
