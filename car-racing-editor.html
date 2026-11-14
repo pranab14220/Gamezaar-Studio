@@ -378,6 +378,7 @@
 .export-link{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:11px 16px;border-radius:10px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#281c31;text-decoration:none;font-size:12px;font-weight:900}
 .export-link.secondary{background:#ffffff12;border:1px solid var(--line);color:var(--text)}
 .export-note{margin-top:13px;padding:11px 12px;border:1px solid #ffb84d38;border-radius:10px;background:#ffb84d0b;color:#d9cba9;font-size:10px;line-height:1.6}
+.release-downloads{display:none;gap:9px;flex-wrap:wrap;margin-top:12px;padding:12px;border:1px solid #61c98b44;border-radius:12px;background:#61c98b0b}.release-downloads.visible{display:flex}.release-downloads strong{width:100%;font-size:11px;color:#bce9c8}.release-downloads a{display:inline-flex;align-items:center;justify-content:center;padding:10px 13px;border-radius:9px;background:#61c98b;color:#172326;font-size:11px;font-weight:900;text-decoration:none}.release-status{font-size:10px;color:var(--muted);margin-top:9px}
 @media(max-width:520px){.export-options{grid-template-columns:1fr}.export-panel{padding:14px}}
 
 </style>
@@ -502,9 +503,16 @@
  </div>
  <div class="export-actions">
   <a class="export-link" href="https://github.com/pranab14220/Gamezaar-Studio/actions/workflows/android-export.yml" target="_blank" rel="noopener">⚙ Build APK + AAB</a>
-  <a class="export-link secondary" href="https://github.com/pranab14220/Gamezaar-Studio/actions" target="_blank" rel="noopener">View build history</a>
+  <a class="export-link secondary" href="https://github.com/pranab14220/Gamezaar-Studio/releases" target="_blank" rel="noopener">All APK / AAB Releases</a>
+  <a class="export-link secondary" href="https://github.com/pranab14220/Gamezaar-Studio/actions" target="_blank" rel="noopener">Build history</a>
  </div>
- <div class="export-note"><strong>How to export:</strong> Open Build APK + AAB → sign in to GitHub with access to this project → tap <strong>Run workflow</strong> → wait for a successful build → open that run's <strong>Artifacts</strong> and download <strong>gamezaar-android-builds</strong>. The ZIP contains both APK and AAB files.<br><strong>Current limitation:</strong> This connected export pipeline packages the currently published Car Racing game. Sending each creator's individual editor settings and uploaded assets into a separate APK is a next integration step; this panel does not claim that customization transfer is already active.</div>
+ <div class="release-downloads" id="releaseDownloads">
+  <strong>✓ Latest GitHub Release</strong>
+  <a id="latestApkLink" href="#" target="_blank" rel="noopener">Download APK</a>
+  <a id="latestAabLink" href="#" target="_blank" rel="noopener">Download AAB</a>
+ </div>
+ <div class="release-status" id="releaseStatus">Checking the latest APK and AAB release…</div>
+ <div class="export-note"><strong>How to export:</strong> Tap <strong>Build APK + AAB</strong> → sign in to GitHub → tap <strong>Run workflow</strong>. After a successful build, APK and AAB are published as separate downloadable files in GitHub Releases. The Studio checks the latest release and shows direct download links here. <strong>Supabase stores only export status and small project records; APK/AAB binaries are not uploaded to Supabase Storage.</strong><br><strong>Current limitation:</strong> This build currently packages the published Car Racing app shell. Individual creator settings and uploaded assets are not yet transferred into a unique APK; that remains a separate integration step.</div>
 </section>
 </main>
 
@@ -1639,5 +1647,25 @@ setupCountSlider('houseAmount','houseAmount',4,'houses');
 document.getElementById('saveBtn').addEventListener('click',()=>{try{localStorage.setItem('gamezaar_current_project',JSON.stringify({name:settings.name,type:'Car Traffic Racing',updatedAt:new Date().toISOString()}));localStorage.setItem('gamezaar_racing_settings',JSON.stringify(settings));document.getElementById('saveStatus').textContent='✓ Project saved on this device';}catch(err){document.getElementById('saveStatus').textContent='Could not save. Try a smaller car image.';}});
 
 if(!Array.isArray(settings.trafficCars)||settings.trafficCars.length!==6)settings.trafficCars=trafficDefaults.map(x=>({...x}));else settings.trafficCars=settings.trafficCars.map((x,i)=>({...trafficDefaults[i],...x}));if(settings.trafficCars.filter(x=>x.selected).length>4)settings.trafficCars.forEach((x,i)=>x.selected=i<4);loadTrafficImages();renderTrafficCards();renderTreeOptions();loadCustomTreeImages();renderRoadOptions();renderLandOptions();renderHouseOptions();renderRoadSignOptions();settings.houses.items.filter(x=>x.imageData).forEach(item=>{const img=new Image();img.onload=()=>draw();img.src=item.imageData;houseImages[item.id]=img;});document.getElementById('houseUploadStatus').textContent='Select up to 3 preset or uploaded houses.';if(settings.land?.imageData){landImage=new Image();landImage.onload=()=>draw();landImage.src=settings.land.imageData;document.getElementById('landUploadStatus').textContent='✓ Your custom land image is selected.';}else{document.getElementById('landUploadStatus').textContent='Using '+(landTypes.find(x=>x.id===settings.land?.type)?.name||'Summer Land')+'.';}if(settings.road?.imageData){roadImage=new Image();roadImage.onload=()=>draw();roadImage.src=settings.road.imageData;document.getElementById('roadUploadStatus').textContent='✓ Your custom road image is selected.';}else{document.getElementById('roadUploadStatus').textContent='Using '+(roadTypes.find(x=>x.id===settings.road?.type)?.name||'Summer Road')+'.';}syncSettings();reset();
+</script>
+
+<script>
+(async function loadLatestGamezaarRelease(){
+ const status=document.getElementById('releaseStatus');
+ const box=document.getElementById('releaseDownloads');
+ try{
+  const response=await fetch('https://api.github.com/repos/pranab14220/Gamezaar-Studio/releases/latest',{headers:{Accept:'application/vnd.github+json'}});
+  if(!response.ok)throw new Error(response.status===404?'No release has been published yet.':'Could not check GitHub Releases.');
+  const release=await response.json();
+  const assets=Array.isArray(release.assets)?release.assets:[];
+  const apk=assets.find(a=>a.name==='gamezaar.apk');
+  const aab=assets.find(a=>a.name==='gamezaar.aab');
+  if(!apk&&!aab)throw new Error('The latest release does not contain APK/AAB files.');
+  if(apk){const link=document.getElementById('latestApkLink');link.href=apk.browser_download_url;link.hidden=false;}else document.getElementById('latestApkLink').hidden=true;
+  if(aab){const link=document.getElementById('latestAabLink');link.href=aab.browser_download_url;link.hidden=false;}else document.getElementById('latestAabLink').hidden=true;
+  box.classList.add('visible');
+  status.textContent='Latest build: '+(release.name||release.tag_name)+' · Published '+new Date(release.published_at||release.created_at).toLocaleString();
+ }catch(error){status.textContent=error.message||'Latest release links will appear here after the first successful build.';}
+})();
 </script>
 </body></html>
