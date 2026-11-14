@@ -34,7 +34,17 @@
 let selected='';
 const cards=[...document.querySelectorAll('.game')];
 const createBtn=document.getElementById('createBtn');
-cards.forEach(card=>card.addEventListener('click',()=>{cards.forEach(c=>c.classList.remove('selected'));card.classList.add('selected');selected=card.dataset.type;createBtn.disabled=false;}));
+cards.forEach(card=>card.addEventListener('click',()=>{
+  cards.forEach(c=>c.classList.remove('selected'));
+  card.classList.add('selected');
+  selected=card.dataset.type;
+  createBtn.disabled=false;
+  createBtn.textContent='Create '+selected+' project →';
+  const notice=document.getElementById('notice');
+  notice.style.display='block';
+  notice.textContent='✓ '+selected+' selected. Now tap the Create project button below.';
+  document.querySelector('.form').scrollIntoView({behavior:'smooth',block:'center'});
+}));
 createBtn.addEventListener('click',()=>{const name=document.getElementById('projectName').value.trim()||'My '+selected+' Game';const project={name,type:selected,createdAt:new Date().toISOString()};try{localStorage.setItem('gamezaar_current_project',JSON.stringify(project));if(selected==='Car Traffic Racing'){window.location.href='car-racing-editor.html';return;}document.getElementById('notice').style.display='block';document.getElementById('notice').textContent='✓ '+selected+' selected. Its dedicated editor will be added next. For now, try Car Traffic Racing.';}catch(e){document.getElementById('notice').style.display='block';document.getElementById('notice').textContent='Your browser could not save this project.';}});
 </script>
 </body></html>
