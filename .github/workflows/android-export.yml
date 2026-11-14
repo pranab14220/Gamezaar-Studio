@@ -41,6 +41,84 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Prepare latest game editor as the Android web app
+        run: cp car-racing-editor.html android-export/www/index.html
+
+      - name: Load creator project and configure this Android app
+        if: ${{ github.event.inputs.project_id != '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PROJECT_ID: ${{ github.event.inputs.project_id }}
+        run: |
+          set -e
+          test -n "$SUPABASE_URL" && test -n "$SUPABASE_SERVICE_ROLE_KEY"
+          curl --fail-with-body -sS "$SUPABASE_URL/rest/v1/game_projects?select=id,name,game_type,settings&id=eq.$PROJECT_ID" \\
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \\
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \\
+            -H "Accept: application/json" > /tmp/gamezaar-project.json
+          python3 - <<'PY'
+          import json, re
+          from pathlib import Path
+
+          rows = json.loads(Path("/tmp/gamezaar-project.json").read_text())
+          if not rows:
+              raise SystemExit("Creator project was not found in Supabase.")
+          project = rows[0]
+          if project.get("game_type") != "Car Traffic Racing":
+              raise SystemExit("This custom export currently supports Car Traffic Racing only.")
+          settings = project.get("settings") or {}
+          if not isinstance(settings, dict):
+              raise SystemExit("Creator game settings are invalid.")
+          settings["name"] = project["name"]
+
+          css = """
+          html.gz-exported-game body>header,
+          html.gz-exported-game .top,
+          html.gz-exported-game .panel.settings,
+          html.gz-exported-game .savebar,
+          html.gz-exported-game #gamezaarAuth,
+          html.gz-exported-game #gzBuildBox,
+          html.gz-exported-game #exportSystem,
+          html.gz-exported-game .preview-fab,
+          html.gz-exported-game .preview-modal {display:none!important}
+          html.gz-exported-game main.wrap{width:100%;max-width:none;margin:0;padding:0}
+          html.gz-exported-game .layout{display:block!important}
+          html.gz-exported-game .preview-panel{display:block!important;width:100%;max-width:100%;margin:0;padding:8px;border:0;border-radius:0;background:transparent;box-shadow:none}
+          html.gz-exported-game .preview-panel>.panel-head{display:none}
+          html.gz-exported-game .game-shell{width:min(100%,620px);max-width:620px;margin:0 auto;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+          """
+          boot = (
+              "(function(){const p=" + json.dumps({
+                  "id": project["id"],
+                  "name": project["name"],
+                  "game_type": project["game_type"],
+                  "settings": settings
+              }, ensure_ascii=False, separators=(",", ":")) + ";"
+              "localStorage.setItem('gamezaar_current_project',JSON.stringify({name:p.name,type:p.game_type,createdAt:new Date().toISOString()}));"
+              "localStorage.setItem('gamezaar_racing_settings',JSON.stringify(p.settings));"
+              "document.documentElement.classList.add('gz-exported-game');"
+              "document.title=p.name;"
+              "const s=document.createElement('style');s.textContent=" + json.dumps(css) + ";document.head.appendChild(s);"
+              "})();"
+          )
+
+          web_index = Path("android-export/www/index.html")
+          html = web_index.read_text()
+          if "</head>" not in html:
+              raise SystemExit("Android web app is missing its head section.")
+          web_index.write_text(html.replace("</head>", '<script src="gamezaar-project.js"></script>\\n</head>', 1))
+          Path("android-export/www/gamezaar-project.js").write_text(boot)
+
+          config_path = Path("android-export/capacitor.config.json")
+          config = json.loads(config_path.read_text())
+          safe_id = re.sub(r"[^a-f0-9]", "", project["id"].lower())[:12]
+          config["appId"] = "in.gamezaar.creator.g" + safe_id
+          config["appName"] = project["name"][:40]
+          config_path.write_text(json.dumps(config, indent=2) + "\\n")
+          print("Configured custom Android package for:", project["name"])
+          PY
+
       - name: Progress — Source ready
         if: ${{ github.event.inputs.job_id != '' }}
         env:
