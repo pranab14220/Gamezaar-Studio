@@ -107,7 +107,7 @@ jobs:
           html = web_index.read_text()
           if "</head>" not in html:
               raise SystemExit("Android web app is missing its head section.")
-          web_index.write_text(html.replace("</head>", '<script src="gamezaar-project.js"></script>\\n</head>', 1))
+          web_index.write_text(html.replace("</head>", '<script src="gamezaar-project.js"></script>\n</head>', 1))
           Path("android-export/www/gamezaar-project.js").write_text(boot)
 
           config_path = Path("android-export/capacitor.config.json")
@@ -115,7 +115,7 @@ jobs:
           safe_id = re.sub(r"[^a-f0-9]", "", project["id"].lower())[:12]
           config["appId"] = "in.gamezaar.creator.g" + safe_id
           config["appName"] = project["name"][:40]
-          config_path.write_text(json.dumps(config, indent=2) + "\\n")
+          config_path.write_text(json.dumps(config, indent=2) + "\n")
           print("Configured custom Android package for:", project["name"])
           PY
 
