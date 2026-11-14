@@ -27,3 +27,10 @@ create policy "Users can read their own export jobs"
 
 -- Inserts and updates are performed only by the authenticated Edge Function
 -- using the server-side service-role key. Never expose that key in the browser.
+
+ 
+-- Private bucket for completed Android exports. Files are accessed only
+-- through authenticated server-side signed URLs.
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('gamezaar-exports', 'gamezaar-exports', false, 104857600)
+on conflict (id) do update set public = false, file_size_limit = 104857600;
