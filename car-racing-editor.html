@@ -381,6 +381,17 @@
 .release-downloads{display:none;gap:9px;flex-wrap:wrap;margin-top:12px;padding:12px;border:1px solid #61c98b44;border-radius:12px;background:#61c98b0b}.release-downloads.visible{display:flex}.release-downloads strong{width:100%;font-size:11px;color:#bce9c8}.release-downloads a{display:inline-flex;align-items:center;justify-content:center;padding:10px 13px;border-radius:9px;background:#61c98b;color:#172326;font-size:11px;font-weight:900;text-decoration:none}.release-status{font-size:10px;color:var(--muted);margin-top:9px}
 @media(max-width:520px){.export-options{grid-template-columns:1fr}.export-panel{padding:14px}}
 
+
+/* On-site authenticated Android export */
+.export-auth,.export-build-box{margin:14px 0;padding:13px;border:1px solid var(--line);border-radius:13px;background:#17132680}
+.auth-fields{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
+.auth-fields input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#171326;color:var(--text);font:inherit;font-size:13px}
+.auth-status{margin-top:9px;color:var(--muted);font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+.build-progress{margin-top:13px}
+.build-progress-head{display:flex;justify-content:space-between;gap:8px;color:var(--gold2);font-size:12px}
+.build-track{height:12px;margin:9px 0;border-radius:20px;background:#ffffff18;overflow:hidden}
+.build-fill{height:100%;width:0%;border-radius:20px;background:linear-gradient(90deg,#61c98b,var(--gold));transition:width .35s}
+
 </style>
 </head>
 <body>
@@ -481,6 +492,36 @@
 </div></details></aside>
 </div>
 <div class="savebar"><button class="btn" id="saveBtn">Save project</button><span class="status" id="saveStatus"></span></div>
+
+
+ <div class="export-auth" id="gamezaarAuth">
+  <div class="export-option">
+   <strong>🔐 GAMEZAAR Account</strong>
+   <span>Sign in with your email and password to build and track your APK. Anonymous sign-in is not used.</span>
+   <div class="auth-fields">
+    <input id="gzAuthEmail" type="email" autocomplete="email" placeholder="Email address">
+    <input id="gzAuthPassword" type="password" autocomplete="current-password" placeholder="Password (minimum 6 characters)">
+   </div>
+   <div class="export-actions">
+    <button class="export-link" id="gzSignIn" type="button">Sign in</button>
+    <button class="export-link secondary" id="gzSignUp" type="button">Create account</button>
+    <button class="export-link secondary" id="gzSignOut" type="button" hidden>Sign out</button>
+   </div>
+   <div class="auth-status" id="gzAuthStatus">Please sign in or create your account.</div>
+  </div>
+ </div>
+ <div class="export-build-box" id="gzBuildBox" hidden>
+  <div class="export-actions"><button class="export-link" id="gzBuildButton" type="button">⚙ Build APK + AAB on this site</button></div>
+  <div class="build-progress" id="gzBuildProgress" hidden>
+   <div class="build-progress-head"><strong id="gzBuildStep">Waiting to start…</strong><strong id="gzBuildPercent">0%</strong></div>
+   <div class="build-track"><div class="build-fill" id="gzBuildFill"></div></div>
+   <div class="auth-status" id="gzBuildMessage">Your build status will appear here.</div>
+   <div class="export-actions" id="gzBuildDownloads" hidden>
+    <a class="export-link" id="gzDownloadApk" href="#" target="_blank" rel="noopener">Download APK</a>
+    <a class="export-link secondary" id="gzDownloadAab" href="#" target="_blank" rel="noopener">Download AAB</a>
+   </div>
+  </div>
+ </div>
 
 <section class="export-panel" id="exportSystem">
  <div class="export-head">
@@ -1668,4 +1709,103 @@ if(!Array.isArray(settings.trafficCars)||settings.trafficCars.length!==6)setting
  }catch(error){status.textContent=error.message||'Latest release links will appear here after the first successful build.';}
 })();
 </script>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const GZ_SUPABASE_URL='https://nrfxlhrarayrkhkobzcv.supabase.co';
+const GZ_SUPABASE_KEY='sb_publishable_YMvA83pWhXdXdzZJw12hvQ_3PLbpVCZ';
+const gzSupabase=createClient(GZ_SUPABASE_URL,GZ_SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+const authStatus=$('gzAuthStatus');
+const buildBox=$('gzBuildBox');
+const signIn=$('gzSignIn'), signUp=$('gzSignUp'), signOut=$('gzSignOut');
+function authMessage(message,isError=false){authStatus.textContent=message;authStatus.style.color=isError?'#ff9b9b':'#bce9c8';}
+function setProgress(percent,step,message){
+ $('gzBuildProgress').hidden=false;
+ $('gzBuildFill').style.width=Math.max(0,Math.min(100,percent||0))+'%';
+ $('gzBuildPercent').textContent=(percent||0)+'%';
+ $('gzBuildStep').textContent=step||'Preparing…';
+ $('gzBuildMessage').textContent=message||'';
+}
+async function updateAuthUI(){
+ const {data:{session}}=await gzSupabase.auth.getSession();
+ const loggedIn=!!session;
+ $('gzAuthEmail').disabled=loggedIn;
+ $('gzAuthPassword').disabled=loggedIn;
+ signIn.hidden=loggedIn; signUp.hidden=loggedIn; signOut.hidden=!loggedIn;
+ buildBox.hidden=!loggedIn;
+ if(loggedIn)authMessage('Signed in as '+(session.user.email||'your account')+'. You can start an APK build.');
+ else authMessage('Please sign in or create your account.');
+}
+signUp.addEventListener('click',async()=>{
+ const email=$('gzAuthEmail').value.trim(),password=$('gzAuthPassword').value;
+ if(!email||password.length<6){authMessage('Enter a valid email and password with at least 6 characters.',true);return;}
+ signUp.disabled=true;
+ const {data,error}=await gzSupabase.auth.signUp({email,password});
+ signUp.disabled=false;
+ if(error){authMessage(error.message,true);return;}
+ if(data.session){authMessage('Account created and signed in.');}
+ else{authMessage('Account created. Check your email and verify it, then sign in.');}
+ await updateAuthUI();
+});
+signIn.addEventListener('click',async()=>{
+ const email=$('gzAuthEmail').value.trim(),password=$('gzAuthPassword').value;
+ if(!email||!password){authMessage('Enter your email and password.',true);return;}
+ signIn.disabled=true;
+ const {error}=await gzSupabase.auth.signInWithPassword({email,password});
+ signIn.disabled=false;
+ if(error){authMessage(error.message,true);return;}
+ await updateAuthUI();
+});
+signOut.addEventListener('click',async()=>{
+ const {error}=await gzSupabase.auth.signOut();
+ if(error){authMessage(error.message,true);return;}
+ $('gzBuildProgress').hidden=true;
+ await updateAuthUI();
+});
+gzSupabase.auth.onAuthStateChange(()=>{updateAuthUI();});
+async function watchExport(jobId){
+ const progress=$('gzBuildProgress');
+ progress.hidden=false;
+ let finished=false;
+ const started=Date.now();
+ while(!finished && Date.now()-started<45*60*1000){
+  const {data,error}=await gzSupabase.from('export_jobs')
+   .select('status,progress_percent,progress_step,apk_storage_path,aab_storage_path,error_message')
+   .eq('id',jobId).single();
+  if(error){$('gzBuildMessage').textContent='Could not refresh build status: '+error.message;return;}
+  const percent=Number(data.progress_percent||0);
+  setProgress(percent,data.progress_step||data.status,data.status==='queued'?'Build is waiting for a GitHub runner.':data.status==='building'?'Android package is being prepared.':data.status==='completed'?'Your APK and AAB are ready.':data.error_message||'');
+  if(data.status==='completed'){
+   const downloads=$('gzBuildDownloads');
+   if(data.apk_storage_path){$('gzDownloadApk').href=data.apk_storage_path;$('gzDownloadApk').hidden=false;}
+   else $('gzDownloadApk').hidden=true;
+   if(data.aab_storage_path){$('gzDownloadAab').href=data.aab_storage_path;$('gzDownloadAab').hidden=false;}
+   else $('gzDownloadAab').hidden=true;
+   downloads.hidden=false;finished=true;
+  }else if(data.status==='failed'){
+   $('gzBuildMessage').textContent=data.error_message||'Build failed. Check the build logs.';
+   finished=true;
+  }else await new Promise(resolve=>setTimeout(resolve,5000));
+ }
+ if(!finished)$('gzBuildMessage').textContent='Build is taking longer than expected. You can reload this page; status will remain saved in your account.';
+}
+$('gzBuildButton').addEventListener('click',async()=>{
+ const button=$('gzBuildButton');
+ button.disabled=true;button.textContent='Starting build…';
+ $('gzBuildDownloads').hidden=true;
+ setProgress(0,'Queued','Sending your build request securely…');
+ try{
+  const {data:{session}}=await gzSupabase.auth.getSession();
+  if(!session)throw new Error('Please sign in again.');
+  const {data,error}=await gzSupabase.functions.invoke('create-export-job',{body:{projectId:null}});
+  if(error)throw error;
+  if(!data?.job?.id)throw new Error(data?.error||'Could not create export job.');
+  await watchExport(data.job.id);
+ }catch(error){$('gzBuildMessage').textContent=error.message||'Could not start build.';}
+ finally{button.disabled=false;button.textContent='⚙ Build APK + AAB on this site';}
+});
+updateAuthUI();
+</script>
+
 </body></html>
