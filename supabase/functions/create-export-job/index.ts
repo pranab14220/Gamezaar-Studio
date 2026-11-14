@@ -34,20 +34,65 @@ Deno.serve(async (req: Request) => {
   const { data: { user }, error: userError } = await userClient.auth.getUser();
   if (userError || !user) return json({ error: "Invalid or expired session" }, 401);
 
-  let body: { projectId?: string };
+  let body: {
+    project?: { name?: unknown; type?: unknown; settings?: unknown };
+    projectId?: unknown;
+  };
   try {
     body = await req.json();
   } catch {
     return json({ error: "Invalid JSON body" }, 400);
   }
-  const projectId = typeof body.projectId === "string" ? body.projectId : null;
-  if (projectId && !/^[0-9a-f-]{36}$/i.test(projectId)) {
-    return json({ error: "Invalid project ID" }, 400);
-  }
 
   const admin = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false },
   });
+
+  let projectId: string | null = null;
+  if (body.project && typeof body.project === "object") {
+    const name = typeof body.project.name === "string"
+      ? body.project.name.trim().slice(0, 40)
+      : "";
+    const gameType = typeof body.project.type === "string" ? body.project.type : "";
+    const settings = body.project.settings;
+    if (!name) return json({ error: "Enter a name for your game before exporting." }, 400);
+    if (gameType !== "Car Traffic Racing") {
+      return json({ error: "Custom APK export is currently available for Car Traffic Racing only." }, 400);
+    }
+    if (!settings || typeof settings !== "object" || Array.isArray(settings)) {
+      return json({ error: "The saved game settings are missing. Save your project and try again." }, 400);
+    }
+    const settingsBytes = new TextEncoder().encode(JSON.stringify(settings)).length;
+    if (settingsBytes > 8 * 1024 * 1024) {
+      return json({ error: "Your project data is too large. Reduce uploaded assets and try again." }, 413);
+    }
+
+    const { data: project, error: projectError } = await admin
+      .from("game_projects")
+      .insert({
+        user_id: user.id,
+        name,
+        game_type: gameType,
+        settings,
+        updated_at: new Date().toISOString(),
+      })
+      .select("id")
+      .single();
+    if (projectError || !project) {
+      return json({ error: "Could not save your game project for export." }, 500);
+    }
+    projectId = project.id;
+  } else if (typeof body.projectId === "string" && /^[0-9a-f-]{36}$/i.test(body.projectId)) {
+    const { data: existingProject, error: projectError } = await admin
+      .from("game_projects")
+      .select("id")
+      .eq("id", body.projectId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (projectError || !existingProject) return json({ error: "Game project not found." }, 404);
+    projectId = existingProject.id;
+  }
+
   const { data: job, error: insertError } = await admin
     .from("export_jobs")
     .insert({ user_id: user.id, project_id: projectId, status: "queued" })
@@ -82,5 +127,5 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Could not start Android build. Check backend GitHub configuration." }, 502);
   }
 
-  return json({ job });
+  return json({ job, projectId });
 });
