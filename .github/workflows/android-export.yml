@@ -36,10 +36,24 @@ jobs:
             -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
             -H "Content-Type: application/json" \
             -H "Prefer: return=minimal" \
-            -d '{"status":"building","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
+            -d '{"status":"building","progress_percent":5,"progress_step":"Preparing Android build","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
 
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Progress — Source ready
+        if: ${{ github.event.inputs.job_id != '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          JOB_ID: ${{ github.event.inputs.job_id }}
+        run: |
+          curl --fail-with-body -sS -X PATCH "$SUPABASE_URL/rest/v1/export_jobs?id=eq.$JOB_ID" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d '{"progress_percent":12,"progress_step":"Source code ready","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -52,6 +66,20 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Progress — Android tools
+        if: ${{ github.event.inputs.job_id != '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          JOB_ID: ${{ github.event.inputs.job_id }}
+        run: |
+          curl --fail-with-body -sS -X PATCH "$SUPABASE_URL/rest/v1/export_jobs?id=eq.$JOB_ID" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d '{"progress_percent":25,"progress_step":"Android tools installed","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
+
       - name: Install Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -60,13 +88,55 @@ jobs:
       - name: Install Android build packages
         run: yes | sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
+      - name: Progress — Dependencies
+        if: ${{ github.event.inputs.job_id != '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          JOB_ID: ${{ github.event.inputs.job_id }}
+        run: |
+          curl --fail-with-body -sS -X PATCH "$SUPABASE_URL/rest/v1/export_jobs?id=eq.$JOB_ID" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d '{"progress_percent":38,"progress_step":"Installing app dependencies","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
+
       - name: Install Capacitor dependencies
         working-directory: android-export
         run: npm install --no-audit --no-fund
 
+      - name: Progress — Android project
+        if: ${{ github.event.inputs.job_id != '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          JOB_ID: ${{ github.event.inputs.job_id }}
+        run: |
+          curl --fail-with-body -sS -X PATCH "$SUPABASE_URL/rest/v1/export_jobs?id=eq.$JOB_ID" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d '{"progress_percent":52,"progress_step":"Generating Android project","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
+
       - name: Generate Android project
         working-directory: android-export
         run: npx cap add android
+
+      - name: Progress — App configuration
+        if: ${{ github.event.inputs.job_id != '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          JOB_ID: ${{ github.event.inputs.job_id }}
+        run: |
+          curl --fail-with-body -sS -X PATCH "$SUPABASE_URL/rest/v1/export_jobs?id=eq.$JOB_ID" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d '{"progress_percent":66,"progress_step":"Configuring full-screen app","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
 
       - name: Enable immersive full-screen Android display
         working-directory: android-export
@@ -108,12 +178,40 @@ jobs:
         working-directory: android-export
         run: npx cap sync android
 
+      - name: Progress — APK and AAB build
+        if: ${{ github.event.inputs.job_id != '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          JOB_ID: ${{ github.event.inputs.job_id }}
+        run: |
+          curl --fail-with-body -sS -X PATCH "$SUPABASE_URL/rest/v1/export_jobs?id=eq.$JOB_ID" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d '{"progress_percent":76,"progress_step":"Building APK and AAB","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
+
       - name: Build APK and AAB
         working-directory: android-export
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug bundleRelease
+
+      - name: Progress — Publishing downloads
+        if: ${{ github.event.inputs.job_id != '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          JOB_ID: ${{ github.event.inputs.job_id }}
+        run: |
+          curl --fail-with-body -sS -X PATCH "$SUPABASE_URL/rest/v1/export_jobs?id=eq.$JOB_ID" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d '{"progress_percent":93,"progress_step":"Publishing APK and AAB downloads","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
 
       - name: Prepare release files
         if: ${{ github.event_name == 'workflow_dispatch' }}
@@ -154,7 +252,7 @@ jobs:
             -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
             -H "Content-Type: application/json" \
             -H "Prefer: return=minimal" \
-            -d '{"status":"completed","apk_storage_path":"'"$APK_URL"'","aab_storage_path":"'"$AAB_URL"'","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
+            -d '{"status":"completed","progress_percent":100,"progress_step":"Ready to download","apk_storage_path":"'"$APK_URL"'","aab_storage_path":"'"$AAB_URL"'","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
 
       - name: Mark export failed
         if: ${{ failure() && github.event.inputs.job_id != '' }}
@@ -169,7 +267,7 @@ jobs:
               -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
               -H "Content-Type: application/json" \
               -H "Prefer: return=minimal" \
-              -d '{"status":"failed","error_message":"Android build failed. Check the build log.","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
+              -d '{"status":"failed","progress_step":"Build failed","error_message":"Android build failed. Check the build log.","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
           fi
 
       - name: Upload APK and AAB build artifacts
