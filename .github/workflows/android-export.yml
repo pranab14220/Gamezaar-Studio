@@ -53,9 +53,9 @@ jobs:
         run: |
           set -e
           test -n "$SUPABASE_URL" && test -n "$SUPABASE_SERVICE_ROLE_KEY"
-          curl --fail-with-body -sS "$SUPABASE_URL/rest/v1/game_projects?select=id,name,game_type,settings&id=eq.$PROJECT_ID" \\
-            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \\
-            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \\
+          curl --fail-with-body -sS "$SUPABASE_URL/rest/v1/game_projects?select=id,name,game_type,settings&id=eq.$PROJECT_ID" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
             -H "Accept: application/json" > /tmp/gamezaar-project.json
           python3 - <<'PY'
           import json, re
