@@ -23,6 +23,21 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
     steps:
+      - name: Mark export as building
+        if: ${{ github.event.inputs.job_id != '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          JOB_ID: ${{ github.event.inputs.job_id }}
+        run: |
+          test -n "$SUPABASE_URL" && test -n "$SUPABASE_SERVICE_ROLE_KEY"
+          curl --fail-with-body -sS -X PATCH "$SUPABASE_URL/rest/v1/export_jobs?id=eq.$JOB_ID" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d '{"status":"building","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -94,13 +109,59 @@ jobs:
         run: npx cap sync android
 
       - name: Build APK and AAB
+        id: build
         working-directory: android-export
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug bundleRelease
 
-      - name: Upload APK and AAB
+      - name: Upload APK and AAB to Supabase Storage
+        if: ${{ success() && github.event.inputs.job_id != '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          JOB_ID: ${{ github.event.inputs.job_id }}
+        run: |
+          set -e
+          APK_PATH="android-export/android/app/build/outputs/apk/debug/app-debug.apk"
+          AAB_PATH="android-export/android/app/build/outputs/bundle/release/app-release.aab"
+          APK_OBJECT="$JOB_ID/gamezaar.apk"
+          AAB_OBJECT="$JOB_ID/gamezaar.aab"
+          curl --fail-with-body -sS -X POST "$SUPABASE_URL/storage/v1/object/gamezaar-exports/$APK_OBJECT" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/vnd.android.package-archive" \
+            -H "x-upsert: true" --data-binary "@$APK_PATH"
+          curl --fail-with-body -sS -X POST "$SUPABASE_URL/storage/v1/object/gamezaar-exports/$AAB_OBJECT" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/octet-stream" \
+            -H "x-upsert: true" --data-binary "@$AAB_PATH"
+          curl --fail-with-body -sS -X PATCH "$SUPABASE_URL/rest/v1/export_jobs?id=eq.$JOB_ID" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d '{"status":"completed","apk_storage_path":"'"$APK_OBJECT"'","aab_storage_path":"'"$AAB_OBJECT"'","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
+
+      - name: Mark export failed
+        if: ${{ failure() && github.event.inputs.job_id != '' }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          JOB_ID: ${{ github.event.inputs.job_id }}
+        run: |
+          if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            curl --silent --show-error -X PATCH "$SUPABASE_URL/rest/v1/export_jobs?id=eq.$JOB_ID" \
+              -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+              -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+              -H "Content-Type: application/json" \
+              -H "Prefer: return=minimal" \
+              -d '{"status":"failed","error_message":"Android build failed. Check the build log.","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
+          fi
+
+      - name: Upload APK and AAB build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: gamezaar-android-builds
