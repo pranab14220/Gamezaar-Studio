@@ -20,7 +20,7 @@ Deno.serve(async (req: Request) => {
   if (!authHeader?.startsWith("Bearer ")) return json({ error: "Sign in required" }, 401);
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  const anonKey = Deno.env.get("SUPABASEANONKEY");
   const serviceRoleKey = Deno.env.get("SERVICE_ROLE_KEY");
   const githubToken = Deno.env.get("GAMEZAAR_GITHUB_TOKEN");
   if (!supabaseUrl || !anonKey || !serviceRoleKey || !githubToken) {
