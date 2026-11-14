@@ -17,7 +17,7 @@ on:
       - '.github/workflows/android-export.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-android:
@@ -109,41 +109,52 @@ jobs:
         run: npx cap sync android
 
       - name: Build APK and AAB
-        id: build
         working-directory: android-export
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug bundleRelease
 
-      - name: Upload APK and AAB to Supabase Storage
+      - name: Prepare release files
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          mkdir -p release-files
+          cp android-export/android/app/build/outputs/apk/debug/app-debug.apk release-files/gamezaar.apk
+          cp android-export/android/app/build/outputs/bundle/release/app-release.aab release-files/gamezaar.aab
+
+      - name: Publish APK and AAB to GitHub Releases
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: gamezaar-build-${{ github.run_number }}
+          name: GAMEZAAR Android Build #${{ github.run_number }}
+          body: |
+            GAMEZAAR Android export.
+            Commit: ${{ github.sha }}
+            Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          files: |
+            release-files/gamezaar.apk
+            release-files/gamezaar.aab
+          fail_on_unmatched_files: true
+          make_latest: true
+
+      - name: Mark export complete with GitHub download links
         if: ${{ success() && github.event.inputs.job_id != '' }}
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           JOB_ID: ${{ github.event.inputs.job_id }}
+          RELEASE_TAG: gamezaar-build-${{ github.run_number }}
         run: |
           set -e
-          APK_PATH="android-export/android/app/build/outputs/apk/debug/app-debug.apk"
-          AAB_PATH="android-export/android/app/build/outputs/bundle/release/app-release.aab"
-          APK_OBJECT="$JOB_ID/gamezaar.apk"
-          AAB_OBJECT="$JOB_ID/gamezaar.aab"
-          curl --fail-with-body -sS -X POST "$SUPABASE_URL/storage/v1/object/gamezaar-exports/$APK_OBJECT" \
-            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "Content-Type: application/vnd.android.package-archive" \
-            -H "x-upsert: true" --data-binary "@$APK_PATH"
-          curl --fail-with-body -sS -X POST "$SUPABASE_URL/storage/v1/object/gamezaar-exports/$AAB_OBJECT" \
-            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "Content-Type: application/octet-stream" \
-            -H "x-upsert: true" --data-binary "@$AAB_PATH"
+          APK_URL="https://github.com/pranab14220/Gamezaar-Studio/releases/download/$RELEASE_TAG/gamezaar.apk"
+          AAB_URL="https://github.com/pranab14220/Gamezaar-Studio/releases/download/$RELEASE_TAG/gamezaar.aab"
           curl --fail-with-body -sS -X PATCH "$SUPABASE_URL/rest/v1/export_jobs?id=eq.$JOB_ID" \
             -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
             -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
             -H "Content-Type: application/json" \
             -H "Prefer: return=minimal" \
-            -d '{"status":"completed","apk_storage_path":"'"$APK_OBJECT"'","aab_storage_path":"'"$AAB_OBJECT"'","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
+            -d '{"status":"completed","apk_storage_path":"'"$APK_URL"'","aab_storage_path":"'"$AAB_URL"'","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
 
       - name: Mark export failed
         if: ${{ failure() && github.event.inputs.job_id != '' }}
