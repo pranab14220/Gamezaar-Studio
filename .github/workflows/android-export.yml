@@ -86,7 +86,58 @@ jobs:
           html.gz-exported-game .layout{display:block!important}
           html.gz-exported-game .preview-panel{display:block!important;width:100%;max-width:100%;margin:0;padding:8px;border:0;border-radius:0;background:transparent;box-shadow:none}
           html.gz-exported-game .preview-panel>.panel-head{display:none}
-          html.gz-exported-game .game-shell{width:min(100%,620px);max-width:620px;margin:0 auto;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+          /* True edge-to-edge Android game viewport: center on the device, not the editor page wrapper. */
+          html.gz-exported-game,
+          html.gz-exported-game body{width:100%;height:100%;min-height:100%;margin:0;padding:0;overflow:hidden}
+          html.gz-exported-game main.wrap,
+          html.gz-exported-game .layout,
+          html.gz-exported-game .preview-panel{
+            position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;
+            min-width:0!important;max-width:none!important;min-height:0!important;max-height:none!important;
+            margin:0!important;padding:0!important;border:0!important;border-radius:0!important;
+            display:block!important;overflow:hidden!important;transform:none!important;
+          }
+          html.gz-exported-game .preview-panel{background:transparent!important;box-shadow:none!important}
+          html.gz-exported-game .game-shell{
+            position:fixed!important;inset:0!important;z-index:1!important;
+            display:flex!important;flex-direction:column!important;
+            width:100vw!important;height:100dvh!important;min-width:0!important;min-height:0!important;
+            max-width:none!important;max-height:none!important;aspect-ratio:auto!important;
+            margin:0!important;padding:0!important;border:0!important;border-radius:0!important;
+            background:#101a24!important;box-shadow:none!important;overflow:hidden!important;
+            left:0!important;right:0!important;top:0!important;bottom:0!important;
+          }
+          html.gz-exported-game .game-shell .stage{
+            position:relative!important;inset:auto!important;flex:1 1 auto!important;
+            width:100%!important;height:auto!important;min-width:0!important;min-height:0!important;
+            max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;
+            border:0!important;border-radius:0!important;overflow:hidden!important;
+          }
+          html.gz-exported-game .game-shell .stage canvas{
+            display:block!important;width:100%!important;height:100%!important;max-width:none!important;
+            aspect-ratio:auto!important;object-fit:fill!important;border:0!important;border-radius:0!important;
+          }
+          /* Box mode keeps HUD and controls in their own rows while the canvas fills the remaining height. */
+          html.gz-exported-game .game-shell:not(.game-fullscreen-layout) .game-hud{
+            position:relative!important;top:auto!important;left:auto!important;right:auto!important;
+            flex:0 0 auto!important;width:100%!important;margin:0!important;padding:12px 8px!important;
+          }
+          html.gz-exported-game .game-shell:not(.game-fullscreen-layout) .control-pad{
+            position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;
+            flex:0 0 48px!important;width:84%!important;margin:8px auto calc(8px + env(safe-area-inset-bottom))!important;
+          }
+          /* Full Screen mode overlays the HUD and steering on the same edge-to-edge canvas. */
+          html.gz-exported-game .game-shell.game-fullscreen-layout .stage{
+            position:absolute!important;inset:0!important;flex:none!important;width:100%!important;height:100%!important;
+          }
+          html.gz-exported-game .game-shell.game-fullscreen-layout .game-hud{
+            position:absolute!important;z-index:5!important;top:calc(10px + env(safe-area-inset-top))!important;
+            left:10px!important;right:10px!important;width:auto!important;margin:0!important;
+          }
+          html.gz-exported-game .game-shell.game-fullscreen-layout .control-pad{
+            position:absolute!important;z-index:6!important;left:8%!important;bottom:calc(12px + env(safe-area-inset-bottom))!important;
+            width:84%!important;margin:0!important;
+          }
           """
           boot = (
               "(function(){const p=" + json.dumps({
