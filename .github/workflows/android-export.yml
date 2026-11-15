@@ -120,9 +120,11 @@ jobs:
             background:#111a2d!important;overflow:hidden!important;box-sizing:border-box!important;
           }
           html.gz-exported-game .game-shell .stage canvas{
-            display:block!important;width:auto!important;height:auto!important;
-            max-width:100%!important;max-height:100%!important;
-            aspect-ratio:360/560!important;object-fit:contain!important;
+            /* The game script recalculates its logical canvas height from the live stage size.
+               Fill that exact viewport so tall Android screens have no letterboxed empty bands. */
+            display:block!important;width:100%!important;height:100%!important;
+            min-width:0!important;min-height:0!important;max-width:100%!important;max-height:100%!important;
+            aspect-ratio:auto!important;object-fit:fill!important;image-rendering:pixelated!important;
             border:0!important;border-radius:10px!important;
           }
           /* Box mode keeps HUD and controls in their own rows while the canvas fills the remaining height. */
