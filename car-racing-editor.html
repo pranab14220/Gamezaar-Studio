@@ -461,10 +461,10 @@ html.gz-exported-game .game-shell.game-fullscreen-layout .control-pad{position:a
 <div class="builder-overview">
  <div class="panel-head"><h2>Game Builder</h2><span class="tag">SECTION 01</span></div>
  <div class="asset-meter">
-  <div class="asset-meter-head"><span>PROJECT ASSET SIZE</span><strong id="assetSizeText">0 KB / 5120 KB</strong></div>
+  <div class="asset-meter-head"><span>PROJECT ASSET SIZE</span><strong id="assetSizeText">0 KB / 2210 KB</strong></div>
   <div class="meter-track"><div class="meter-fill" id="assetMeterFill"></div></div>
-  <div class="meter-foot"><span id="assetRemaining">5120 KB remaining</span><span>Goal: 4096 KB · Max: 5120 KB</span></div>
-  <div class="asset-message" id="assetMessage">Recommended asset budget: 4096 KB. Total asset limit: 5120 KB. This counts uploaded assets, not the final APK runtime.</div>
+  <div class="meter-foot"><span id="assetRemaining">2210 KB remaining</span><span>Maximum custom asset budget: 2210 KB</span></div>
+  <div class="asset-message" id="assetMessage">Maximum custom asset budget: 2210 KB (1,900 KB graphics + 310 KB audio). This is separate from the final APK runtime.</div>
  </div>
 </div>
 
@@ -802,7 +802,7 @@ function renderSoundSettings(){
     if(!Number.isFinite(duration)||duration<=0){reject('Could not read audio duration. Please choose another MP3 / OGG file.');return;}
     if(duration>rule.duration+0.05){reject('Audio is too long. Maximum duration is '+rule.duration+' seconds.');return;}
     const reader=new FileReader();
-    reader.onload=()=>{settings.soundSystem.custom[key]=reader.result;status.textContent='✓ Uploaded: '+selected.name+' · '+Math.ceil(selected.size/1024)+' KB · '+duration.toFixed(1)+' sec';if(key==='music'&&running)startBackgroundMusic();};
+    reader.onload=()=>{settings.soundSystem.custom[key]=reader.result;status.textContent='✓ Uploaded: '+selected.name+' · '+Math.ceil(selected.size/1024)+' KB · '+duration.toFixed(1)+' sec';updateAssetMeter();if(key==='music'&&running)startBackgroundMusic();};
     reader.onerror=()=>reject('Could not read this audio file.');
     reader.readAsDataURL(selected);
    };
@@ -843,7 +843,7 @@ function loadBoundedImage(file,maxWidth,maxHeight,onReady,onError){
    let quality=.84,data=cv.toDataURL('image/webp',quality);
    while(dataUrlBytes(data)>IMAGE_FILE_LIMIT_BYTES&&quality>.3){quality-=.08;data=cv.toDataURL('image/webp',quality);}
    if(dataUrlBytes(data)>IMAGE_FILE_LIMIT_BYTES){onError('Could not compress image below 100 KB.');return;}
-   onReady(data,cv.width,cv.height);
+   onReady(data,cv.width,cv.height);if(typeof updateAssetMeter==='function')updateAssetMeter();
   };img.onerror=()=>onError('Could not load this image. Try another one.');img.src=reader.result;
  };reader.onerror=()=>onError('Could not read this image.');reader.readAsDataURL(file);
 }
@@ -1649,10 +1649,10 @@ canvas.addEventListener('pointercancel',()=>{touchStartPoint=null;});
 document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a'){e.preventDefault();move(-1)}if(e.key==='ArrowRight'||e.key.toLowerCase()==='d'){e.preventDefault();move(1)}if(e.key===' '&&!running){e.preventDefault();startGame();}});
 document.getElementById('gameName').value=settings.name;document.getElementById('gameDescription').value=settings.description||'';document.getElementById('gameName').addEventListener('input',e=>{settings.name=e.target.value||'My Racing Game';document.getElementById('projectTitle').textContent=settings.name;draw();});document.getElementById('gameDescription').addEventListener('input',e=>{settings.description=e.target.value.slice(0,120);draw();});
 document.querySelectorAll('.swatch').forEach(b=>b.addEventListener('click',()=>{settings.carColor=b.dataset.color;syncSettings();draw()}));
-const ASSET_GOAL_BYTES=4*1024*1024,ASSET_LIMIT_BYTES=5*1024*1024;
+const ASSET_LIMIT_BYTES=2210*1024;
 function dataUrlBytes(data){if(!data)return 0;const part=data.split(',')[1]||'';return Math.floor(part.length*3/4)-(part.endsWith('==')?2:part.endsWith('=')?1:0);}
-function formatMB(bytes){return (bytes/1024/1024).toFixed(2);}
-function updateAssetMeter(){const bytes=dataUrlBytes(settings.carImageData),pct=Math.min(100,bytes/ASSET_LIMIT_BYTES*100),fill=document.getElementById('assetMeterFill');document.getElementById('assetSizeText').textContent=Math.ceil(bytes/1024)+' KB / 5120 KB';document.getElementById('assetRemaining').textContent=Math.floor(Math.max(0,ASSET_LIMIT_BYTES-bytes)/1024)+' KB remaining';fill.style.width=pct+'%';fill.classList.toggle('warn',bytes>=ASSET_GOAL_BYTES);fill.classList.toggle('full',bytes>=ASSET_LIMIT_BYTES);document.getElementById('assetMessage').textContent=bytes>ASSET_GOAL_BYTES?'You are above the recommended 4 MB asset budget. Keep room for other game assets and sound.':'Recommended asset budget: 4096 KB. Total asset limit: 5120 KB. This counts uploaded assets, not the final APK runtime.';}
+function countUploadedAssetBytes(value){if(typeof value==='string')return value.startsWith('data:')?dataUrlBytes(value):0;if(Array.isArray(value))return value.reduce((sum,item)=>sum+countUploadedAssetBytes(item),0);if(value&&typeof value==='object')return Object.values(value).reduce((sum,item)=>sum+countUploadedAssetBytes(item),0);return 0;}
+function updateAssetMeter(){const bytes=countUploadedAssetBytes(settings),pct=Math.min(100,bytes/ASSET_LIMIT_BYTES*100),fill=document.getElementById('assetMeterFill');document.getElementById('assetSizeText').textContent=Math.ceil(bytes/1024)+' KB / 2210 KB';document.getElementById('assetRemaining').textContent=Math.floor(Math.max(0,ASSET_LIMIT_BYTES-bytes)/1024)+' KB remaining';fill.style.width=pct+'%';fill.classList.toggle('warn',bytes>=ASSET_LIMIT_BYTES*.9);fill.classList.toggle('full',bytes>=ASSET_LIMIT_BYTES);document.getElementById('assetMessage').textContent=bytes>ASSET_LIMIT_BYTES?'Your uploaded assets exceed the 2210 KB budget. Remove or reduce some custom assets.':'Maximum custom asset budget: 2210 KB (1,900 KB graphics + 310 KB audio). This is separate from the final APK runtime.';}
 const removeCarImageBtn=document.getElementById('removeCarImage');function updateCarImageRemoveButton(){removeCarImageBtn.classList.toggle('visible',!!settings.carImageData);}
 removeCarImageBtn.addEventListener('click',()=>{settings.carImageData='';uploadedCarImage=null;localStorage.setItem('gamezaar_racing_settings',JSON.stringify(settings));updateCarImageRemoveButton();drawCarPreview();draw();updateAssetMeter();document.getElementById('uploadStatus').textContent='Default player car restored.';});
 document.getElementById('carUpload').addEventListener('change',e=>{const file=e.target.files&&e.target.files[0];if(!file)return;const status=document.getElementById('uploadStatus');loadBoundedImage(file,64,96,data=>{settings.carImageData=data;uploadedCarImage=new Image();uploadedCarImage.onload=()=>{updateCarImageRemoveButton();drawCarPreview();draw();updateAssetMeter();};uploadedCarImage.src=data;status.textContent='✓ Custom car image uploaded';},msg=>{status.textContent=msg;});e.target.value='';});
