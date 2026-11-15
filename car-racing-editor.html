@@ -558,7 +558,7 @@ html.gz-exported-game .game-shell.game-fullscreen-layout .control-pad{position:a
 <label class="tree-option"><input type="checkbox" id="mediationMintegral"> Mintegral</label>
 </div>
 <div class="tree-note" style="margin:8px 0 12px">These switches save creator preferences only. Each selected network must first be enabled in your AdMob Mediation groups and its Android adapter/SDK must be included in GAMEZAAR's native export. Until that integration is completed, no third-party network will serve ads.</div>
-<div class="sound-option"><div class="sound-option-head"><span><strong>📢 Banner Ads</strong><small>Small ad placement, usually at the top or bottom</small></span><input type="checkbox" id="monetizationBanner" aria-label="Enable Banner Ads"></div><div class="field" style="margin:10px 0 0"><label for="monetizationBannerId">Banner Ad Unit ID</label><input id="monetizationBannerId" type="text" maxlength="180" placeholder="ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX" autocomplete="off" spellcheck="false"></div></div>
+<div class="sound-option"><div class="sound-option-head"><span><strong>📢 Banner Ads</strong><small>Small ad placement, usually at the top or bottom</small></span><input type="checkbox" id="monetizationBanner" aria-label="Enable Banner Ads"></div><div class="field" style="margin:10px 0 0"><label for="monetizationBannerId">Banner Ad Unit ID</label><input id="monetizationBannerId" type="text" maxlength="180" placeholder="ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX" autocomplete="off" spellcheck="false"></div><div class="field" style="margin:10px 0 0"><label for="monetizationBannerPosition">Banner Ad Position</label><select id="monetizationBannerPosition"><option value="bottom">Bottom (recommended)</option><option value="top">Top</option></select><small style="display:block;margin-top:6px;color:var(--muted);font-size:10px">Bottom keeps the banner below the game canvas, outside the playable area.</small></div></div>
 <div class="sound-option"><div class="sound-option-head"><span><strong>📺 Interstitial Ads</strong><small>Full-screen ads between game sessions or natural breaks</small></span><input type="checkbox" id="monetizationInterstitial" aria-label="Enable Interstitial Ads"></div><div class="field" style="margin:10px 0 0"><label for="monetizationInterstitialId">Interstitial Ad Unit ID</label><input id="monetizationInterstitialId" type="text" maxlength="180" placeholder="ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX" autocomplete="off" spellcheck="false"></div></div>
 <div class="sound-option"><div class="sound-option-head"><span><strong>🎁 Rewarded Ads</strong><small>Players choose to watch an ad for an in-game reward</small></span><input type="checkbox" id="monetizationRewarded" aria-label="Enable Rewarded Ads"></div><div class="field" style="margin:10px 0 0"><label for="monetizationRewardedId">Rewarded Ad Unit ID</label><input id="monetizationRewardedId" type="text" maxlength="180" placeholder="ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX" autocomplete="off" spellcheck="false"></div></div>
 <label class="compact-toggle" style="margin-top:12px"><input id="monetizationTestMode" type="checkbox" checked> <span>Test Mode (default ON)</span></label>
@@ -743,7 +743,7 @@ settings.coinSystem={design:['gold','silver','bronze','emerald','ruby'].includes
 if(!['red-white','black-white'].includes(settings.kerbStyle))settings.kerbStyle='red-white';
 if(typeof settings.kerbsOn!=='boolean')settings.kerbsOn=true;
 if(!settings.monetization||typeof settings.monetization!=='object')settings.monetization={};
-settings.monetization={provider:'admob_mediation',networks:{applovin:settings.monetization.networks?.applovin===true,unity:settings.monetization.networks?.unity===true,meta:settings.monetization.networks?.meta===true,pangle:settings.monetization.networks?.pangle===true,inmobi:settings.monetization.networks?.inmobi===true,mintegral:settings.monetization.networks?.mintegral===true},bannerOn:settings.monetization.bannerOn===true,interstitialOn:settings.monetization.interstitialOn===true,rewardedOn:settings.monetization.rewardedOn===true,testMode:settings.monetization.testMode!==false,bannerId:typeof settings.monetization.bannerId==='string'?settings.monetization.bannerId:'',interstitialId:typeof settings.monetization.interstitialId==='string'?settings.monetization.interstitialId:'',rewardedId:typeof settings.monetization.rewardedId==='string'?settings.monetization.rewardedId:''};
+settings.monetization={provider:'admob_mediation',networks:{applovin:settings.monetization.networks?.applovin===true,unity:settings.monetization.networks?.unity===true,meta:settings.monetization.networks?.meta===true,pangle:settings.monetization.networks?.pangle===true,inmobi:settings.monetization.networks?.inmobi===true,mintegral:settings.monetization.networks?.mintegral===true},bannerOn:settings.monetization.bannerOn===true,interstitialOn:settings.monetization.interstitialOn===true,rewardedOn:settings.monetization.rewardedOn===true,testMode:settings.monetization.testMode!==false,bannerId:typeof settings.monetization.bannerId==='string'?settings.monetization.bannerId:'',interstitialId:typeof settings.monetization.interstitialId==='string'?settings.monetization.interstitialId:'',rewardedId:typeof settings.monetization.rewardedId==='string'?settings.monetization.rewardedId:'',bannerPosition:['top','bottom'].includes(settings.monetization.bannerPosition)?settings.monetization.bannerPosition:'bottom'};
 
 let gameAudioContext=null,musicTimer=0,musicStep=0,musicNodes=[],customSoundPlayers={};
 function getAudioContext(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;if(!gameAudioContext)gameAudioContext=new AC();if(gameAudioContext.state==='suspended')gameAudioContext.resume().catch(()=>{});return gameAudioContext;}
@@ -1487,6 +1487,7 @@ function syncMonetizationSettings(){
  document.getElementById('monetizationRewarded').checked=m.rewardedOn;
  document.getElementById('monetizationTestMode').checked=m.testMode;
  document.getElementById('monetizationBannerId').value=m.bannerId;
+ document.getElementById('monetizationBannerPosition').value=m.bannerPosition||'bottom';
  document.getElementById('monetizationInterstitialId').value=m.interstitialId;
  document.getElementById('monetizationRewardedId').value=m.rewardedId;
 }
@@ -1500,13 +1501,14 @@ function saveMonetizationSettings(){
  m.rewardedOn=document.getElementById('monetizationRewarded').checked;
  m.testMode=document.getElementById('monetizationTestMode').checked;
  m.bannerId=document.getElementById('monetizationBannerId').value.trim();
+ m.bannerPosition=['top','bottom'].includes(document.getElementById('monetizationBannerPosition').value)?document.getElementById('monetizationBannerPosition').value:'bottom';
  m.interstitialId=document.getElementById('monetizationInterstitialId').value.trim();
  m.rewardedId=document.getElementById('monetizationRewardedId').value.trim();
  try{localStorage.setItem('gamezaar_racing_settings',JSON.stringify(settings));document.getElementById('monetizationStatus').textContent='✓ Ad settings saved on this device. Tap Save project to save the full game project.';}
  catch(err){document.getElementById('monetizationStatus').textContent='Could not save ad settings. Check available device storage.';}
 }
 syncMonetizationSettings();
-['mediationAppLovin','mediationUnity','mediationMeta','mediationPangle','mediationInMobi','mediationMintegral','monetizationBanner','monetizationInterstitial','monetizationRewarded','monetizationTestMode','monetizationBannerId','monetizationInterstitialId','monetizationRewardedId'].forEach(id=>{
+['mediationAppLovin','mediationUnity','mediationMeta','mediationPangle','mediationInMobi','mediationMintegral','monetizationBanner','monetizationInterstitial','monetizationRewarded','monetizationTestMode','monetizationBannerId','monetizationBannerPosition','monetizationInterstitialId','monetizationRewardedId'].forEach(id=>{
  const el=document.getElementById(id);
  el.addEventListener(el.type==='text'?'input':'change',saveMonetizationSettings);
 });
