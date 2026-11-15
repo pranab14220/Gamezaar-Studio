@@ -389,6 +389,13 @@
 .auth-fields input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#171326;color:var(--text);font:inherit;font-size:13px}
 .auth-status{margin-top:9px;color:var(--muted);font-size:11px;line-height:1.5;overflow-wrap:anywhere}
 .build-progress{margin-top:13px}
+.build-progress-head .build-step-wrap{display:flex;align-items:center;gap:8px;min-width:0}
+.build-spinner{display:none;width:15px;height:15px;flex:0 0 15px;border:2px solid #ffcf8350;border-top-color:var(--gold2);border-radius:50%;animation:gzBuildSpin .75s linear infinite}
+.build-progress.is-building .build-spinner{display:inline-block}
+@keyframes gzBuildSpin{to{transform:rotate(360deg)}}
+.export-link.is-disabled,.export-link:disabled{opacity:.42!important;filter:grayscale(.65);pointer-events:none;cursor:not-allowed!important}
+.export-link.is-disabled{position:relative}
+
 .build-progress-head{display:flex;justify-content:space-between;gap:8px;color:var(--gold2);font-size:12px}
 .build-track{height:12px;margin:9px 0;border-radius:20px;background:#ffffff18;overflow:hidden}
 .build-fill{height:100%;width:0%;border-radius:20px;background:linear-gradient(90deg,#61c98b,var(--gold));transition:width .35s}
@@ -560,7 +567,7 @@ html.gz-exported-game .game-shell.game-fullscreen-layout .control-pad{position:a
  <div class="export-build-box" id="gzBuildBox" hidden>
   <div class="export-actions"><button class="export-link" id="gzBuildButton" type="button">⚙ Build APK + AAB on this site</button></div>
   <div class="build-progress" id="gzBuildProgress" hidden>
-   <div class="build-progress-head"><strong id="gzBuildStep">Waiting to start…</strong><strong id="gzBuildPercent">0%</strong></div>
+   <div class="build-progress-head"><span class="build-step-wrap"><span class="build-spinner" id="gzBuildSpinner" aria-hidden="true"></span><strong id="gzBuildStep">Waiting to start…</strong></span><strong id="gzBuildPercent">0%</strong></div>
    <div class="build-track"><div class="build-fill" id="gzBuildFill"></div></div>
    <div class="auth-status" id="gzBuildMessage">Your build status will appear here.</div>
    <div class="export-actions" id="gzBuildDownloads" hidden>
@@ -1791,6 +1798,18 @@ const authStatus=$('gzAuthStatus');
 const buildBox=$('gzBuildBox');
 const signIn=$('gzSignIn'), signUp=$('gzSignUp'), signOut=$('gzSignOut');
 function authMessage(message,isError=false){authStatus.textContent=message;authStatus.style.color=isError?'#ff9b9b':'#bce9c8';}
+function setBuildBusy(busy){
+ const progress=$('gzBuildProgress');
+ progress.classList.toggle('is-building',!!busy);
+ const links=[$('latestApkLink'),$('gzDownloadApk')];
+ links.forEach(link=>{
+  if(!link)return;
+  link.classList.toggle('is-disabled',!!busy);
+  link.setAttribute('aria-disabled',busy?'true':'false');
+  if(busy)link.setAttribute('tabindex','-1');else link.removeAttribute('tabindex');
+ });
+ $('gzBuildButton').disabled=!!busy;
+}
 function setProgress(percent,step,message){
  $('gzBuildProgress').hidden=false;
  $('gzBuildFill').style.width=Math.max(0,Math.min(100,percent||0))+'%';
@@ -1848,6 +1867,7 @@ async function watchExport(jobId){
   const percent=Number(data.progress_percent||0);
   setProgress(percent,data.progress_step||data.status,data.status==='queued'?'Build is waiting for a GitHub runner.':data.status==='building'?'Android package is being prepared.':data.status==='completed'?'Your APK and AAB are ready.':data.error_message||'');
   if(data.status==='completed'){
+   setBuildBusy(false);
    const downloads=$('gzBuildDownloads');
    if(data.apk_storage_path){$('gzDownloadApk').href=data.apk_storage_path;$('gzDownloadApk').hidden=false;}
    else $('gzDownloadApk').hidden=true;
@@ -1855,15 +1875,16 @@ async function watchExport(jobId){
    else $('gzDownloadAab').hidden=true;
    downloads.hidden=false;finished=true;
   }else if(data.status==='failed'){
+   setBuildBusy(false);
    $('gzBuildMessage').textContent=data.error_message||'Build failed. Check the build logs.';
    finished=true;
   }else await new Promise(resolve=>setTimeout(resolve,5000));
  }
- if(!finished)$('gzBuildMessage').textContent='Build is taking longer than expected. You can reload this page; status will remain saved in your account.';
+ if(!finished){setBuildBusy(false);$('gzBuildMessage').textContent='Build is taking longer than expected. You can reload this page; status will remain saved in your account.';}
 }
 $('gzBuildButton').addEventListener('click',async()=>{
  const button=$('gzBuildButton');
- button.disabled=true;button.textContent='Starting build…';
+ button.disabled=true;button.textContent='Building…';setBuildBusy(true);
  $('gzBuildDownloads').hidden=true;
  setProgress(0,'Queued','Sending your build request securely…');
  try{
@@ -1883,7 +1904,7 @@ $('gzBuildButton').addEventListener('click',async()=>{
   if(error)throw error;
   if(!data?.job?.id)throw new Error(data?.error||'Could not create export job.');
   await watchExport(data.job.id);
- }catch(error){$('gzBuildMessage').textContent=error.message||'Could not start build.';}
+ }catch(error){$('gzBuildMessage').textContent=error.message||'Could not start build.';setBuildBusy(false);}
  finally{button.disabled=false;button.textContent='⚙ Build APK + AAB on this site';}
 });
 updateAuthUI();
