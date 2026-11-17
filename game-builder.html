@@ -6,7 +6,15 @@
 <title>Game Builder — GAMEZAAR Studio</title>
 <style>
 :root{--bg:#171326;--panel:#29223f;--panel2:#342b4e;--line:#ffffff20;--gold:#ffb84d;--gold2:#ffd18a;--text:#f8f5ff;--muted:#b9b1ca}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#7564a530,transparent 35%),var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}.wrap{width:min(1100px,calc(100% - 30px));margin:auto}header{height:68px;border-bottom:1px solid var(--line);display:flex;align-items:center;background:#171326e8}.nav{display:flex;justify-content:space-between;align-items:center}.brand{font-weight:900;letter-spacing:.6px}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:2px}.back{color:var(--gold2);text-decoration:none;font-size:13px;font-weight:700}.intro{padding:38px 0 22px}.eyebrow{font-size:11px;color:var(--gold2);letter-spacing:1.8px;font-weight:900}.intro h1{font-size:clamp(30px,5vw,44px);margin:8px 0}.intro p{color:var(--muted);font-size:14px;margin:0}.section-title{font-size:17px;margin:24px 0 13px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.game{background:linear-gradient(145deg,#302744,#241e36);border:1px solid var(--line);border-radius:16px;padding:16px;text-align:left;color:var(--text);cursor:pointer;transition:.18s;min-height:126px}.game:hover{transform:translateY(-3px);border-color:#ffb84d88}.game.selected{border:2px solid var(--gold);background:#473653;box-shadow:0 0 0 3px #ffb84d18}.emoji{font-size:29px}.game strong{display:block;font-size:14px;margin-top:8px}.game small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.form{margin:24px 0 50px;padding:20px;background:linear-gradient(145deg,#302744,#241e36);border:1px solid var(--line);border-radius:18px}.form label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}.form input{width:100%;max-width:460px;padding:13px 14px;border:1px solid var(--line);border-radius:11px;background:#171326;color:white;font:inherit;outline:none}.form input:focus{border-color:var(--gold)}.actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:17px}.btn{border:0;border-radius:11px;padding:12px 19px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#281c31;font-weight:900;cursor:pointer}.btn:disabled{opacity:.4;cursor:not-allowed}.hint{font-size:11px;color:var(--muted)}.notice{display:none;margin-top:14px;color:#bde7c8;font-size:13px}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#7564a530,transparent 35%),var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}.wrap{width:min(1100px,calc(100% - 30px));margin:auto}header{height:68px;border-bottom:1px solid var(--line);display:flex;align-items:center;background:#171326e8}.nav{display:flex;justify-content:space-between;align-items:center}.brand{font-weight:900;letter-spacing:.6px}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:2px}.back{color:var(--gold2);text-decoration:none;font-size:13px;font-weight:700}.intro{padding:38px 0 22px}.eyebrow{font-size:11px;color:var(--gold2);letter-spacing:1.8px;font-weight:900}.intro h1{font-size:clamp(30px,5vw,44px);margin:8px 0}.intro p{color:var(--muted);font-size:14px;margin:0}.section-title{font-size:17px;margin:24px 0 13px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.game{background:linear-gradient(145deg,#302744,#241e36);border:1px solid var(--line);border-radius:16px;padding:16px;text-align:left;color:var(--text);cursor:pointer;transition:.18s;min-height:126px}.game:hover{transform:translateY(-3px);border-color:#ffb84d88}.game.selected{border:2px solid var(--gold);background:#473653;box-shadow:0 0 0 3px #ffb84d18}
+.game.coming-soon{position:relative;overflow:hidden;filter:saturate(.48);opacity:.62;background:linear-gradient(145deg,#282438,#201c2d);border-color:#ffffff16;cursor:not-allowed}
+.game.coming-soon:hover{transform:none;border-color:#ffffff28}
+.game.coming-soon::after{content:"COMING SOON";position:absolute;top:13px;right:-29px;transform:rotate(35deg);padding:5px 34px;background:#756d80;color:#f5f0ff;font-size:8px;font-weight:900;letter-spacing:1px;box-shadow:0 2px 8px #0006}
+.game.coming-soon strong{color:#c6bfd0}.game.coming-soon small{color:#928b9e}
+.game.coming-soon .emoji{filter:grayscale(.65)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:20;background:#302744;border:1px solid #ffb84d77;color:#fff;padding:13px 18px;border-radius:12px;box-shadow:0 12px 35px #0008;font-size:13px;font-weight:800;text-align:center;width:min(90vw,390px);transition:.22s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.emoji{font-size:29px}.game strong{display:block;font-size:14px;margin-top:8px}.game small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.form{margin:24px 0 50px;padding:20px;background:linear-gradient(145deg,#302744,#241e36);border:1px solid var(--line);border-radius:18px}.form label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}.form input{width:100%;max-width:460px;padding:13px 14px;border:1px solid var(--line);border-radius:11px;background:#171326;color:white;font:inherit;outline:none}.form input:focus{border-color:var(--gold)}.actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:17px}.btn{border:0;border-radius:11px;padding:12px 19px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#281c31;font-weight:900;cursor:pointer}.btn:disabled{opacity:.4;cursor:not-allowed}.hint{font-size:11px;color:var(--muted)}.notice{display:none;margin-top:14px;color:#bde7c8;font-size:13px}
 @media(max-width:650px){.grid{grid-template-columns:repeat(2,1fr);gap:9px}.game{padding:13px;min-height:120px}.intro{padding-top:28px}.form{padding:16px}}
 </style>
 </head>
@@ -17,7 +25,7 @@
 <h2 class="section-title">01 / Select a game type</h2>
 <section class="grid" id="games">
 <button class="game" data-type="Car Traffic Racing"><span class="emoji">🏎️</span><strong>Car Traffic Racing</strong><small>Dodge traffic and collect coins</small></button>
-<button class="game" data-type="Space Shooter"><span class="emoji">🚀</span><strong>Space Shooter</strong><small>Shoot enemies and survive</small></button>
+<button class="game coming-soon" data-type="Space Shooter" aria-label="Space Shooter — Coming Soon"><span class="emoji">🚀</span><strong>Space Shooter</strong><small>Shoot enemies and survive</small></button>
 <button class="game" data-type="Endless Runner"><span class="emoji">🏃</span><strong>Endless Runner</strong><small>Run, jump and avoid obstacles</small></button>
 <button class="game" data-type="Dinosaur Run"><span class="emoji">🦖</span><strong>Dinosaur Run</strong><small>Jump over incoming obstacles</small></button>
 <button class="game" data-type="2048 Puzzle"><span class="emoji">🔢</span><strong>2048 Puzzle</strong><small>Merge matching number tiles</small></button>
@@ -28,6 +36,7 @@
 <button class="game" data-type="Flappy Bird Style"><span class="emoji">🐤</span><strong>Flappy Bird Style</strong><small>Fly through the gaps</small></button>
 <button class="game" data-type="Airplane Adventure"><span class="emoji">✈️</span><strong>Airplane Adventure</strong><small>Fly, collect and explore</small></button>
 </section>
+<div class="toast" id="comingToast" role="status" aria-live="polite">🚀 Space Shooter is Coming Soon! We are preparing something exciting.</div>
 <section class="form"><h2 class="section-title" style="margin-top:0">02 / Name your project</h2><label for="projectName">Project name</label><input id="projectName" maxlength="40" placeholder="e.g. My First Racing Game"><div class="actions"><button class="btn" id="createBtn" disabled>Create project →</button><span class="hint">You can change the name later.</span></div><div class="notice" id="notice"></div></section>
 </main>
 <script>
@@ -35,6 +44,13 @@ let selected='';
 const cards=[...document.querySelectorAll('.game')];
 const createBtn=document.getElementById('createBtn');
 cards.forEach(card=>card.addEventListener('click',()=>{
+  if(card.dataset.type==='Space Shooter'){
+    const toast=document.getElementById('comingToast');
+    toast.classList.add('show');
+    clearTimeout(window.__gamezaarComingTimer);
+    window.__gamezaarComingTimer=setTimeout(()=>toast.classList.remove('show'),2800);
+    return;
+  }
   cards.forEach(c=>c.classList.remove('selected'));
   card.classList.add('selected');
   selected=card.dataset.type;
@@ -45,6 +61,6 @@ cards.forEach(card=>card.addEventListener('click',()=>{
   notice.textContent='✓ '+selected+' selected. Now tap the Create project button below.';
   document.querySelector('.form').scrollIntoView({behavior:'smooth',block:'center'});
 }));
-createBtn.addEventListener('click',()=>{const name=document.getElementById('projectName').value.trim()||'My '+selected+' Game';const project={name,type:selected,createdAt:new Date().toISOString()};try{localStorage.setItem('gamezaar_current_project',JSON.stringify(project));if(selected==='Car Traffic Racing'){window.location.href='car-racing-editor.html';return;}if(selected==='Space Shooter'){window.location.href='space-shooter-editor.html';return;}document.getElementById('notice').style.display='block';document.getElementById('notice').textContent='✓ '+selected+' selected. Its dedicated editor will be added next. For now, try Car Traffic Racing.';}catch(e){document.getElementById('notice').style.display='block';document.getElementById('notice').textContent='Your browser could not save this project.';}});
+createBtn.addEventListener('click',()=>{if(selected==='Space Shooter')return;const name=document.getElementById('projectName').value.trim()||'My '+selected+' Game';const project={name,type:selected,createdAt:new Date().toISOString()};try{localStorage.setItem('gamezaar_current_project',JSON.stringify(project));if(selected==='Car Traffic Racing'){window.location.href='car-racing-editor.html';return;}if(selected==='Space Shooter'){window.location.href='space-shooter-editor.html';return;}document.getElementById('notice').style.display='block';document.getElementById('notice').textContent='✓ '+selected+' selected. Its dedicated editor will be added next. For now, try Car Traffic Racing.';}catch(e){document.getElementById('notice').style.display='block';document.getElementById('notice').textContent='Your browser could not save this project.';}});
 </script>
 </body></html>
