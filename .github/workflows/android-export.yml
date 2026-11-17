@@ -304,16 +304,16 @@ jobs:
           source=manifest.read_text()
           metadata='<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="@string/admob_app_id" />'
           if "com.google.android.gms.ads.APPLICATION_ID" not in source:
-              source=source.replace("</application>", "        "+metadata+"\\n    </application>")
+              source=source.replace("</application>", "        "+metadata+"\n    </application>")
           manifest.write_text(source)
           strings=Path("android/app/src/main/res/values/strings.xml")
           strings.parent.mkdir(parents=True, exist_ok=True)
-          xml=strings.read_text() if strings.exists() else '<?xml version="1.0" encoding="utf-8"?>\\n<resources>\\n</resources>\\n'
+          xml=strings.read_text() if strings.exists() else '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n</resources>\n'
           entry=f'<string name="admob_app_id">{app_id}</string>'
           if re.search(r'<string name="admob_app_id">.*?</string>', xml):
               xml=re.sub(r'<string name="admob_app_id">.*?</string>', entry, xml)
           else:
-              xml=xml.replace("</resources>", "    "+entry+"\\n</resources>")
+              xml=xml.replace("</resources>", "    "+entry+"\n</resources>")
           strings.write_text(xml)
           print("AdMob App ID configured:", "Google test App ID" if test_mode else "creator production App ID")
           PY
