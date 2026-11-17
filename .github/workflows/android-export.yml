@@ -296,7 +296,8 @@ jobs:
           config=json.loads(Path("www/gamezaar-admob-config.json").read_text())
           test_mode=config.get("testMode", True) is not False
           sample_app_id="ca-app-pub-3940256099942544~3347511713"
-          app_id=sample_app_id if test_mode else str(config.get("appId") or "").strip()
+          active_ads=any(config.get(key, False) is True for key in ("bannerOn","interstitialOn","rewardedOn"))
+          app_id=sample_app_id if test_mode or not active_ads else str(config.get("appId") or "").strip()
           if not app_id:
               raise SystemExit("Production AdMob App ID is required when Test Mode is OFF. Add it in Monetization & Ads.")
           manifest=Path("android/app/src/main/AndroidManifest.xml")
