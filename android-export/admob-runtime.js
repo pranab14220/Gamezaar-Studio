@@ -76,7 +76,24 @@ async function preloadInterstitial() {
   }
 }
 
+function showPreviewAd(format) {
+  return new Promise(resolve => {
+    const old = document.getElementById('gamezaarAdPreviewOverlay');
+    if (old) old.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'gamezaarAdPreviewOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(5,5,12,.94);font-family:system-ui,sans-serif;';
+    const rewarded = format === 'rewarded';
+    overlay.innerHTML = '<div style="width:min(100%,360px);padding:22px;border:1px solid #ffca75;border-radius:18px;background:linear-gradient(145deg,#302744,#171326);color:#fff4dc;text-align:center;box-shadow:0 18px 55px #000b"><div style="font-size:10px;letter-spacing:2px;color:#ffca75;font-weight:900">GAMEZAAR · AD PREVIEW</div><h2 style="margin:12px 0 8px;font-size:20px">'+(rewarded?'Rewarded Video Demo':'Interstitial Ad Demo')+'</h2><p style="font-size:12px;line-height:1.55;color:#c9c1d8">This is a browser simulation only. No Google ad is requested, no ad is clicked, and no revenue is earned.</p><div style="height:82px;margin:15px 0;border:1px dashed #ffca7588;border-radius:10px;display:grid;place-items:center;color:#ffdda2;font-size:12px;font-weight:800">'+(rewarded?'DEMO VIDEO AD':'DEMO FULL-SCREEN AD')+'</div><div style="display:grid;gap:9px"><button id="gzPreviewAdPrimary" style="padding:12px;border:0;border-radius:10px;background:linear-gradient(135deg,#ffe0a0,#ffb84d);color:#281c31;font-weight:900">'+(rewarded?'Complete Demo Ad & Earn Revival':'Continue Game')+'</button><button id="gzPreviewAdClose" style="padding:10px;border:1px solid #ffffff35;border-radius:10px;background:#ffffff12;color:#fff4dc;font-weight:700">'+(rewarded?'Close without reward':'Close')+'</button></div></div>';
+    const cleanup = value => { overlay.remove(); resolve(value); };
+    overlay.querySelector('#gzPreviewAdPrimary').addEventListener('click', () => cleanup(rewarded ? { earned: true, demo: true, reward: { type: 'demo-revival', amount: 1 } } : true));
+    overlay.querySelector('#gzPreviewAdClose').addEventListener('click', () => cleanup(rewarded ? { earned: false, demo: true } : false));
+    document.body.appendChild(overlay);
+  });
+}
+
 async function initializeAds() {
+  if (!config) config = readConfig();
   if (!isNative()) return false;
   if (initialized) return true;
   if (initializationPromise) return initializationPromise;
@@ -139,7 +156,9 @@ async function initializeAds() {
 }
 
 async function showInterstitial() {
-  if (!isNative() || !config?.interstitialOn || interstitialBusy) return false;
+  if (!config) config = readConfig();
+  if (!isNative()) return config?.interstitialOn ? !!(await showPreviewAd('interstitial')) : false;
+  if (!config?.interstitialOn || interstitialBusy) return false;
   if (!initialized && !(await initializeAds())) return false;
 
   interstitialBusy = true;
@@ -161,9 +180,9 @@ async function showInterstitial() {
 }
 
 async function showRewarded() {
-  if (!isNative() || !config?.rewardedOn || rewardedBusy) {
-    return { earned: false, reason: 'rewarded-not-available' };
-  }
+  if (!config) config = readConfig();
+  if (!isNative()) return config?.rewardedOn ? await showPreviewAd('rewarded') : { earned: false, reason: 'rewarded-not-enabled' };
+  if (!config?.rewardedOn || rewardedBusy) return { earned: false, reason: 'rewarded-not-available' };
   if (!initialized && !(await initializeAds())) {
     return { earned: false, reason: 'ads-not-initialized' };
   }
@@ -194,6 +213,7 @@ window.GAMEZAAR_ADS = {
   showInterstitial,
   showRewarded,
   isNative,
+  isPreview: () => !isNative(),
   getMode: () => config?.testMode === false ? 'production' : 'test',
   getStatus: () => ({ initialized, bannerOn: !!config?.bannerOn, interstitialOn: !!config?.interstitialOn, rewardedOn: !!config?.rewardedOn })
 };
