@@ -294,7 +294,7 @@ jobs:
               if source.strip():
                   p=Path(f"/tmp/gamezaar-inline-{i}.js"); p.write_text(source); files.append(str(p))
           if not files: raise SystemExit("No inline game scripts were found to validate.")
-          Path("/tmp/gamezaar-inline-files.txt").write_text("\\n".join(files))
+          Path("/tmp/gamezaar-inline-files.txt").write_text("\n".join(files))
           print("Prepared",len(files),"inline script(s) for syntax validation.")
           PY
           while IFS= read -r file; do node --check "$file"; done < /tmp/gamezaar-inline-files.txt
