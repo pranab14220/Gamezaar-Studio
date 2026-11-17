@@ -44,6 +44,16 @@ jobs:
       - name: Prepare latest game editor as the Android web app
         run: cp car-racing-editor.html android-export/www/index.html
 
+      - name: Prepare default AdMob test configuration
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("android-export/www/gamezaar-admob-config.json")
+          if not p.exists():
+              p.write_text(json.dumps({"testMode":True,"bannerOn":False,"interstitialOn":False,"rewardedOn":False}))
+          PY
+
       - name: Load creator project and configure this Android app
         if: ${{ github.event.inputs.project_id != '' }}
         env:
@@ -71,6 +81,18 @@ jobs:
           if not isinstance(settings, dict):
               raise SystemExit("Creator game settings are invalid.")
           settings["name"] = project["name"]
+          monetization = settings.get("monetization") or {}
+          Path("android-export/www/gamezaar-admob-config.json").write_text(json.dumps({
+              "testMode": monetization.get("testMode", True) is not False,
+              "appId": monetization.get("appId", ""),
+              "bannerOn": monetization.get("bannerOn", False) is True,
+              "bannerId": monetization.get("bannerId", ""),
+              "bannerPosition": monetization.get("bannerPosition", "bottom"),
+              "interstitialOn": monetization.get("interstitialOn", False) is True,
+              "interstitialId": monetization.get("interstitialId", ""),
+              "rewardedOn": monetization.get("rewardedOn", False) is True,
+              "rewardedId": monetization.get("rewardedId", "")
+          }, separators=(",", ":"))
 
           css = """
           html.gz-exported-game body>header,
@@ -241,9 +263,11 @@ jobs:
             -H "Prefer: return=minimal" \
             -d '{"progress_percent":38,"progress_step":"Installing app dependencies","updated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
 
-      - name: Install Capacitor dependencies
+      - name: Install Capacitor and AdMob dependencies
         working-directory: android-export
-        run: npm install --no-audit --no-fund
+        run: |
+          npm install --no-audit --no-fund
+          npm run build:admob
 
       - name: Progress — Android project
         if: ${{ github.event.inputs.job_id != '' }}
@@ -262,6 +286,36 @@ jobs:
       - name: Generate Android project
         working-directory: android-export
         run: npx cap add android
+
+      - name: Configure Google AdMob Android application ID
+        working-directory: android-export
+        run: |
+          python3 - <<'PY'
+          import json, re
+          from pathlib import Path
+          config=json.loads(Path("www/gamezaar-admob-config.json").read_text())
+          test_mode=config.get("testMode", True) is not False
+          sample_app_id="ca-app-pub-3940256099942544~3347511713"
+          app_id=sample_app_id if test_mode else str(config.get("appId") or "").strip()
+          if not app_id:
+              raise SystemExit("Production AdMob App ID is required when Test Mode is OFF. Add it in Monetization & Ads.")
+          manifest=Path("android/app/src/main/AndroidManifest.xml")
+          source=manifest.read_text()
+          metadata='<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="@string/admob_app_id" />'
+          if "com.google.android.gms.ads.APPLICATION_ID" not in source:
+              source=source.replace("</application>", "        "+metadata+"\\n    </application>")
+          manifest.write_text(source)
+          strings=Path("android/app/src/main/res/values/strings.xml")
+          strings.parent.mkdir(parents=True, exist_ok=True)
+          xml=strings.read_text() if strings.exists() else '<?xml version="1.0" encoding="utf-8"?>\\n<resources>\\n</resources>\\n'
+          entry=f'<string name="admob_app_id">{app_id}</string>'
+          if re.search(r'<string name="admob_app_id">.*?</string>', xml):
+              xml=re.sub(r'<string name="admob_app_id">.*?</string>', entry, xml)
+          else:
+              xml=xml.replace("</resources>", "    "+entry+"\\n</resources>")
+          strings.write_text(xml)
+          print("AdMob App ID configured:", "Google test App ID" if test_mode else "creator production App ID")
+          PY
 
       - name: Progress — App configuration
         if: ${{ github.event.inputs.job_id != '' }}
