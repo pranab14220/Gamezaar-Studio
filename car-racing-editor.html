@@ -567,7 +567,7 @@ html.gz-exported-game .game-shell.game-fullscreen-layout .control-pad{position:a
 <label class="compact-toggle" style="margin-top:12px"><input id="monetizationTestMode" type="checkbox" checked> <span>Test Mode (default ON)</span></label>
 <div class="tree-note">Test Mode ON is recommended while developing and testing. Use your own production Ad Unit IDs only after the app and ad integration are ready.</div>
 <div class="tree-note" id="monetizationStatus" role="status" aria-live="polite">Ad settings are saved with your game when you tap Save project.</div>
-<div class="tip" style="margin-top:10px">Important: This section stores your ad preferences and Ad Unit IDs in the game project. Actual ad display requires the Android ad SDK and export integration; enabling a switch here alone does not display ads.</div>
+<div class="tip" style="margin-top:10px">Connected to Android AdMob export: Live Preview uses clearly marked demo ads; APK uses Google test ads when Test Mode is ON and your own App ID / Ad Unit IDs when OFF. Interstitial ads appear after a final game over; Rewarded ads are connected to Player Revival. Real ad delivery still depends on consent, network fill, and an active approved AdMob account.</div>
 </div></details>
 <details class="builder-section" id="revivalSection"><summary>18 · Player Revival System<span class="section-chevron" aria-hidden="true">⌄</span></summary><div class="builder-section-body">
 <div class="sound-option"><div class="sound-option-head"><span><strong>♻️ Enable Player Revival</strong><small>Let players continue after a crash or game over</small></span><input type="checkbox" id="revivalEnabled" aria-label="Enable Player Revival"></div></div>
@@ -747,7 +747,7 @@ function hideGameSplash(){if(gameSplashTimer){clearTimeout(gameSplashTimer);game
 function showGameSplash(){hideGameSplash();gameSplashCountdown.style.display='grid';let remaining=5;gameSplashCountdown.textContent=String(remaining);gameSplashActions.hidden=true;gameSplashOverlay.classList.add('active');gameSplashOverlay.setAttribute('aria-hidden','false');gameSplashInterval=setInterval(()=>{remaining=Math.max(0,remaining-1);gameSplashCountdown.textContent=String(remaining);if(remaining===0&&gameSplashInterval){clearInterval(gameSplashInterval);gameSplashInterval=null;}},1000);gameSplashTimer=setTimeout(()=>{gameSplashActions.hidden=false;gameSplashCountdown.style.display='none';gameSplashTimer=null;},5000);}
 gameSplashPlay.addEventListener('click',hideGameSplash);gameSplashSkip.addEventListener('click',hideGameSplash);
 function closePreview(){hideGameSplash();previewModal.classList.remove('open');previewModal.setAttribute('aria-hidden','true');document.body.style.overflow='';if(!running)stopPopupAnimation();openPreviewBtn.focus();}
-function openPreview(){const demoAd=document.getElementById('previewAdDemo');demoAd.hidden=!settings.monetization?.bannerOn;document.getElementById('previewAdDemoTitle').textContent=settings.monetization?.testMode===false?'PRODUCTION BANNER PLACEMENT':'GOOGLE TEST BANNER PREVIEW';document.getElementById('previewAdDemoNote').textContent='Browser preview only — no real ad request, clicks, or earnings.';previewModal.classList.add('open');previewModal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';observeGameCanvasSize();draw();if(!running&&!popupAnimRaf)animatePopup();showGameSplash();closePreviewBtn.focus();}
+function openPreview(){const demoAd=document.getElementById('previewAdDemo'),gameShell=document.querySelector('.preview-modal .game-shell');demoAd.hidden=!settings.monetization?.bannerOn;document.getElementById('previewAdDemoTitle').textContent=settings.monetization?.testMode===false?'PRODUCTION BANNER PLACEMENT':'GOOGLE TEST BANNER PREVIEW';document.getElementById('previewAdDemoNote').textContent='Browser simulation only — no real ad request, clicks, or earnings.';if(gameShell&&settings.monetization?.bannerPosition==='top')gameShell.parentElement.insertBefore(demoAd,gameShell);else if(gameShell)gameShell.insertAdjacentElement('afterend',demoAd);previewModal.classList.add('open');previewModal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';observeGameCanvasSize();draw();if(!running&&!popupAnimRaf)animatePopup();showGameSplash();closePreviewBtn.focus();}
 openPreviewBtn.addEventListener('click',openPreview);
 closePreviewBtn.addEventListener('click',closePreview);
 previewModal.addEventListener('click',e=>{if(e.target===previewModal)closePreview();});
@@ -858,9 +858,10 @@ function renderSoundSettings(){
  document.querySelectorAll('[data-preview-sound]').forEach(btn=>btn.addEventListener('click',()=>{const key=btn.dataset.previewSound;if(key==='music'){stopBackgroundMusic();if(settings.soundSystem.custom.music)playCustomSound('music',false);else{const oldRunning=running;running=true;const notes=musicPresets[Math.max(1,Math.min(5,Number(settings.soundSystem.choices.music)||1))-1];const ac=getAudioContext();if(ac)notes.forEach((n,i)=>playTone(n,.28,'triangle',.035,i*.22));running=oldRunning;}return;}playGameSound(key);}));
 }
 
-const highScoreKey='gamezaar_highscore_'+String(project.createdAt||project.name||'default').replace(/[^a-z0-9_-]/gi,'_');
+const gameStorageId=String(project.id||project.name||project.createdAt||'default').replace(/[^a-z0-9_-]/gi,'_');
+const highScoreKey='gamezaar_highscore_'+gameStorageId;
 let highScore=Math.max(0,Number(localStorage.getItem(highScoreKey))||0);
-const walletKey='gamezaar_wallet_'+String(project.createdAt||project.name||'default').replace(/[^a-z0-9_-]/gi,'_');
+const walletKey='gamezaar_wallet_'+gameStorageId;
 let walletCoins=Math.max(0,Math.floor(Number(localStorage.getItem(walletKey))||0));
 let revivalsUsed=0,revivalPromptTimer=null,revivalPromptBusy=false,interstitialShownForRun=false;
 let running=false,over=false,hasStarted=false,score=0,frame=0,worldFrame=0,playerLane=1,trafficCars=[],coinItems=[],coinsCollected=0,coinSpawnSeconds=0,raf=0,lastSpawn=0,uploadedCarImage=null,coinImage=null;
@@ -1751,7 +1752,7 @@ function showRevivalPrompt(){
  if(walletCoins<coinCost&&r.insufficientBehavior==='alternative')coinCost=Math.max(1,Number(r.alternativeCoinCost)||150);
  const rewardedEnabled=settings.monetization?.rewardedOn===true;
  const ads=window.GAMEZAAR_ADS;
- const canRewarded=rewardedEnabled&&!!ads?.isNative?.();
+ const canRewarded=rewardedEnabled&&!!(ads?.isNative?.()||ads?.isPreview?.());
  const coinAllowed=r.method!=='ad'&&walletCoins>=coinCost;
  const adAllowed=canRewarded&&(r.method==='ad'||r.method==='both'||(r.method==='coin'&&walletCoins<coinCost&&r.insufficientBehavior==='ad'));
  if(!coinAllowed&&!adAllowed&&r.allowSkip!==true){finishGame();return;}
