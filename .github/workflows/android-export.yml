@@ -17,6 +17,10 @@ on:
       - 'car-racing-editor.html'
       - '.github/workflows/android-export.yml'
 
+concurrency:
+  group: gamezaar-android-export
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
