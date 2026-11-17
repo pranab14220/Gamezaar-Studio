@@ -7,13 +7,16 @@
     "android:add": "cap add android",
     "android:sync": "cap sync android",
     "android:apk": "cd android && ./gradlew assembleDebug",
-    "android:aab": "cd android && ./gradlew bundleRelease"
+    "android:aab": "cd android && ./gradlew bundleRelease",
+    "build:admob": "esbuild admob-runtime.js --bundle --platform=browser --format=iife --target=es2020 --outfile=www/admob-runtime.bundle.js"
   },
   "dependencies": {
-    "@capacitor/core": "7.4.3"
+    "@capacitor/core": "7.4.3",
+    "@capacitor-community/admob": "7.2.0"
   },
   "devDependencies": {
     "@capacitor/android": "7.4.3",
-    "@capacitor/cli": "7.4.3"
+    "@capacitor/cli": "7.4.3",
+    "esbuild": "^0.25.0"
   }
 }
