@@ -176,6 +176,19 @@ jobs:
             width:84%!important;margin:0!important;
           }
           """
+          monetization = settings.get("monetization") or {}
+          banner_enabled = monetization.get("bannerOn") is True
+          banner_position = "top" if monetization.get("bannerPosition") == "top" else "bottom"
+          if banner_enabled:
+              css += """
+              /* Keep the native 50dp banner outside the playable game canvas. */
+              html.gz-exported-game.gz-banner-bottom .game-shell{
+                bottom:calc(8px + 50px + env(safe-area-inset-bottom))!important;
+              }
+              html.gz-exported-game.gz-banner-top .game-shell{
+                top:calc(8px + 50px + env(safe-area-inset-top))!important;
+              }
+              """
           boot = (
               "(function(){const p=" + json.dumps({
                   "id": project["id"],
@@ -186,7 +199,8 @@ jobs:
               "localStorage.setItem('gamezaar_current_project',JSON.stringify({id:p.id,name:p.name,type:p.game_type,createdAt:new Date().toISOString()}));"
               "localStorage.setItem('gamezaar_racing_settings',JSON.stringify(p.settings));"
               "document.documentElement.classList.add('gz-exported-game');"
-              "document.title=p.name;"
+              + ("document.documentElement.classList.add('gz-banner-" + banner_position + "');" if banner_enabled else "")
+              + "document.title=p.name;"
               "const s=document.createElement('style');s.textContent=" + json.dumps(css) + ";document.head.appendChild(s);"
               "})();"
           )
