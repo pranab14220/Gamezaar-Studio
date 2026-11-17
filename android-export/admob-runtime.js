@@ -7,13 +7,18 @@ import {
 } from '@capacitor-community/admob';
 
 const TEST_IDS = {
-  banner: 'ca-app-pub-3940256099942544/6300978111',
+  // Google's official Android demo ad units.
+  banner: 'ca-app-pub-3940256099942544/9214589741',
   interstitial: 'ca-app-pub-3940256099942544/1033173712',
   rewarded: 'ca-app-pub-3940256099942544/5224354917'
 };
 
-let initialized = false;
 let config = null;
+let initialized = false;
+let initializationPromise = null;
+let interstitialReady = false;
+let interstitialBusy = false;
+let rewardedBusy = false;
 
 function readConfig() {
   try {
@@ -24,91 +29,163 @@ function readConfig() {
   }
 }
 
+function isNative() {
+  try { return Capacitor.isNativePlatform(); } catch (_) { return false; }
+}
+
 function adOptions(format) {
-  const testMode = config.testMode !== false;
-  const customId = format === 'banner' ? config.bannerId :
-    format === 'interstitial' ? config.interstitialId : config.rewardedId;
+  const testMode = config?.testMode !== false;
+  const customId = format === 'banner' ? config?.bannerId :
+    format === 'interstitial' ? config?.interstitialId : config?.rewardedId;
   return {
     adId: testMode ? TEST_IDS[format] : String(customId || '').trim(),
     isTesting: testMode
   };
 }
 
-async function initializeAds() {
-  if (!Capacitor.isNativePlatform()) return false;
-  config = readConfig();
-  if (!config.bannerOn && !config.interstitialOn && !config.rewardedOn) return false;
+function dispatch(name, detail = {}) {
+  try { window.dispatchEvent(new CustomEvent(name, { detail })); } catch (_) {}
+}
 
-  if (!config.testMode) {
-    const enabledIds = [
-      config.bannerOn && config.bannerId,
-      config.interstitialOn && config.interstitialId,
-      config.rewardedOn && config.rewardedId
-    ].filter(Boolean);
-    if (enabledIds.length === 0) {
-      console.warn('[GAMEZAAR Ads] Production mode is ON, but no enabled ad unit has an ID.');
-      return false;
-    }
-  }
-
+async function requestConsent() {
   try {
-    const consent = await AdMob.requestConsentInfo();
-    if (consent.isConsentFormAvailable && consent.status === AdmobConsentStatus.REQUIRED) {
+    const info = await AdMob.requestConsentInfo();
+    if (info?.isConsentFormAvailable && info.status === AdmobConsentStatus.REQUIRED) {
       await AdMob.showConsentForm();
     }
-    const refreshedConsent = await AdMob.requestConsentInfo();
-    if (!refreshedConsent.canRequestAds) {
-      console.info('[GAMEZAAR Ads] Ads are waiting for consent.');
-      return false;
-    }
-    await AdMob.initialize();
-    initialized = true;
-
-    if (config.bannerOn) {
-      const opts = adOptions('banner');
-      if (opts.adId) {
-        await AdMob.showBanner({
-          ...opts,
-          adSize: BannerAdSize.ADAPTIVE_BANNER,
-          position: config.bannerPosition === 'top' ? BannerAdPosition.TOP_CENTER : BannerAdPosition.BOTTOM_CENTER,
-          margin: 0
-        });
-      }
-    }
-    return true;
+    const latest = await AdMob.requestConsentInfo();
+    return latest?.canRequestAds === true;
   } catch (error) {
-    console.warn('[GAMEZAAR Ads] Initialization failed; game will continue without ads.', error);
+    console.warn('[GAMEZAAR Ads] Consent check failed; ads remain disabled until consent is resolved.', error);
     return false;
   }
 }
 
-async function showInterstitial() {
-  if (!initialized || !config?.interstitialOn) return false;
+async function preloadInterstitial() {
+  if (!initialized || !config?.interstitialOn || interstitialBusy) return false;
+  const options = adOptions('interstitial');
+  if (!options.adId) return false;
   try {
-    const opts = adOptions('interstitial');
-    if (!opts.adId) return false;
-    await AdMob.prepareInterstitial(opts);
-    await AdMob.showInterstitial();
+    await AdMob.prepareInterstitial(options);
+    interstitialReady = true;
     return true;
   } catch (error) {
-    console.warn('[GAMEZAAR Ads] Interstitial unavailable.', error);
+    interstitialReady = false;
+    console.warn('[GAMEZAAR Ads] Interstitial preload failed.', error);
     return false;
+  }
+}
+
+async function initializeAds() {
+  if (!isNative()) return false;
+  if (initialized) return true;
+  if (initializationPromise) return initializationPromise;
+
+  initializationPromise = (async () => {
+    config = readConfig();
+    const enabled = !!(config.bannerOn || config.interstitialOn || config.rewardedOn);
+    if (!enabled) return false;
+
+    const activeFormats = [
+      ['banner', config.bannerOn, config.bannerId],
+      ['interstitial', config.interstitialOn, config.interstitialId],
+      ['rewarded', config.rewardedOn, config.rewardedId]
+    ].filter(item => item[1]);
+
+    if (config.testMode === false) {
+      const missing = activeFormats.filter(item => !String(item[2] || '').trim()).map(item => item[0]);
+      if (missing.length) {
+        console.warn('[GAMEZAAR Ads] Add production Ad Unit IDs for enabled formats:', missing.join(', '));
+        dispatch('gamezaar:ads-error', { reason: 'missing-ad-unit-id', formats: missing });
+        return false;
+      }
+    }
+
+    if (!(await requestConsent())) {
+      dispatch('gamezaar:ads-consent-required');
+      return false;
+    }
+
+    try {
+      await AdMob.initialize();
+      initialized = true;
+
+      if (config.bannerOn) {
+        const options = adOptions('banner');
+        await AdMob.showBanner({
+          ...options,
+          adSize: BannerAdSize.ADAPTIVE_BANNER,
+          position: config.bannerPosition === 'top'
+            ? BannerAdPosition.TOP_CENTER
+            : BannerAdPosition.BOTTOM_CENTER,
+          margin: 0
+        });
+        dispatch('gamezaar:banner-requested', { position: config.bannerPosition || 'bottom' });
+      }
+
+      if (config.interstitialOn) preloadInterstitial();
+      dispatch('gamezaar:ads-ready', { mode: config.testMode === false ? 'production' : 'test' });
+      return true;
+    } catch (error) {
+      initialized = false;
+      console.warn('[GAMEZAAR Ads] SDK initialization failed; gameplay will continue without ads.', error);
+      dispatch('gamezaar:ads-error', { reason: 'initialization-failed', message: String(error?.message || error) });
+      return false;
+    }
+  })();
+
+  try { return await initializationPromise; }
+  finally { initializationPromise = null; }
+}
+
+async function showInterstitial() {
+  if (!isNative() || !config?.interstitialOn || interstitialBusy) return false;
+  if (!initialized && !(await initializeAds())) return false;
+
+  interstitialBusy = true;
+  try {
+    if (!interstitialReady && !(await preloadInterstitial())) return false;
+    await AdMob.showInterstitial();
+    interstitialReady = false;
+    dispatch('gamezaar:interstitial-shown');
+    return true;
+  } catch (error) {
+    interstitialReady = false;
+    console.warn('[GAMEZAAR Ads] Interstitial could not be shown.', error);
+    dispatch('gamezaar:ads-error', { reason: 'interstitial-failed', message: String(error?.message || error) });
+    return false;
+  } finally {
+    interstitialBusy = false;
+    if (initialized && config?.interstitialOn) preloadInterstitial();
   }
 }
 
 async function showRewarded() {
-  if (!initialized || !config?.rewardedOn) return { earned: false };
+  if (!isNative() || !config?.rewardedOn || rewardedBusy) {
+    return { earned: false, reason: 'rewarded-not-available' };
+  }
+  if (!initialized && !(await initializeAds())) {
+    return { earned: false, reason: 'ads-not-initialized' };
+  }
+
+  rewardedBusy = true;
   try {
-    const opts = adOptions('rewarded');
-    if (!opts.adId) return { earned: false };
-    await AdMob.prepareRewardVideoAd(opts);
+    const options = adOptions('rewarded');
+    if (!options.adId) return { earned: false, reason: 'missing-ad-unit-id' };
+    await AdMob.prepareRewardVideoAd(options);
+    // This promise resolves only after the SDK confirms that the user earned the reward.
     const reward = await AdMob.showRewardVideoAd();
-    const result = { earned: !!reward, reward: reward || null };
-    window.dispatchEvent(new CustomEvent('gamezaar:rewarded', { detail: result }));
+    const earned = !!reward && typeof reward === 'object';
+    const result = { earned, reward: earned ? reward : null };
+    dispatch('gamezaar:rewarded', result);
     return result;
   } catch (error) {
-    console.warn('[GAMEZAAR Ads] Rewarded ad unavailable or not completed.', error);
-    return { earned: false, error: String(error?.message || error) };
+    console.warn('[GAMEZAAR Ads] Rewarded ad was not completed or could not be shown.', error);
+    const result = { earned: false, reason: 'not-earned', error: String(error?.message || error) };
+    dispatch('gamezaar:rewarded', result);
+    return result;
+  } finally {
+    rewardedBusy = false;
   }
 }
 
@@ -116,8 +193,9 @@ window.GAMEZAAR_ADS = {
   initialize: initializeAds,
   showInterstitial,
   showRewarded,
-  isNative: () => Capacitor.isNativePlatform(),
-  getMode: () => config?.testMode === false ? 'production' : 'test'
+  isNative,
+  getMode: () => config?.testMode === false ? 'production' : 'test',
+  getStatus: () => ({ initialized, bannerOn: !!config?.bannerOn, interstitialOn: !!config?.interstitialOn, rewardedOn: !!config?.rewardedOn })
 };
 
 if (document.readyState === 'loading') {
