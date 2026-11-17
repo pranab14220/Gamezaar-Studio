@@ -860,6 +860,9 @@ function renderSoundSettings(){
 
 const highScoreKey='gamezaar_highscore_'+String(project.createdAt||project.name||'default').replace(/[^a-z0-9_-]/gi,'_');
 let highScore=Math.max(0,Number(localStorage.getItem(highScoreKey))||0);
+const walletKey='gamezaar_wallet_'+String(project.createdAt||project.name||'default').replace(/[^a-z0-9_-]/gi,'_');
+let walletCoins=Math.max(0,Math.floor(Number(localStorage.getItem(walletKey))||0));
+let revivalsUsed=0,revivalPromptTimer=null,revivalPromptBusy=false,interstitialShownForRun=false;
 let running=false,over=false,hasStarted=false,score=0,frame=0,worldFrame=0,playerLane=1,trafficCars=[],coinItems=[],coinsCollected=0,coinSpawnSeconds=0,raf=0,lastSpawn=0,uploadedCarImage=null,coinImage=null;
 let trafficImageCache={};
 const carPreview=document.getElementById('carPreview'),carPreviewCtx=carPreview.getContext('2d');
@@ -1698,7 +1701,91 @@ if(!hasStarted||over){
  }}
 function reset(){cancelAnimationFrame(raf);stopBackgroundMusic();stopPopupAnimation();crashBlast=null;running=false;over=false;hasStarted=false;lastFrameTime=0;survivalTick=0;score=0;coinsCollected=0;coinSpawnSeconds=0;coinItems=[];frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;setState('READY');draw();animatePopup();}
 function setState(s){const stateEl=document.getElementById('gameState');if(stateEl)stateEl.textContent=s;}
-function startGame(){if(running)return;stopPopupAnimation();lastFrameTime=0;survivalTick=0;if(over){score=0;coinsCollected=0;coinSpawnSeconds=0;coinItems=[];frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;over=false;}hasStarted=true;running=true;playGameSound('raceStart');startBackgroundMusic();setState('RACING');draw();loop();}
+function clearRevivalPromptTimer(){if(revivalPromptTimer){clearInterval(revivalPromptTimer);revivalPromptTimer=null;}}
+function ensureRevivalOverlay(){
+ let overlay=document.getElementById('gamezaarRevivalOverlay');
+ if(overlay)return overlay;
+ const style=document.createElement('style');
+ style.textContent='.gamezaar-revival-overlay{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:12px;background:rgba(5,7,15,.84);backdrop-filter:blur(3px)}.gamezaar-revival-overlay[hidden]{display:none!important}.gz-revive-card{width:min(100%,310px);padding:18px 15px;border:1px solid #ffca75;border-radius:16px;background:linear-gradient(145deg,#26324b,#171d2d);box-shadow:0 12px 35px #000b;text-align:center;color:#fff4dc}.gz-revive-card h3{margin:0 0 7px;color:#ffd18a;font:900 18px monospace}.gz-revive-card p{margin:5px 0 9px;font:12px system-ui;color:#e0e7f5}.gz-revive-balance{font-size:11px;color:#ffe0a0;margin:7px 0 12px}.gz-revive-actions{display:grid;gap:8px}.gz-revive-actions button{width:100%;min-height:40px;padding:9px 12px;border:1px solid #ffe0a0;border-radius:10px;background:linear-gradient(135deg,#ffe0a0,#ffb84d);color:#281c31;font-weight:900;font-size:12px}.gz-revive-actions button.secondary{background:#ffffff12;border-color:#ffffff30;color:#f4e8d2}.gz-revive-actions button:disabled{opacity:.45}.gz-revive-note{display:block;min-height:17px;margin-top:10px;color:#c8d4e7;font-size:10px;line-height:1.4}';
+ document.head.appendChild(style);
+ overlay=document.createElement('div');
+ overlay.id='gamezaarRevivalOverlay';
+ overlay.className='gamezaar-revival-overlay';
+ overlay.hidden=true;
+ overlay.innerHTML='<div class="gz-revive-card"><h3>CRASHED!</h3><p id="gzReviveMessage">Choose how to continue your race</p><div class="gz-revive-balance" id="gzReviveBalance"></div><div class="gz-revive-actions" id="gzReviveActions"></div><small class="gz-revive-note" id="gzReviveNote" aria-live="polite"></small></div>';
+ canvas.parentElement.appendChild(overlay);
+ return overlay;
+}
+function saveRevivalStats(method){
+ if(settings.revival?.trackStats===false)return;
+ const key='gamezaar_revival_stats_'+String(project.createdAt||project.name||'default').replace(/[^a-z0-9_-]/gi,'_');
+ let stats={coin:0,ad:0,total:0};
+ try{stats={...stats,...JSON.parse(localStorage.getItem(key)||'{}')};}catch(_){}
+ stats[method]=(Number(stats[method])||0)+1;stats.total=(Number(stats.total)||0)+1;
+ try{localStorage.setItem(key,JSON.stringify(stats));}catch(_){}
+}
+function resumeAfterRevival(method,cost=0){
+ clearRevivalPromptTimer();
+ const overlay=document.getElementById('gamezaarRevivalOverlay');if(overlay)overlay.hidden=true;
+ if(method==='coin'){walletCoins=Math.max(0,walletCoins-cost);try{localStorage.setItem(walletKey,String(walletCoins));}catch(_){}}
+ revivalsUsed++;saveRevivalStats(method);
+ // Resume at the current player position. No health boost, invincibility or checkpoint teleport is applied.
+ trafficCars=trafficCars.filter(car=>Math.abs(car.y-player.y)>85);
+ crashBlast=null;over=false;running=true;hasStarted=true;lastFrameTime=0;stopPopupAnimation();
+ startBackgroundMusic();setState('RACING');draw();loop();
+}
+function finishGame(){
+ clearRevivalPromptTimer();
+ const overlay=document.getElementById('gamezaarRevivalOverlay');if(overlay)overlay.hidden=true;
+ running=false;over=true;setState('GAME OVER');draw();if(!popupAnimRaf)animatePopup();
+ if(!interstitialShownForRun){interstitialShownForRun=true;const ads=window.GAMEZAAR_ADS;if(ads?.showInterstitial)ads.showInterstitial().catch(error=>console.warn('[GAMEZAAR] Interstitial skipped.',error));}
+}
+function showRevivalPrompt(){
+ const r=settings.revival||{};
+ const max=r.maxRevives==='unlimited'?Infinity:r.maxRevives==='custom'?Number(r.customMax)||1:Number(r.maxRevives)||1;
+ if(r.enabled!==true||revivalsUsed>=max){finishGame();return;}
+ const overlay=ensureRevivalOverlay();
+ const message=overlay.querySelector('#gzReviveMessage'),balance=overlay.querySelector('#gzReviveBalance'),actions=overlay.querySelector('#gzReviveActions'),note=overlay.querySelector('#gzReviveNote');
+ const baseCost=Math.max(1,Number(r.coinCost)||100)+(r.increasingCost?revivalsUsed*(Number(r.costIncrease)||50):0);
+ let coinCost=baseCost;
+ if(walletCoins<coinCost&&r.insufficientBehavior==='alternative')coinCost=Math.max(1,Number(r.alternativeCoinCost)||150);
+ const rewardedEnabled=settings.monetization?.rewardedOn===true;
+ const ads=window.GAMEZAAR_ADS;
+ const canRewarded=rewardedEnabled&&!!ads?.isNative?.();
+ const coinAllowed=r.method!=='ad'&&walletCoins>=coinCost;
+ const adAllowed=canRewarded&&(r.method==='ad'||r.method==='both'||(r.method==='coin'&&walletCoins<coinCost&&r.insufficientBehavior==='ad'));
+ if(!coinAllowed&&!adAllowed&&r.allowSkip!==true){finishGame();return;}
+ overlay.hidden=false;actions.replaceChildren();note.textContent='';
+ message.textContent='Revival '+(revivalsUsed+1)+' of '+(max===Infinity?'Unlimited':max)+'. Choose how to continue.';
+ balance.textContent='Wallet: '+walletCoins+' coins';
+ function addAction(label,handler,secondary=false){
+  const button=document.createElement('button');button.type='button';button.textContent=label;if(secondary)button.className='secondary';
+  button.addEventListener('click',handler);actions.appendChild(button);return button;
+ }
+ if(coinAllowed)addAction('↻ Revive for '+coinCost+' Coins',()=>resumeAfterRevival('coin',coinCost));
+ else if(r.method!=='ad'&&r.insufficientBehavior==='alternative'&&walletCoins<coinCost)note.textContent='Not enough coins for the alternative revival cost.';
+ else if(r.method!=='ad'&&walletCoins<baseCost&&r.insufficientBehavior==='end'&&r.method!=='both')note.textContent='Not enough coins to revive.';
+ if(adAllowed){
+  addAction('▶ Watch Ad to Revive',async button=>{
+   if(revivalPromptBusy)return;revivalPromptBusy=true;clearRevivalPromptTimer();
+   [...actions.querySelectorAll('button')].forEach(b=>b.disabled=true);note.textContent='Loading rewarded ad…';
+   try{
+    const result=await ads.showRewarded();
+    if(result?.earned){resumeAfterRevival('ad');return;}
+    note.textContent='Ad reward was not confirmed. No revival was granted. You can retry or end the race.';
+   }catch(error){note.textContent='Rewarded ad unavailable. No coins were deducted.';}
+   revivalPromptBusy=false;[...actions.querySelectorAll('button')].forEach(b=>b.disabled=false);
+  },true);
+ }
+ if(r.allowSkip!==false)addAction('End Race',()=>finishGame(),true);
+ if(!coinAllowed&&!adAllowed&&r.allowSkip!==false)note.textContent='No eligible revival method is currently available.';
+ const seconds=Math.max(0,Number(r.countdownSeconds)||0);
+ if(seconds>0){
+  let remaining=seconds;note.textContent='Choose within '+remaining+' seconds.';
+  revivalPromptTimer=setInterval(()=>{if(revivalPromptBusy)return;remaining--;if(remaining<=0){clearRevivalPromptTimer();finishGame();}else note.textContent='Choose within '+remaining+' seconds.';},1000);
+ }
+}
+function startGame(){if(running)return;revivalsUsed=0;interstitialShownForRun=false;revivalPromptBusy=false;clearRevivalPromptTimer();const reviveOverlay=document.getElementById('gamezaarRevivalOverlay');if(reviveOverlay)reviveOverlay.hidden=true;stopPopupAnimation();lastFrameTime=0;survivalTick=0;if(over){score=0;coinsCollected=0;coinSpawnSeconds=0;coinItems=[];frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;over=false;}hasStarted=true;running=true;playGameSound('raceStart');startBackgroundMusic();setState('RACING');draw();loop();}
 function spawn(){
  const selected=getTrafficModels().filter(v=>v.selected);if(!selected.length)return;
  const requested=Math.max(1,Math.min(5,Number(settings.trafficAmount)||1));
@@ -1738,8 +1825,8 @@ function spawn(){
 }
 let lastFrameTime=0,survivalTick=0;
 function loop(timestamp){if(!running)return;const elapsed=lastFrameTime?Math.max(0,timestamp-lastFrameTime):1000/60;lastFrameTime=timestamp;const step=Math.min(4,elapsed/(1000/60));frame+=step;const steerDelta=player.targetX-player.x;player.x+=steerDelta*(1-Math.pow(1-.19,step));if(Math.abs(steerDelta)<.12)player.x=player.targetX;const targetTilt=Math.max(-.13,Math.min(.13,steerDelta*.003));player.tilt+=(targetTilt-player.tilt)*(1-Math.pow(1-.22,step));const speedMultiplier=getScoreSpeedMultiplier();worldFrame+=speedMultiplier*step;const speed=1+3*.55;trafficCars.forEach(c=>c.y+=c.speed*speed*speedMultiplier/2*step);trafficCars=trafficCars.filter(c=>c.y<GAME_HEIGHT+TRAFFIC_CAR_HEIGHT);coinSpawnSeconds+=step/60;const coinInterval=Math.max(1,Number(settings.coinSystem?.intervalMinutes)||1)*60;while(coinSpawnSeconds>=coinInterval){coinSpawnSeconds-=coinInterval;spawnCoinBatch();}coinItems.forEach(c=>c.y+=speedMultiplier*step);coinItems=coinItems.filter(c=>c.y<GAME_HEIGHT+24);if(frame-lastSpawn>Math.max(45,Math.ceil(nextWaveDelay/speedMultiplier))){spawn();lastSpawn=frame;}
-const playerCollisionScale=graphicScale('playerCar'),trafficCollisionScale=graphicScale('trafficCars');for(const c of trafficCars){const collisionWidth=(PLAYER_CAR_WIDTH*playerCollisionScale+TRAFFIC_CAR_WIDTH*trafficCollisionScale)/2;const collisionHeight=(PLAYER_CAR_HEIGHT*playerCollisionScale+TRAFFIC_CAR_HEIGHT*trafficCollisionScale)/2;if(Math.abs(c.x-player.x)<collisionWidth&&Math.abs(c.y-player.y)<collisionHeight){crashBlast={x:(c.x+player.x)/2,y:(c.y+player.y)/2,started:performance.now(),scale:(playerCollisionScale+trafficCollisionScale)/2};running=false;over=true;stopBackgroundMusic();playGameSound('gameOver');setState('GAME OVER');draw();animatePopup();return;}}
-const scoreCfg=settings.scoreSystem||{};coinItems=coinItems.filter(c=>{const hit=Math.abs(c.x-player.x)<(13*graphicScale('playerCar')+12*(Number(settings.coinSystem?.size)||100)/100)&&Math.abs(c.y-player.y)<(20*graphicScale('playerCar')+12*(Number(settings.coinSystem?.size)||100)/100);if(hit){coinsCollected++;playGameSound('coinCollection');score+=Math.max(0,Number(scoreCfg.coinPoints??10)||0);return false;}return true;});trafficCars.forEach(c=>{if(!c.passed&&c.y>player.y+35){c.passed=true;if(scoreCfg.passOn!==false)score+=Math.max(0,Number(scoreCfg.passPoints)||0);}});
+const playerCollisionScale=graphicScale('playerCar'),trafficCollisionScale=graphicScale('trafficCars');for(const c of trafficCars){const collisionWidth=(PLAYER_CAR_WIDTH*playerCollisionScale+TRAFFIC_CAR_WIDTH*trafficCollisionScale)/2;const collisionHeight=(PLAYER_CAR_HEIGHT*playerCollisionScale+TRAFFIC_CAR_HEIGHT*trafficCollisionScale)/2;if(Math.abs(c.x-player.x)<collisionWidth&&Math.abs(c.y-player.y)<collisionHeight){crashBlast={x:(c.x+player.x)/2,y:(c.y+player.y)/2,started:performance.now(),scale:(playerCollisionScale+trafficCollisionScale)/2};running=false;over=true;stopBackgroundMusic();playGameSound('gameOver');setState('GAME OVER');draw();animatePopup();showRevivalPrompt();return;}}
+const scoreCfg=settings.scoreSystem||{};coinItems=coinItems.filter(c=>{const hit=Math.abs(c.x-player.x)<(13*graphicScale('playerCar')+12*(Number(settings.coinSystem?.size)||100)/100)&&Math.abs(c.y-player.y)<(20*graphicScale('playerCar')+12*(Number(settings.coinSystem?.size)||100)/100);if(hit){coinsCollected++;walletCoins++;try{localStorage.setItem(walletKey,String(walletCoins));}catch(_){}playGameSound('coinCollection');score+=Math.max(0,Number(scoreCfg.coinPoints??10)||0);return false;}return true;});trafficCars.forEach(c=>{if(!c.passed&&c.y>player.y+35){c.passed=true;if(scoreCfg.passOn!==false)score+=Math.max(0,Number(scoreCfg.passPoints)||0);}});
 survivalTick+=step;while(survivalTick>=60){survivalTick-=60;if(scoreCfg.survivalOn!==false)score+=Math.max(0,Number(scoreCfg.survivalPoints)||0);}if(score>highScore){highScore=score;localStorage.setItem(highScoreKey,String(highScore));}updateSpeedSystemStatus();updateDifficultySystemStatus();draw();raf=requestAnimationFrame(loop);}
 function move(dir){if(!running)return;const nextLane=Math.max(0,Math.min(2,playerLane+dir));if(nextLane!==playerLane){playerLane=nextLane;player.targetX=playerLaneX[playerLane];playGameSound('steering');}}
 canvas.addEventListener('click',e=>{if(running)return;const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)*canvas.width/rect.width,y=(e.clientY-rect.top)*canvas.height/rect.height;if(x>=105&&x<=255&&y>=Math.round((GAME_HEIGHT-180)/2)+120&&y<=Math.round((GAME_HEIGHT-180)/2)+170){playGameSound('startButton');startGame();}});
