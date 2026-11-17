@@ -178,7 +178,7 @@ jobs:
                   "game_type": project["game_type"],
                   "settings": settings
               }, ensure_ascii=False, separators=(",", ":")) + ";"
-              "localStorage.setItem('gamezaar_current_project',JSON.stringify({name:p.name,type:p.game_type,createdAt:new Date().toISOString()}));"
+              "localStorage.setItem('gamezaar_current_project',JSON.stringify({id:p.id,name:p.name,type:p.game_type,createdAt:new Date().toISOString()}));"
               "localStorage.setItem('gamezaar_racing_settings',JSON.stringify(p.settings));"
               "document.documentElement.classList.add('gz-exported-game');"
               "document.title=p.name;"
