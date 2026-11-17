@@ -565,6 +565,22 @@ html.gz-exported-game .game-shell.game-fullscreen-layout .control-pad{position:a
 <div class="tree-note">Test Mode ON is recommended while developing and testing. Use your own production Ad Unit IDs only after the app and ad integration are ready.</div>
 <div class="tree-note" id="monetizationStatus" role="status" aria-live="polite">Ad settings are saved with your game when you tap Save project.</div>
 <div class="tip" style="margin-top:10px">Important: This section stores your ad preferences and Ad Unit IDs in the game project. Actual ad display requires the Android ad SDK and export integration; enabling a switch here alone does not display ads.</div>
+</div></details>
+<details class="builder-section" id="revivalSection"><summary>18 · Player Revival System<span class="section-chevron" aria-hidden="true">⌄</span></summary><div class="builder-section-body">
+<div class="sound-option"><div class="sound-option-head"><span><strong>♻️ Enable Player Revival</strong><small>Let players continue after a crash or game over</small></span><input type="checkbox" id="revivalEnabled" aria-label="Enable Player Revival"></div></div>
+<div class="field"><label for="revivalMethod">Revival Method</label><select id="revivalMethod"><option value="coin">Coin Only</option><option value="ad">Rewarded Ad Only</option><option value="both">Both — Player Chooses</option></select><small class="tree-note" id="revivalAdNote">Rewarded Ad options require Rewarded Ads to be enabled in Monetization.</small></div>
+<div class="field" id="revivalCoinCostField"><label for="revivalCoinCost">Coin Cost Per Revival</label><input id="revivalCoinCost" type="number" min="1" max="1000000" step="1" value="100"><small class="tree-note">Coins are deducted only after the revival is successfully confirmed.</small></div>
+<label class="compact-toggle"><input id="revivalIncreasingCost" type="checkbox"> <span>Increase coin cost after every revival</span></label>
+<div class="field" id="revivalCostIncreaseField"><label for="revivalCostIncrease">Additional Coins Per Revival</label><input id="revivalCostIncrease" type="number" min="1" max="1000000" step="1" value="50"><small class="tree-note">Example: 100, then 150, then 200 coins.</small></div>
+<div class="field"><label for="revivalMax">Maximum Revivals Per Game</label><select id="revivalMax"><option value="1">1 Revival</option><option value="2">2 Revivals</option><option value="3">3 Revivals</option><option value="5">5 Revivals</option><option value="custom">Custom Limit</option><option value="unlimited">Unlimited</option></select></div>
+<div class="field" id="revivalCustomMaxField"><label for="revivalCustomMax">Custom Revival Limit</label><input id="revivalCustomMax" type="number" min="1" max="99" step="1" value="5"></div>
+<div class="field"><label for="revivalInsufficient">When Player Has Insufficient Coins</label><select id="revivalInsufficient"><option value="ad">Offer Rewarded Ad (if enabled)</option><option value="end">End the Game</option><option value="alternative">Offer Revival at Alternative Coin Cost</option></select></div>
+<div class="field" id="revivalAlternativeCostField"><label for="revivalAlternativeCost">Alternative Coin Cost</label><input id="revivalAlternativeCost" type="number" min="1" max="1000000" step="1" value="150"></div>
+<div class="field"><label for="revivalCountdown">Revival Countdown</label><select id="revivalCountdown"><option value="0">No Countdown</option><option value="5">5 Seconds</option><option value="10">10 Seconds</option><option value="15">15 Seconds</option><option value="20">20 Seconds</option></select><small class="tree-note">The player must choose a revival option before the countdown ends.</small></div>
+<label class="compact-toggle"><input id="revivalAllowSkip" type="checkbox" checked> <span>Allow player to skip revival</span></label>
+<div class="sound-option" style="margin-top:12px"><div class="sound-option-head"><span><strong>📊 Revival Statistics</strong><small>Track coin revivals and rewarded-ad revivals separately</small></span><span class="tag">AUTO TRACK</span></div></div>
+<div class="tree-note" id="revivalStatus" role="status" aria-live="polite">Revival settings are saved with your game when you tap Save project.</div>
+<div class="tip" style="margin-top:10px">Safety rules: Coins must not be deducted twice. Rewarded-ad revival is granted only after the ad network confirms the reward. This editor stores the rules; the exported game's revival flow and rewarded-ad SDK must implement them before players can use real revivals.</div>
 </div></details></aside>
 </div>
 <div class="savebar"><button class="btn" id="saveBtn">Save project</button><span class="status" id="saveStatus"></span></div>
@@ -744,6 +760,8 @@ if(!['red-white','black-white'].includes(settings.kerbStyle))settings.kerbStyle=
 if(typeof settings.kerbsOn!=='boolean')settings.kerbsOn=true;
 if(!settings.monetization||typeof settings.monetization!=='object')settings.monetization={};
 settings.monetization={provider:'admob_mediation',networks:{applovin:settings.monetization.networks?.applovin===true,unity:settings.monetization.networks?.unity===true,meta:settings.monetization.networks?.meta===true,pangle:settings.monetization.networks?.pangle===true,inmobi:settings.monetization.networks?.inmobi===true,mintegral:settings.monetization.networks?.mintegral===true},bannerOn:settings.monetization.bannerOn===true,interstitialOn:settings.monetization.interstitialOn===true,rewardedOn:settings.monetization.rewardedOn===true,testMode:settings.monetization.testMode!==false,bannerId:typeof settings.monetization.bannerId==='string'?settings.monetization.bannerId:'',interstitialId:typeof settings.monetization.interstitialId==='string'?settings.monetization.interstitialId:'',rewardedId:typeof settings.monetization.rewardedId==='string'?settings.monetization.rewardedId:'',bannerPosition:['top','bottom'].includes(settings.monetization.bannerPosition)?settings.monetization.bannerPosition:'bottom'};
+if(!settings.revival||typeof settings.revival!=='object')settings.revival={};
+settings.revival={enabled:settings.revival.enabled===true,method:['coin','ad','both'].includes(settings.revival.method)?settings.revival.method:'coin',coinCost:Math.max(1,Math.min(1000000,Math.floor(Number(settings.revival.coinCost)||100))),increasingCost:settings.revival.increasingCost===true,costIncrease:Math.max(1,Math.min(1000000,Math.floor(Number(settings.revival.costIncrease)||50))),maxRevives:['1','2','3','5','custom','unlimited'].includes(String(settings.revival.maxRevives))?String(settings.revival.maxRevives):'3',customMax:Math.max(1,Math.min(99,Math.floor(Number(settings.revival.customMax)||5))),insufficientBehavior:['ad','end','alternative'].includes(settings.revival.insufficientBehavior)?settings.revival.insufficientBehavior:'end',alternativeCoinCost:Math.max(1,Math.min(1000000,Math.floor(Number(settings.revival.alternativeCoinCost)||150))),countdownSeconds:[0,5,10,15,20].includes(Number(settings.revival.countdownSeconds))?Number(settings.revival.countdownSeconds):5,allowSkip:settings.revival.allowSkip!==false,trackStats:true};
 
 let gameAudioContext=null,musicTimer=0,musicStep=0,musicNodes=[],customSoundPlayers={};
 function getAudioContext(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;if(!gameAudioContext)gameAudioContext=new AC();if(gameAudioContext.state==='suspended')gameAudioContext.resume().catch(()=>{});return gameAudioContext;}
@@ -1512,6 +1530,47 @@ syncMonetizationSettings();
  const el=document.getElementById(id);
  el.addEventListener(el.type==='text'?'input':'change',saveMonetizationSettings);
 });
+function syncRevivalSettings(){
+ const r=settings.revival, rewardedOn=settings.monetization.rewardedOn===true;
+ const ids={revivalEnabled:r.enabled,revivalMethod:r.method,revivalCoinCost:r.coinCost,revivalIncreasingCost:r.increasingCost,revivalCostIncrease:r.costIncrease,revivalMax:r.maxRevives,revivalCustomMax:r.customMax,revivalInsufficient:r.insufficientBehavior,revivalAlternativeCost:r.alternativeCoinCost,revivalCountdown:String(r.countdownSeconds),revivalAllowSkip:r.allowSkip};
+ Object.entries(ids).forEach(([id,value])=>{const el=document.getElementById(id);if(el.type==='checkbox')el.checked=value;else el.value=String(value);});
+ document.querySelector('#revivalMethod option[value="ad"]').disabled=!rewardedOn;
+ document.querySelector('#revivalMethod option[value="both"]').disabled=!rewardedOn;
+ document.querySelector('#revivalInsufficient option[value="ad"]').disabled=!rewardedOn;
+ document.getElementById('revivalAdNote').textContent=rewardedOn?'Rewarded Ads are enabled in Monetization. Ad revival choices are available.':'Turn ON Rewarded Ads in Monetization to use Ad Only, Both, or the ad fallback.';
+ document.getElementById('revivalCoinCostField').hidden=r.method==='ad';
+ document.getElementById('revivalCostIncreaseField').hidden=!r.increasingCost||r.method==='ad';
+ document.getElementById('revivalCustomMaxField').hidden=r.maxRevives!=='custom';
+ document.getElementById('revivalAlternativeCostField').hidden=r.insufficientBehavior!=='alternative';
+ document.getElementById('revivalInsufficient').disabled=r.method==='ad';
+}
+function saveRevivalSettings(){
+ const r=settings.revival;
+ r.enabled=document.getElementById('revivalEnabled').checked;
+ r.method=document.getElementById('revivalMethod').value;
+ r.coinCost=Math.max(1,Math.min(1000000,Math.floor(Number(document.getElementById('revivalCoinCost').value)||1)));
+ r.increasingCost=document.getElementById('revivalIncreasingCost').checked;
+ r.costIncrease=Math.max(1,Math.min(1000000,Math.floor(Number(document.getElementById('revivalCostIncrease').value)||1)));
+ r.maxRevives=document.getElementById('revivalMax').value;
+ r.customMax=Math.max(1,Math.min(99,Math.floor(Number(document.getElementById('revivalCustomMax').value)||1)));
+ r.insufficientBehavior=document.getElementById('revivalInsufficient').value;
+ r.alternativeCoinCost=Math.max(1,Math.min(1000000,Math.floor(Number(document.getElementById('revivalAlternativeCost').value)||1)));
+ r.countdownSeconds=Number(document.getElementById('revivalCountdown').value)||0;
+ r.allowSkip=document.getElementById('revivalAllowSkip').checked;
+ r.trackStats=true;
+ if(!settings.monetization.rewardedOn&&r.insufficientBehavior==='ad')r.insufficientBehavior='end';
+ syncRevivalSettings();
+ try{localStorage.setItem('gamezaar_racing_settings',JSON.stringify(settings));document.getElementById('revivalStatus').textContent='✓ Revival settings saved on this device. Tap Save project to save the full game project.';}
+ catch(err){document.getElementById('revivalStatus').textContent='Could not save Revival settings. Check available device storage.';}
+}
+syncRevivalSettings();
+['revivalEnabled','revivalMethod','revivalCoinCost','revivalIncreasingCost','revivalCostIncrease','revivalMax','revivalCustomMax','revivalInsufficient','revivalAlternativeCost','revivalCountdown','revivalAllowSkip'].forEach(id=>{
+ const el=document.getElementById(id);
+ el.addEventListener(el.type==='number'?'input':'change',saveRevivalSettings);
+});
+const rewardedToggle=document.getElementById('monetizationRewarded');
+rewardedToggle.addEventListener('change',()=>{saveMonetizationSettings();syncRevivalSettings();if(!settings.monetization.rewardedOn&&settings.revival.insufficientBehavior==='ad'){settings.revival.insufficientBehavior='end';document.getElementById('revivalInsufficient').value='end';saveRevivalSettings();}});
+
 const kerbsToggle=document.getElementById('kerbsToggle');kerbsToggle.checked=settings.kerbsOn;kerbsToggle.addEventListener('change',e=>{settings.kerbsOn=e.target.checked;localStorage.setItem('gamezaar_racing_settings',JSON.stringify(settings));draw();});
 document.querySelectorAll('[data-kerb]').forEach(btn=>{btn.classList.toggle('active',btn.dataset.kerb===settings.kerbStyle);btn.addEventListener('click',()=>{settings.kerbStyle=btn.dataset.kerb;document.querySelectorAll('[data-kerb]').forEach(b=>b.classList.toggle('active',b===btn));localStorage.setItem('gamezaar_racing_settings',JSON.stringify(settings));draw();});});
 function drawRoadsideKerbs(){
