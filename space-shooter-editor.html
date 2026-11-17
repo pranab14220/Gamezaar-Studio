@@ -8,12 +8,52 @@
 :root{--bg:#171326;--panel:#29223f;--panel2:#211b34;--line:#ffffff22;--gold:#ffb84d;--gold2:#ffd18a;--text:#f8f5ff;--muted:#b9b1ca}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#7564a530,transparent 35%),var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}.wrap{width:min(1120px,calc(100% - 28px));margin:auto}header{height:66px;border-bottom:1px solid var(--line);display:flex;align-items:center}.nav{display:flex;align-items:center;justify-content:space-between}.brand{font-weight:900;letter-spacing:.6px}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:2px}.back{color:var(--gold2);text-decoration:none;font-size:13px;font-weight:700}.top{padding:24px 0 18px}.eyebrow{font-size:10px;color:var(--gold2);letter-spacing:1.8px;font-weight:900}.top h1{font-size:clamp(27px,4vw,38px);margin:5px 0}.top p{margin:0;color:var(--muted);font-size:13px}.layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(290px,.9fr);gap:16px;align-items:start}.panel{background:linear-gradient(145deg,#302744,#241e36);border:1px solid var(--line);border-radius:17px;padding:15px;min-width:0}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.panel h2{font-size:15px;margin:0}.tag{font-size:10px;color:#bce9c8;background:#bce9c817;padding:5px 8px;border-radius:20px}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}.tab,.smallbtn{border:1px solid var(--line);border-radius:9px;padding:8px 11px;background:#171326;color:var(--muted);font-size:11px;font-weight:800;cursor:pointer}.tab.active{color:#281c31;background:linear-gradient(135deg,var(--gold2),var(--gold));border-color:transparent}.stage-wrap{position:relative;background:radial-gradient(circle at 50% 40%,#34314e,#11101c 75%);border:1px solid #ffffff25;border-radius:13px;overflow:hidden;min-height:330px;display:grid;place-items:center;padding:12px}.stage-wrap canvas{width:min(100%,440px);height:auto;aspect-ratio:1/1;touch-action:none;display:block}.hint{font-size:10px;color:var(--muted);line-height:1.5;margin:9px 0 0}.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.row.between{justify-content:space-between}.btn{border:0;border-radius:10px;padding:10px 13px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#281c31;font-weight:900;font-size:11px;cursor:pointer}.btn.secondary{background:#ffffff12;color:var(--text);border:1px solid var(--line)}.btn.danger{background:#8d344b;color:white}.btn:disabled{opacity:.4}.section-title{font-size:12px;font-weight:900;color:var(--gold2);margin:18px 0 9px;padding-bottom:8px;border-bottom:1px solid var(--line)}.field{margin:12px 0}.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}.field input[type=text],.field input[type=number],.field select{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:9px;background:#171326;color:white;font:inherit;font-size:12px;outline:none}.field input:focus,.field select:focus{border-color:var(--gold)}.upload{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;padding:10px;border:1px dashed #ffb84d88;border-radius:10px;background:#ffb84d0c;color:var(--gold2);font-size:11px;font-weight:850;cursor:pointer}.upload input{display:none}.point-list{display:grid;gap:7px;margin-top:10px}.point-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px;border:1px solid var(--line);border-radius:9px;background:#171326;font-size:10px}.point-item strong{color:var(--gold2)}.point-item button{border:0;background:#ffffff12;color:#ffb3bd;border-radius:7px;padding:5px 8px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}.stat{padding:9px;border:1px solid var(--line);border-radius:9px;background:#171326}.stat small{display:block;color:var(--muted);font-size:9px}.stat strong{font-size:12px;color:var(--gold2)}.status{font-size:10px;color:#bce9c8;min-height:15px;margin-top:8px}.toggle{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11px}.toggle input{accent-color:var(--gold)}.footer-actions{display:flex;gap:9px;flex-wrap:wrap;margin:17px 0 40px}.hidden{display:none!important}
 @media(max-width:760px){.layout{grid-template-columns:1fr}.stage-wrap{min-height:290px}.stage-wrap canvas{max-width:340px}.top{padding-top:20px}.panel{padding:12px}}
+
+/* Dedicated studio navigation */
+.studio-shell{display:grid;grid-template-columns:238px minmax(0,1fr);gap:18px;align-items:start;margin-top:8px}
+.studio-sidebar{position:sticky;top:14px;background:linear-gradient(160deg,#2d2542,#211b32);border:1px solid var(--line);border-radius:17px;padding:12px;max-height:calc(100vh - 28px);overflow:auto}
+.side-heading{font-size:9px;letter-spacing:1.7px;color:var(--gold2);font-weight:900;padding:7px 9px 10px}
+.side-nav{display:grid;gap:4px}
+.side-link{display:flex;align-items:center;gap:10px;width:100%;border:1px solid transparent;border-radius:10px;padding:10px 9px;background:transparent;color:var(--muted);text-align:left;font:700 11px system-ui;cursor:pointer}
+.side-link .num{display:grid;place-items:center;width:23px;height:23px;border-radius:7px;background:#ffffff0c;color:var(--gold2);font-size:9px;flex:none}
+.side-link.active{background:linear-gradient(100deg,#ffb84d24,#ffb84d0b);border-color:#ffb84d55;color:#fff}
+.side-link.active .num{background:var(--gold);color:#271d32}
+.side-foot{border-top:1px solid var(--line);margin-top:10px;padding:11px 8px 3px;color:var(--muted);font-size:9px;line-height:1.5}
+.studio-main{min-width:0}.studio-main .top{padding-top:18px}
+.mobile-nav-toggle{display:none}
+.section-placeholder{background:linear-gradient(145deg,#302744,#241e36);border:1px solid var(--line);border-radius:17px;padding:clamp(18px,4vw,30px);min-height:340px}
+.placeholder-icon{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;background:#ffb84d18;color:var(--gold2);font-size:24px;margin-bottom:16px}
+.placeholder-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:22px}
+.placeholder-item{padding:12px;border:1px solid var(--line);border-radius:11px;background:#171326;color:var(--muted);font-size:11px}
+.placeholder-item strong{display:block;color:var(--text);margin-bottom:4px}
+@media(max-width:850px){.studio-shell{grid-template-columns:1fr}.studio-sidebar{position:relative;top:auto;max-height:none;padding:10px}.side-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.side-link{padding:9px 7px}.mobile-nav-toggle{display:inline-flex}.studio-sidebar.collapsed .side-nav,.studio-sidebar.collapsed .side-foot{display:none}.studio-sidebar.collapsed{padding-bottom:8px}.placeholder-list{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <header><div class="wrap nav"><div class="brand">GAMEZAAR<small>STUDIO · SPACE SHOOTER</small></div><a class="back" href="game-builder.html">← Game templates</a></div></header>
 <main class="wrap">
-<section class="top"><div class="eyebrow">SPACE SHOOTER · ASSET WORKSHOP</div><h1>Weapon Attachment Editor</h1><p>Upload your own ships, then place firing nozzles and effect anchors visually. Drag markers to match your artwork.</p></section>
+<div class="studio-shell">
+<aside class="studio-sidebar" id="studioSidebar">
+ <div class="row between" style="padding:4px 7px 8px"><div class="side-heading">SPACE SHOOTER STUDIO</div><button class="smallbtn mobile-nav-toggle" id="navToggle" aria-label="Toggle navigation">☰</button></div>
+ <nav class="side-nav" id="sideNav" aria-label="Studio sections">
+  <button class="side-link active" data-section="player"><span class="num">01</span> Player Ship</button>
+  <button class="side-link" data-section="enemies"><span class="num">02</span> Enemies</button>
+  <button class="side-link" data-section="weapons"><span class="num">03</span> Weapons</button>
+  <button class="side-link" data-section="boss"><span class="num">04</span> Boss System</button>
+  <button class="side-link" data-section="environment"><span class="num">05</span> Space Environment</button>
+  <button class="side-link" data-section="powerups"><span class="num">06</span> Power-ups</button>
+  <button class="side-link" data-section="audio"><span class="num">07</span> Sounds & Music</button>
+  <button class="side-link" data-section="controls"><span class="num">08</span> Controls & HUD</button>
+  <button class="side-link" data-section="waves"><span class="num">09</span> Waves & Difficulty</button>
+  <button class="side-link" data-section="rewards"><span class="num">10</span> Coins & Rewards</button>
+  <button class="side-link" data-section="preview"><span class="num">11</span> Game Preview</button>
+  <button class="side-link" data-section="monetization"><span class="num">12</span> Monetization & Build</button>
+ </nav>
+ <div class="side-foot">Your Space Shooter settings will be organized by game system. More sections will be connected to the playable game engine as they are implemented.</div>
+</aside>
+<div class="studio-main">
+<section class="top"><div class="eyebrow">GAMEZAAR · SPACE SHOOTER WORKSHOP</div><h1 id="workspaceTitle">Player Ship</h1><p id="workspaceSubtitle">Customize your spaceship artwork and attachment positions.</p></section>
+<div id="activeWorkspace">
 <div class="layout">
 <section class="panel">
  <div class="panel-head"><h2>01 / Ship Preview & Attachments</h2><span class="tag">DRAG TO POSITION</span></div>
@@ -46,10 +86,44 @@
  <p class="hint"><strong>Fire Point:</strong> bullet/laser muzzle location.<br><strong>Missile Point:</strong> missile launch location.<br><strong>Engine:</strong> thruster flame origin.<br><strong>Explosion:</strong> preferred destruction-effect origin.</p>
 </aside>
 </div>
+</div>
+<div id="placeholderWorkspace" class="section-placeholder hidden">
+ <div class="placeholder-icon" id="placeholderIcon">✦</div>
+ <div class="eyebrow" id="placeholderEyebrow">SPACE SHOOTER CONFIGURATION</div>
+ <h2 id="placeholderTitle" style="font-size:24px;margin:8px 0">Section setup</h2>
+ <p id="placeholderDescription" style="max-width:650px;color:var(--muted);font-size:13px;line-height:1.7">This section is part of the Space Shooter Studio structure.</p>
+ <div class="placeholder-list" id="placeholderList"></div>
+ <p class="hint" style="margin-top:18px">This navigation section is currently a planned workspace. Its controls are not yet connected to gameplay or APK export.</p>
+</div>
 <div class="footer-actions"><a class="btn secondary" href="game-builder.html">← Back to templates</a><button class="btn" id="saveBottom">Save Space Shooter Setup</button></div>
+</div></div>
 </main>
 <script>
 (()=>{
+
+const sectionInfo={
+ player:{title:'Player Ship',sub:'Customize your spaceship artwork and attachment positions.',icon:'🚀',items:[['Ship artwork','Upload your own transparent PNG, JPG or WebP ship.'],['Attachment points','Place weapon nozzles, missile launch points and engine anchors.']]},
+ enemies:{title:'Enemies',sub:'Plan enemy ship types, movement patterns and attack behavior.',icon:'👾',items:[['Enemy library','Different enemy ships, sizes and visual assets.'],['Behavior & stats','Movement speed, health, collision size and attack style.']]},
+ weapons:{title:'Weapons',sub:'Configure weapon types and align their launch points to your ship.',icon:'🎯',items:[['Weapon types','Bullets, spread shots, lasers and missiles.'],['Firing setup','Fire rate, damage, projectile speed and muzzle alignment.']]},
+ boss:{title:'Boss System',sub:'Design large enemy encounters and multi-phase boss battles.',icon:'☠️',items:[['Boss artwork','Custom boss ships, health bars and attack effects.'],['Boss phases','Attack patterns, phase changes and wave triggers.']]},
+ environment:{title:'Space Environment',sub:'Build the scrolling universe behind your battles.',icon:'🌌',items:[['Background layers','Space images, stars, planets and parallax movement.'],['Visual effects','Asteroids, nebulae and screen effects.']]},
+ powerups:{title:'Power-ups',sub:'Create pickups that change the player ship during a run.',icon:'✨',items:[['Pickup assets','Shield, health, rapid fire and weapon upgrades.'],['Pickup behavior','Duration, spawn chance and effect rules.']]},
+ audio:{title:'Sounds & Music',sub:'Add sound effects and background music to the game.',icon:'🔊',items:[['Sound effects','Laser, missile, hit, explosion and pickup sounds.'],['Music','Menu music, gameplay tracks and volume settings.']]},
+ controls:{title:'Controls & HUD',sub:'Set up mobile-friendly controls and the on-screen game display.',icon:'🎮',items:[['Player controls','Touch drag, virtual joystick and movement sensitivity.'],['HUD elements','Health, score, coins, pause and weapon indicators.']]},
+ waves:{title:'Waves & Difficulty',sub:'Control how enemy encounters progress over time.',icon:'📈',items:[['Wave setup','Spawn count, enemy mix and spawn intervals.'],['Difficulty curve','Progression speed, challenge scaling and boss intervals.']]},
+ rewards:{title:'Coins & Rewards',sub:'Configure the in-game reward and unlock system.',icon:'🪙',items:[['Coin drops','Enemy rewards, pickup values and drop chances.'],['Unlockables','Ship skins, upgrades and reward progression.']]},
+ preview:{title:'Game Preview',sub:'Test the complete Space Shooter experience as you build it.',icon:'▶️',items:[['Live gameplay','Play, pause and restart the current game build.'],['Debug checks','Review collisions, controls, performance and errors.']]},
+ monetization:{title:'Monetization & Build',sub:'Prepare ad placements and Android export settings.',icon:'📱',items:[['Monetization','Banner, interstitial and rewarded ad configuration.'],['Android build','App identity, splash screen and APK/AAB export.']]}
+};
+document.querySelectorAll('.side-link').forEach(btn=>btn.addEventListener('click',()=>{
+ const key=btn.dataset.section,info=sectionInfo[key];document.querySelectorAll('.side-link').forEach(x=>x.classList.toggle('active',x===btn));
+ document.getElementById('workspaceTitle').textContent=info.title;document.getElementById('workspaceSubtitle').textContent=info.sub;
+ const real=key==='player'||key==='weapons';document.getElementById('activeWorkspace').classList.toggle('hidden',!real);document.getElementById('placeholderWorkspace').classList.toggle('hidden',real);
+ if(!real){document.getElementById('placeholderIcon').textContent=info.icon;document.getElementById('placeholderTitle').textContent=info.title;document.getElementById('placeholderDescription').textContent=info.sub;document.getElementById('placeholderList').innerHTML=info.items.map(x=>'<div class="placeholder-item"><strong>'+x[0]+'</strong>'+x[1]+'</div>').join('');}
+ if(innerWidth<=850)document.getElementById('studioSidebar').classList.add('collapsed');
+}));
+document.getElementById('navToggle').onclick=()=>document.getElementById('studioSidebar').classList.toggle('collapsed');
+
 const canvas=document.getElementById('editorCanvas'),ctx=canvas.getContext('2d');
 const kinds={fire:{label:'Fire Point',color:'#ffc04f'},missile:{label:'Missile Point',color:'#ff8e67'},engine:{label:'Engine',color:'#67e6bd'},explosion:{label:'Explosion',color:'#c49aff'}};
 const ships={player:{image:null,src:'',points:[]},enemy:{image:null,src:'',points:[]},boss:{image:null,src:'',points:[]}};
