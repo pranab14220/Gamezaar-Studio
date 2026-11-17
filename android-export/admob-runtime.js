@@ -8,7 +8,7 @@ import {
 
 const TEST_IDS = {
   // Google's official Android demo ad units.
-  banner: 'ca-app-pub-3940256099942544/9214589741',
+  banner: 'ca-app-pub-3940256099942544/6300978111',
   interstitial: 'ca-app-pub-3940256099942544/1033173712',
   rewarded: 'ca-app-pub-3940256099942544/5224354917'
 };
@@ -131,7 +131,7 @@ async function initializeAds() {
         const options = adOptions('banner');
         await AdMob.showBanner({
           ...options,
-          adSize: BannerAdSize.ADAPTIVE_BANNER,
+          adSize: BannerAdSize.BANNER,
           position: config.bannerPosition === 'top'
             ? BannerAdPosition.TOP_CENTER
             : BannerAdPosition.BOTTOM_CENTER,
