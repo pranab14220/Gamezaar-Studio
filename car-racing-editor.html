@@ -1775,16 +1775,19 @@ function showRevivalPrompt(){
     if(result?.earned){resumeAfterRevival('ad');return;}
     note.textContent='Ad reward was not confirmed. No revival was granted. You can retry or end the race.';
    }catch(error){note.textContent='Rewarded ad unavailable. No coins were deducted.';}
-   revivalPromptBusy=false;[...actions.querySelectorAll('button')].forEach(b=>b.disabled=false);
+   revivalPromptBusy=false;[...actions.querySelectorAll('button')].forEach(b=>b.disabled=false);startCountdown();
   },true);
  }
  if(r.allowSkip!==false)addAction('End Race',()=>finishGame(),true);
  if(!coinAllowed&&!adAllowed&&r.allowSkip!==false)note.textContent='No eligible revival method is currently available.';
  const seconds=Math.max(0,Number(r.countdownSeconds)||0);
- if(seconds>0){
+ function startCountdown(){
+  clearRevivalPromptTimer();
+  if(seconds<=0)return;
   let remaining=seconds;note.textContent='Choose within '+remaining+' seconds.';
   revivalPromptTimer=setInterval(()=>{if(revivalPromptBusy)return;remaining--;if(remaining<=0){clearRevivalPromptTimer();finishGame();}else note.textContent='Choose within '+remaining+' seconds.';},1000);
  }
+ startCountdown();
 }
 function startGame(){if(running)return;revivalsUsed=0;interstitialShownForRun=false;revivalPromptBusy=false;clearRevivalPromptTimer();const reviveOverlay=document.getElementById('gamezaarRevivalOverlay');if(reviveOverlay)reviveOverlay.hidden=true;stopPopupAnimation();lastFrameTime=0;survivalTick=0;if(over){score=0;coinsCollected=0;coinSpawnSeconds=0;coinItems=[];frame=0;worldFrame=0;playerLane=1;player.x=player.targetX=playerLaneX[1];player.tilt=0;trafficCars=[];lastSpawn=0;over=false;}hasStarted=true;running=true;playGameSound('raceStart');startBackgroundMusic();setState('RACING');draw();loop();}
 function spawn(){
@@ -2153,5 +2156,27 @@ $('gzBuildButton').addEventListener('click',async()=>{
 updateAuthUI();
 </script>
 
+<script>
+if(!window.GAMEZAAR_ADS){
+ const readAdSettings=()=>{try{return JSON.parse(localStorage.getItem('gamezaar_racing_settings')||'{}').monetization||{};}catch(_){return {};}};
+ const showDemoAd=format=>new Promise(resolve=>{
+  const old=document.getElementById('gamezaarAdPreviewOverlay');if(old)old.remove();
+  const rewarded=format==='rewarded',overlay=document.createElement('div');
+  overlay.id='gamezaarAdPreviewOverlay';
+  overlay.style.cssText='position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(5,5,12,.94);font-family:system-ui,sans-serif;';
+  overlay.innerHTML='<div style="width:min(100%,360px);padding:22px;border:1px solid #ffca75;border-radius:18px;background:linear-gradient(145deg,#302744,#171326);color:#fff4dc;text-align:center;box-shadow:0 18px 55px #000b"><div style="font-size:10px;letter-spacing:2px;color:#ffca75;font-weight:900">GAMEZAAR · AD PREVIEW</div><h2 style="margin:12px 0 8px;font-size:20px">'+(rewarded?'Rewarded Video Demo':'Interstitial Ad Demo')+'</h2><p style="font-size:12px;line-height:1.55;color:#c9c1d8">Browser simulation only. No Google ad request, clicks, or earnings.</p><div style="height:82px;margin:15px 0;border:1px dashed #ffca7588;border-radius:10px;display:grid;place-items:center;color:#ffdda2;font-size:12px;font-weight:800">'+(rewarded?'DEMO VIDEO AD':'DEMO FULL-SCREEN AD')+'</div><div style="display:grid;gap:9px"><button id="gzPreviewAdPrimary" style="padding:12px;border:0;border-radius:10px;background:linear-gradient(135deg,#ffe0a0,#ffb84d);color:#281c31;font-weight:900">'+(rewarded?'Complete Demo Ad & Earn Revival':'Continue Game')+'</button><button id="gzPreviewAdClose" style="padding:10px;border:1px solid #ffffff35;border-radius:10px;background:#ffffff12;color:#fff4dc;font-weight:700">'+(rewarded?'Close without reward':'Close')+'</button></div></div>';
+  const done=value=>{overlay.remove();resolve(value);};
+  overlay.querySelector('#gzPreviewAdPrimary').addEventListener('click',()=>done(rewarded?{earned:true,demo:true,reward:{type:'demo-revival',amount:1}}:true));
+  overlay.querySelector('#gzPreviewAdClose').addEventListener('click',()=>done(rewarded?{earned:false,demo:true}:false));
+  document.body.appendChild(overlay);
+ });
+ window.GAMEZAAR_ADS={
+  initialize:async()=>false,isNative:()=>false,isPreview:()=>true,
+  getMode:()=>readAdSettings().testMode===false?'production':'test',
+  showInterstitial:async()=>readAdSettings().interstitialOn===true?!!(await showDemoAd('interstitial')):false,
+  showRewarded:async()=>readAdSettings().rewardedOn===true?await showDemoAd('rewarded'):{earned:false,reason:'rewarded-not-enabled'}
+ };
+}
+</script>
 <script src="admob-runtime.bundle.js"></script>
 </body></html>
