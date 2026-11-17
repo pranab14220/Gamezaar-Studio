@@ -1558,7 +1558,7 @@ function saveRevivalSettings(){
  r.countdownSeconds=Number(document.getElementById('revivalCountdown').value)||0;
  r.allowSkip=document.getElementById('revivalAllowSkip').checked;
  r.trackStats=true;
- if(!settings.monetization.rewardedOn&&r.insufficientBehavior==='ad')r.insufficientBehavior='end';
+ if(!settings.monetization.rewardedOn){if(r.method!=='coin')r.method='coin';if(r.insufficientBehavior==='ad')r.insufficientBehavior='end';}
  syncRevivalSettings();
  try{localStorage.setItem('gamezaar_racing_settings',JSON.stringify(settings));document.getElementById('revivalStatus').textContent='✓ Revival settings saved on this device. Tap Save project to save the full game project.';}
  catch(err){document.getElementById('revivalStatus').textContent='Could not save Revival settings. Check available device storage.';}
