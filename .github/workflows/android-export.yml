@@ -269,6 +269,37 @@ jobs:
           npm install --no-audit --no-fund
           npm run build:admob
 
+      - name: Validate exported game JavaScript
+        working-directory: android-export
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          class Scripts(HTMLParser):
+              def __init__(self):
+                  super().__init__(); self.items=[]; self.active=False; self.current=[]
+              def handle_starttag(self, tag, attrs):
+                  if tag.lower()=="script":
+                      attrs=dict(attrs)
+                      self.active="src" not in attrs and attrs.get("type","").lower() not in ("application/json","application/ld+json")
+                      self.current=[]
+              def handle_data(self, data):
+                  if self.active: self.current.append(data)
+              def handle_endtag(self, tag):
+                  if tag.lower()=="script" and self.active:
+                      self.items.append("".join(self.current)); self.active=False
+          parser=Scripts(); parser.feed(Path("www/index.html").read_text())
+          files=[]
+          for i, source in enumerate(parser.items):
+              if source.strip():
+                  p=Path(f"/tmp/gamezaar-inline-{i}.js"); p.write_text(source); files.append(str(p))
+          if not files: raise SystemExit("No inline game scripts were found to validate.")
+          Path("/tmp/gamezaar-inline-files.txt").write_text("\\n".join(files))
+          print("Prepared",len(files),"inline script(s) for syntax validation.")
+          PY
+          while IFS= read -r file; do node --check "$file"; done < /tmp/gamezaar-inline-files.txt
+
+
       - name: Progress — Android project
         if: ${{ github.event.inputs.job_id != '' }}
         env:
@@ -297,6 +328,14 @@ jobs:
           test_mode=config.get("testMode", True) is not False
           sample_app_id="ca-app-pub-3940256099942544~3347511713"
           active_ads=any(config.get(key, False) is True for key in ("bannerOn","interstitialOn","rewardedOn"))
+          if not test_mode and active_ads:
+              missing_units=[name for name, enabled, unit in (
+                  ("Banner", config.get("bannerOn", False), config.get("bannerId")),
+                  ("Interstitial", config.get("interstitialOn", False), config.get("interstitialId")),
+                  ("Rewarded", config.get("rewardedOn", False), config.get("rewardedId"))
+              ) if enabled and not str(unit or "").strip()]
+              if missing_units:
+                  raise SystemExit("Production Ad Unit ID missing for: "+", ".join(missing_units))
           app_id=sample_app_id if test_mode or not active_ads else str(config.get("appId") or "").strip()
           if not app_id:
               raise SystemExit("Production AdMob App ID is required when Test Mode is OFF. Add it in Monetization & Ads.")
