@@ -251,6 +251,20 @@ body.light-mode .settings-panel .smallnote{color:#756b7e!important}
   .settings-panel .savebar .btn{width:100%}
 }
 
+
+/* Player-facing appearance switch */
+.player-theme-toggle{margin-left:auto;white-space:nowrap;font-size:11px;padding:9px 11px}
+.preview-dialog.player-light-mode{background:#f4f0e8;color:#2d2638;border-color:#d6c9b5}
+.preview-dialog.player-light-mode .game-title{color:#5d4526}
+.preview-dialog.player-light-mode .game-description{color:#756b7e}
+.preview-dialog.player-light-mode .scorebox{background:#fff;color:#2d2638;border-color:#d8cbb8}
+.preview-dialog.player-light-mode .scorebox small{color:#756b7e}
+.preview-dialog.player-light-mode .btn.secondary{background:#fff;color:#43384e;border-color:#d8cbb8}
+.preview-dialog.player-light-mode .status{color:#77511e}
+.preview-dialog.player-light-mode .help{color:#756b7e}
+.preview-dialog.player-light-mode .player-theme-toggle{background:linear-gradient(135deg,#302744,#241e36);color:#ffe0a0;border-color:#5b4b70}
+@media(max-width:420px){.game-actions{flex-wrap:wrap}.player-theme-toggle{margin-left:0}}
+
 </style>
 </head>
 <body>
@@ -262,7 +276,7 @@ body.light-mode .settings-panel .smallnote{color:#756b7e!important}
 <div class="panel-head"><h2>01 / Live game preview</h2><span class="tag">PLAYABLE</span></div>
 <div class="game-wrap">
 <div class="game-head"><div><div class="game-title" id="previewTitle">2048</div><div class="game-description" id="previewDescription"></div></div><div class="scores"><div class="scorebox"><small>Score</small><strong id="score">0</strong></div><div class="scorebox"><small>Best</small><strong id="best">0</strong></div></div></div>
-<div class="game-actions"><button class="btn" id="newGame">New Game ↻</button><button class="btn secondary" id="undo" disabled>Undo ↶</button></div>
+<div class="game-actions"><button class="btn" id="newGame">New Game ↻</button><button class="btn secondary" id="undo" disabled>Undo ↶</button><button class="btn secondary player-theme-toggle" id="playerThemeToggle" type="button" aria-label="Switch game appearance">☀️ Light Mode</button></div>
 <div class="board" id="board" aria-label="2048 game board"></div>
 <div class="status" id="gameStatus" aria-live="polite">Use arrow keys or swipe to move tiles.</div>
 <div class="help">How to play: move tiles in any direction. Matching numbers merge into one. Reach your target tile to win. Keep merging to continue playing.</div>
@@ -317,13 +331,17 @@ body.light-mode .settings-panel .smallnote{color:#756b7e!important}
 <script>
 const $=id=>document.getElementById(id);
 const previewOverlay=$('previewOverlay'),previewMount=$('previewMount'),previewDialog=$('previewDialog'),gameWrap=document.querySelector('.preview-panel .game-wrap'),gameSplash=$('gameSplash');previewMount.appendChild(gameWrap);previewMount.appendChild(gameSplash);
+const playerThemeToggle=$('playerThemeToggle');
+function setPlayerTheme(mode,remember=true){const light=mode==='light';previewDialog.classList.toggle('player-light-mode',light);playerThemeToggle.textContent=light?'🌙 Dark Mode':'☀️ Light Mode';playerThemeToggle.setAttribute('aria-label',light?'Switch to dark mode':'Switch to light mode');if(remember){try{localStorage.setItem('gamezaar_2048_player_theme',mode);}catch(e){}}}
+playerThemeToggle.addEventListener('click',()=>setPlayerTheme(previewDialog.classList.contains('player-light-mode')?'dark':'light'));
+
 let splashTimer=null,splashInterval=null;
 function hideGameSplash(){if(splashTimer){clearTimeout(splashTimer);splashTimer=null;}if(splashInterval){clearInterval(splashInterval);splashInterval=null;}$('gameSplash').classList.remove('active');$('gameSplash').setAttribute('aria-hidden','true');}
 function showGameSplash(){hideGameSplash();$('splashCountdown').style.display='grid';let remaining=5;$('splashCountdown').textContent=String(remaining);$('splashActions').hidden=true;$('gameSplash').classList.add('active');$('gameSplash').setAttribute('aria-hidden','false');splashInterval=setInterval(()=>{remaining=Math.max(0,remaining-1);$('splashCountdown').textContent=String(remaining);if(remaining===0&&splashInterval){clearInterval(splashInterval);splashInterval=null;}},1000);splashTimer=setTimeout(()=>{$('splashActions').hidden=false;$('splashCountdown').style.display='none';splashTimer=null;},5000);}
 $('splashPlay').addEventListener('click',hideGameSplash);$('splashSkip').addEventListener('click',hideGameSplash);
 function syncStudioOptions(){const mode=document.querySelector('input[name="appearanceMode"]:checked')?.value||'dark';previewDialog.classList.remove('fullscreen-layout');previewDialog.classList.toggle('light-mode',mode==='light');document.body.classList.toggle('light-mode',mode==='light');}
 function closeLivePreview(){hideGameSplash();previewOverlay.classList.remove('open');$('openLivePreview').focus();}
-$('openLivePreview').addEventListener('click',()=>{syncStudioOptions();previewOverlay.classList.add('open');showGameSplash();});
+$('openLivePreview').addEventListener('click',()=>{syncStudioOptions();let playerMode='';try{playerMode=localStorage.getItem('gamezaar_2048_player_theme')||'';}catch(e){}setPlayerTheme(playerMode||(document.querySelector('input[name="appearanceMode"]:checked')?.value||'dark'),false);previewOverlay.classList.add('open');showGameSplash();});
 $('splashPlay').addEventListener('click',hideGameSplash);$('closeLivePreview').addEventListener('click',closeLivePreview);previewOverlay.addEventListener('click',e=>{if(e.target===previewOverlay)closeLivePreview();});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&previewOverlay.classList.contains('open'))closeLivePreview();});
 let size=4,grid=[],score=0,best=Number(localStorage.getItem('gz2048_best')||0),history=null,won=false,keepPlaying=false,theme='classic',audioCtx=null;
 const themes={
