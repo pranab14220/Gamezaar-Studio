@@ -345,7 +345,8 @@ function syncStudioOptions(){const mode=document.querySelector('input[name="appe
 function closeLivePreview(){hideGameSplash();previewOverlay.classList.remove('open');$('openLivePreview').focus();}
 $('openLivePreview').addEventListener('click',()=>{syncStudioOptions();let playerMode='';try{playerMode=localStorage.getItem('gamezaar_2048_player_theme')||'';}catch(e){}setPlayerTheme(playerMode||(document.querySelector('input[name="appearanceMode"]:checked')?.value||'dark'),false);previewOverlay.classList.add('open');showGameSplash();});
 $('splashPlay').addEventListener('click',hideGameSplash);$('closeLivePreview').addEventListener('click',closeLivePreview);previewOverlay.addEventListener('click',e=>{if(e.target===previewOverlay)closeLivePreview();});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&previewOverlay.classList.contains('open'))closeLivePreview();});
-let size=4,grid=[],score=0,best=Number(localStorage.getItem('gz2048_best')||0),history=null,won=false,keepPlaying=false,theme='classic',audioCtx=null;\nconst assetData={};let musicAudio=null;
+let size=4,grid=[],score=0,best=Number(localStorage.getItem('gz2048_best')||0),history=null,won=false,keepPlaying=false,theme='classic',audioCtx=null;
+const assetData={};let musicAudio=null;
 const themes={
 classic:{board:'#342b4e',empty:'#211b31',colors:{2:['#eee4da','#655b52'],4:['#ede0c8','#655b52'],8:['#f2b179','#fff'],16:['#f59563','#fff'],32:['#f67c5f','#fff'],64:['#f65e3b','#fff'],128:['#edcf72','#fff'],256:['#edcc61','#fff'],512:['#edc850','#fff'],1024:['#edc53f','#fff'],2048:['#edc22e','#fff']}},
 ocean:{board:'#17384a',empty:'#102b3b',colors:{2:['#d9f0f2','#24515b'],4:['#a8dadc','#24515b'],8:['#75c9d1','#103b4a'],16:['#48b5c5','#fff'],32:['#2a9dba','#fff'],64:['#287da5','#fff'],128:['#6c91c2','#fff'],256:['#5575ad','#fff'],512:['#425b91','#fff'],1024:['#354879','#fff'],2048:['#f4c95d','#253047']}},
@@ -363,7 +364,7 @@ document.querySelectorAll(".asset-file").forEach(input=>input.addEventListener("
  const audio=key.toLowerCase().indexOf("sound")>=0||key==="backgroundMusic";
  const limits={tileBackground:307200,gameBackground:512000,gameLogo:256000,winImage:409600,gameOverImage:409600,backgroundMusic:1048576,moveSound:153600,mergeSound:153600,winSound:153600,gameOverSound:153600};
  const limit=limits[key]||256000;if(file.size>limit){toast("File too large. Maximum "+Math.round(limit/1024)+" KB.");input.value="";return;}
- if(audio&&!(/\\.(mp3|ogg|opus)$/i).test(file.name)){toast("Choose MP3, OGG or OPUS audio.");input.value="";return;}
+ if(audio&&![".mp3",".ogg",".opus"].some(ext=>file.name.toLowerCase().endsWith(ext))){toast("Choose MP3, OGG or OPUS audio.");input.value="";return;}
  if(!audio&&file.type.indexOf("image/")!==0){toast("Choose an image file.");input.value="";return;}
  const reader=new FileReader();reader.onload=()=>{assetData[key]=String(reader.result);try{localStorage.setItem("gz2048_asset_"+key,assetData[key]);}catch(e){toast("Browser storage full. Use a smaller file.");return;}updateAssetPreview(key,assetData[key]);toast("✓ "+file.name+" added");};reader.readAsDataURL(file);
 }));
