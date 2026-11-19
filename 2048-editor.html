@@ -16,6 +16,18 @@ body.light-mode{background:#f3efe8;color:#2d2638}body.light-mode .panel{backgrou
 .preview-fab:active{transform:translateY(2px) scale(.97);box-shadow:0 4px 12px #0008}
 .preview-fab span{font-size:15px}
 @media(max-width:420px){.preview-fab{right:14px;bottom:calc(14px + env(safe-area-inset-bottom));padding:12px 17px}}
+
+/* Full-screen game canvas with a slim preview toolbar kept outside the game area */
+.preview-overlay{padding:0;align-items:stretch;justify-content:stretch;overflow:hidden;background:#090711}
+.preview-dialog{width:100%;height:100%;max-height:100dvh;min-height:0;overflow:hidden;display:flex;flex-direction:column;padding:0;border:0;border-radius:0;box-shadow:none;background:radial-gradient(ellipse at 50% 20%,#342849 0%,#171326 72%)}
+.preview-dialog-head{position:relative;z-index:8;flex:0 0 42px;min-height:42px;margin:0;padding:0 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;border:0;border-bottom:1px solid #ffffff20;background:#171326}
+.preview-dialog-head h2{font-size:12px;letter-spacing:.8px;color:var(--gold2);font-weight:900}
+.preview-close{padding:5px 10px;border-radius:7px;font-size:11px;line-height:1.2}
+#previewMount{position:relative;isolation:isolate;flex:1;min-height:0;width:100%;overflow:auto;display:flex;align-items:center;justify-content:center;padding:clamp(10px,3vw,24px)}
+.preview-dialog .game-wrap{width:min(100%,560px);max-width:560px;margin:auto}
+.preview-dialog .board{width:min(100%,min(72vw,520px));margin-left:auto;margin-right:auto}
+.preview-dialog .splash-overlay{position:absolute;inset:0;z-index:6;border-radius:0}
+@media(max-width:600px){#previewMount{align-items:flex-start;padding:16px 12px}.preview-dialog .game-wrap{width:100%;max-width:480px}.preview-dialog .board{width:min(100%,min(88vw,480px))}}
 </style>
 </head>
 <body>
@@ -82,11 +94,11 @@ body.light-mode{background:#f3efe8;color:#2d2638}body.light-mode .panel{backgrou
 </div>
 </main>
 <button class="preview-fab" id="openLivePreview" type="button"><span aria-hidden="true">▶</span> Live Preview</button>
-<div class="preview-overlay" id="previewOverlay" role="dialog" aria-modal="true" aria-label="2048 live game preview"><div class="preview-dialog" id="previewDialog"><div class="preview-dialog-head"><h2>▶ 2048 LIVE PREVIEW</h2><button class="preview-close" id="closeLivePreview">✕ Close</button></div><div id="previewMount"></div><div class="splash-overlay" id="gameSplash" aria-hidden="true"><div class="splash-content"><div class="splash-brand">GAMEZAAR<br><span>STUDIO</span></div><div class="splash-tagline">CREATE · PLAY · SHARE · <strong>EARN</strong></div><div class="splash-copy">Your game. Your creativity.<br>Your earning journey starts here.</div><div class="splash-credit">Created with <strong>Gamezaar-Studio.in</strong></div><div class="splash-count" id="splashCountdown">5</div><div class="splash-actions" id="splashActions" hidden><button type="button" class="splash-play" id="splashPlay">▶ PLAY</button><button type="button" class="splash-skip" id="splashSkip" aria-label="Skip splash screen">×</button></div></div></div></div></div>
+<div class="preview-overlay" id="previewOverlay" role="dialog" aria-modal="true" aria-label="2048 live game preview"><div class="preview-dialog" id="previewDialog"><div class="preview-dialog-head"><h2>▶ LIVE PREVIEW</h2><button class="preview-close" id="closeLivePreview">✕ Close</button></div><div id="previewMount"></div><div class="splash-overlay" id="gameSplash" aria-hidden="true"><div class="splash-content"><div class="splash-brand">GAMEZAAR<br><span>STUDIO</span></div><div class="splash-tagline">CREATE · PLAY · SHARE · <strong>EARN</strong></div><div class="splash-copy">Your game. Your creativity.<br>Your earning journey starts here.</div><div class="splash-credit">Created with <strong>Gamezaar-Studio.in</strong></div><div class="splash-count" id="splashCountdown">5</div><div class="splash-actions" id="splashActions" hidden><button type="button" class="splash-play" id="splashPlay">▶ PLAY</button><button type="button" class="splash-skip" id="splashSkip" aria-label="Skip splash screen">×</button></div></div></div></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 const $=id=>document.getElementById(id);
-const previewOverlay=$('previewOverlay'),previewMount=$('previewMount'),previewDialog=$('previewDialog'),gameWrap=document.querySelector('.preview-panel .game-wrap');previewMount.appendChild(gameWrap);
+const previewOverlay=$('previewOverlay'),previewMount=$('previewMount'),previewDialog=$('previewDialog'),gameWrap=document.querySelector('.preview-panel .game-wrap'),gameSplash=$('gameSplash');previewMount.appendChild(gameWrap);previewMount.appendChild(gameSplash);
 let splashTimer=null,splashInterval=null;
 function hideGameSplash(){if(splashTimer){clearTimeout(splashTimer);splashTimer=null;}if(splashInterval){clearInterval(splashInterval);splashInterval=null;}$('gameSplash').classList.remove('active');$('gameSplash').setAttribute('aria-hidden','true');}
 function showGameSplash(){hideGameSplash();$('splashCountdown').style.display='grid';let remaining=5;$('splashCountdown').textContent=String(remaining);$('splashActions').hidden=true;$('gameSplash').classList.add('active');$('gameSplash').setAttribute('aria-hidden','false');splashInterval=setInterval(()=>{remaining=Math.max(0,remaining-1);$('splashCountdown').textContent=String(remaining);if(remaining===0&&splashInterval){clearInterval(splashInterval);splashInterval=null;}},1000);splashTimer=setTimeout(()=>{$('splashActions').hidden=false;$('splashCountdown').style.display='none';splashTimer=null;},5000);}
