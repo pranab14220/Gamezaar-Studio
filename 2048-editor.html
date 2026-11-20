@@ -546,6 +546,14 @@ body.light-mode .settings-panel>.builder-section{
 .preview-dialog .game-logo-mark.logo-classic{background:linear-gradient(135deg,#ffdc9a,#d78b36)!important;box-shadow:inset 0 0 0 3px #fff5d2,0 4px 10px #0005!important}
 .preview-dialog .game-logo-mark.logo-circle{border-radius:50%!important;transform:rotate(-6deg);box-shadow:0 0 0 3px #ffcf83,0 5px 12px #0006!important}
 
+
+/* Final priority for creator-selected preview colors */
+.preview-dialog.creator-custom-bg #previewMount{background-color:var(--creator-game-bg)!important}
+.preview-dialog .game-topbar{background:var(--creator-title-bg)!important}
+.preview-dialog .board{background-color:var(--creator-board-bg)!important}
+.preview-dialog .cell{background-color:var(--creator-tile-bg)!important}
+.preview-dialog .scorebox{background-color:var(--creator-score-bg)!important}
+
 </style>
 </head>
 <body>
@@ -688,7 +696,7 @@ function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');
 
 function applyVisualCustomization(){
  const v=id=>$(id).value;
- previewDialog.style.setProperty('--creator-game-bg',v('gameBgColor'));
+ previewDialog.style.setProperty('--creator-game-bg',v('gameBgColor'));previewMount.style.backgroundColor=v('gameBgColor');
  previewDialog.style.setProperty('--creator-board-bg',v('boardBgColor'));
  previewDialog.style.setProperty('--creator-title-bg',v('titleBarColor'));
  previewDialog.style.setProperty('--creator-score-bg',v('scoreBgColor'));
