@@ -382,6 +382,65 @@ body.light-mode .settings-panel>.builder-section{
 .preview-dialog.player-light-mode .score-icon{color:#a66a20;text-shadow:none}
 @media(max-width:390px){.score-strip{gap:6px}.score-strip .score-inline{padding:6px 9px;gap:5px}.score-strip .score-inline strong{font-size:15px}}
 
+
+/* Design 3 — slim floating gold-purple premium toolbar */
+.game-topbar{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:10px!important;margin:0 0 12px!important;padding:9px 10px!important;
+  border:1px solid #d99b4f88!important;border-radius:18px!important;
+  background:linear-gradient(135deg,#453354 0%,#2b203d 55%,#1e182d 100%)!important;
+  box-shadow:0 8px 22px #08051180,0 0 0 2px #ffbd5810,inset 0 1px 0 #ffffff20,inset 0 -2px 0 #08061155!important;
+}
+.game-brand-lockup{display:flex!important;align-items:center!important;gap:9px!important;min-width:0!important}
+.game-logo-mark{
+  width:37px!important;height:37px!important;flex:0 0 37px!important;
+  display:grid!important;grid-template-columns:repeat(2,1fr)!important;grid-template-rows:repeat(2,1fr)!important;
+  gap:2px!important;padding:3px!important;border:1px solid #ffcf83!important;border-radius:10px!important;
+  background:linear-gradient(145deg,#f7c46f,#b87531)!important;
+  box-shadow:0 3px 9px #0006,0 0 13px #ffbd5830!important;
+}
+.game-logo-mark span{display:grid!important;place-items:center!important;border-radius:3px!important;background:linear-gradient(145deg,#fff0c9,#e8ad50)!important;color:#39233d!important;font-size:9px!important;font-weight:1000!important;line-height:1!important}
+.game-brand-copy{min-width:0!important}
+.game-brand-copy .game-title{font-size:clamp(18px,4vw,23px)!important;line-height:1!important;letter-spacing:.2px!important;color:#ffcf83!important;text-shadow:0 2px 9px #ffb84d35!important}
+.game-brand-copy .game-description{display:none!important}
+.game-top-controls{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:6px!important;margin:0!important;flex:0 0 auto!important}
+.icon-control{
+  display:grid!important;place-items:center!important;width:36px!important;height:36px!important;
+  padding:0!important;border:1px solid #d9a35f66!important;border-radius:50%!important;
+  background:linear-gradient(145deg,#594466,#342842)!important;color:#ffe2ad!important;
+  box-shadow:0 3px 8px #08051170,inset 0 1px 0 #ffffff20!important;
+  font-size:20px!important;line-height:1!important;transition:transform .15s ease,filter .15s ease!important;
+}
+.icon-control:active{transform:scale(.93)!important;filter:brightness(1.2)!important}
+.icon-control:disabled{opacity:.35!important}
+.player-theme-toggle{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:43px!important;flex:0 0 43px!important;height:36px!important;padding:0!important;
+  border:1px solid #d9a35f66!important;border-radius:999px!important;
+  background:linear-gradient(145deg,#594466,#342842)!important;
+  box-shadow:0 3px 8px #08051170,inset 0 1px 0 #ffffff20!important;
+}
+.player-theme-toggle .theme-switch-track{transform:scale(.82)!important}
+.player-theme-toggle[aria-pressed="true"] .theme-switch-knob{transform:translateX(20px)!important}
+.preview-dialog.player-light-mode .game-topbar{
+  background:linear-gradient(135deg,#fff2d8,#ead8f0 58%,#ded0e9)!important;
+  border-color:#bd8b51!important;box-shadow:0 7px 18px #6e4d3026,inset 0 1px 0 #fff!important;
+}
+.preview-dialog.player-light-mode .game-brand-copy .game-title{color:#68452d!important;text-shadow:none!important}
+.preview-dialog.player-light-mode .icon-control,.preview-dialog.player-light-mode .player-theme-toggle{
+  background:linear-gradient(145deg,#fff,#e6d9ee)!important;color:#67452f!important;border-color:#c6a16e!important;
+  box-shadow:0 3px 8px #6e4d3020,inset 0 1px 0 #fff!important;
+}
+@media(max-width:390px){
+  .game-topbar{padding:8px!important;gap:6px!important;border-radius:15px!important}
+  .game-logo-mark{width:33px!important;height:33px!important;flex-basis:33px!important}
+  .game-brand-lockup{gap:7px!important}
+  .game-brand-copy .game-title{font-size:19px!important}
+  .game-top-controls{gap:5px!important}
+  .icon-control{width:33px!important;height:33px!important;font-size:18px!important}
+  .player-theme-toggle{width:39px!important;flex-basis:39px!important;height:33px!important}
+}
+
 </style>
 </head>
 <body>
