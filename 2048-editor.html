@@ -461,6 +461,21 @@ body.light-mode .settings-panel>.builder-section{
 @media(max-width:600px){#previewMount{align-items:flex-start!important;padding:0 10px 12px!important}.preview-dialog .game-wrap{margin:0 auto!important}}
 @media(max-width:390px){.game-top-controls{gap:9px!important}.player-theme-toggle{width:43px!important;flex-basis:43px!important;height:35px!important}}
 
+
+/* Compact score pills and align their right edge with the game board */
+.score-strip{
+  width:100%!important;max-width:100%!important;box-sizing:border-box!important;
+  justify-content:flex-end!important;gap:7px!important;
+  padding:0!important;margin:0 0 9px!important;
+}
+.score-strip .score-inline{
+  box-sizing:border-box!important;min-height:27px!important;height:27px!important;
+  padding:3px 9px!important;gap:5px!important;border-radius:9px!important;
+}
+.score-strip .score-inline strong{font-size:14px!important;line-height:1!important}
+.score-strip .score-icon{width:16px!important;height:16px!important;font-size:16px!important}
+.score-strip .best-score-icon{font-size:13px!important}
+
 </style>
 </head>
 <body>
