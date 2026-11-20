@@ -330,6 +330,46 @@ body.light-mode .settings-panel>.builder-section{
   box-shadow:0 10px 24px #5c46301c,inset 0 1px 0 #ffffff!important;
 }
 
+
+/* Compact premium 2048 top bar: logo + icon controls + theme switch */
+.game-topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px!important;padding:10px 11px;border:1px solid #ffffff24;border-radius:15px;background:linear-gradient(135deg,#3a2e50 0%,#211a31 72%);box-shadow:0 8px 20px #08061155,inset 0 1px 0 #ffffff18}
+.game-brand-lockup{display:flex;align-items:center;gap:10px;min-width:0}
+.game-logo-mark{width:48px;height:48px;flex:0 0 48px;display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:4px;border:1px solid #ffe1a0;border-radius:12px;background:linear-gradient(145deg,#ffe6ad,#e99a32);box-shadow:0 4px 10px #0006,0 0 18px #ffbd5840,inset 0 1px 2px #fff9;transform:rotate(-3deg)}
+.game-logo-mark span{display:grid;place-items:center;border-radius:4px;background:linear-gradient(145deg,#fff4d7,#edc16c);color:#69421d;font-size:13px;font-weight:1000;line-height:1;box-shadow:0 2px 3px #8a581c55,inset 0 1px 1px #fff}
+.game-logo-mark span:nth-child(2){background:linear-gradient(145deg,#f9c77e,#ed9850);color:#fff}
+.game-logo-mark span:nth-child(3){background:linear-gradient(145deg,#f2a25e,#db713b);color:#fff}
+.game-logo-mark span:nth-child(4){background:linear-gradient(145deg,#ffe9a4,#edbd3e);color:#69421d}
+.game-brand-copy{min-width:0}
+.game-brand-copy .game-title{font-size:clamp(22px,5vw,30px);line-height:1;font-weight:1000;letter-spacing:-1px;color:#ffd18a;text-shadow:0 2px 0 #70451e,0 0 14px #ffb84d45}
+.game-brand-copy .game-description{margin-top:4px;font-size:9px}
+.game-top-controls{display:flex;align-items:center;gap:7px;flex:0 0 auto;margin:0!important}
+.icon-control{width:40px;height:40px;display:grid;place-items:center;padding:0;border:1px solid #ffcf8066;border-radius:12px;background:linear-gradient(145deg,#493958,#251d35);color:#ffe0a0;font-size:25px;font-weight:800;line-height:1;box-shadow:0 4px 9px #0005,inset 0 1px 0 #ffffff24;cursor:pointer;transition:transform .16s,filter .16s,box-shadow .16s}
+.icon-control.new-game-control{background:linear-gradient(145deg,#ffe0a0,#ffb84d);color:#38243a;border-color:#fff0c4;font-size:29px}
+.icon-control.undo-control{font-size:25px}
+.icon-control:active{transform:translateY(2px) scale(.96)}
+.icon-control:disabled{opacity:.35;filter:grayscale(.65);cursor:not-allowed;box-shadow:none}
+.player-theme-toggle{width:58px;height:34px;flex:0 0 58px;padding:0;border:1px solid #ffcf8066;border-radius:999px;background:linear-gradient(145deg,#302744,#1c172b);box-shadow:0 4px 10px #0005,inset 0 1px 0 #ffffff20;cursor:pointer;position:relative}
+.theme-switch-track{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 7px;color:#ffd18a;font-size:13px}
+.theme-switch-knob{position:absolute;left:3px;top:3px;width:26px;height:26px;border-radius:50%;background:linear-gradient(145deg,#ffe7b0,#ffb84d);box-shadow:0 2px 6px #0007,inset 0 1px 1px #fff;transition:transform .2s cubic-bezier(.2,.8,.2,1)}
+.player-theme-toggle[aria-pressed="true"] .theme-switch-knob{transform:translateX(24px);background:linear-gradient(145deg,#e6e3ff,#a99be8)}
+.player-theme-toggle[aria-pressed="true"] .theme-switch-track{color:#d9d1ff}
+.scores{justify-content:flex-end;margin:0 0 11px}
+.preview-dialog.player-light-mode .game-topbar{background:linear-gradient(135deg,#fff,#e9dfd1);border-color:#d9c8ae;box-shadow:0 8px 18px #5c46301c,inset 0 1px 0 #fff}
+.preview-dialog.player-light-mode .game-brand-copy .game-title{color:#79501e;text-shadow:0 1px 0 #fff,0 0 12px #d99b3d35}
+.preview-dialog.player-light-mode .icon-control:not(.new-game-control){background:linear-gradient(145deg,#fff,#e8dfd3);color:#624a30;border-color:#d8c6ad;box-shadow:0 4px 9px #5c463022,inset 0 1px 0 #fff}
+.preview-dialog.player-light-mode .player-theme-toggle{background:linear-gradient(145deg,#fff,#e8dfd3);border-color:#d8c6ad}
+@media(max-width:390px){
+ .game-topbar{padding:8px;gap:6px}
+ .game-brand-lockup{gap:7px}
+ .game-logo-mark{width:41px;height:41px;flex-basis:41px}
+ .game-logo-mark span{font-size:11px}
+ .game-top-controls{gap:5px}
+ .icon-control{width:35px;height:37px;border-radius:10px}
+ .player-theme-toggle{width:52px;flex-basis:52px;height:32px}
+ .player-theme-toggle[aria-pressed="true"] .theme-switch-knob{transform:translateX(20px)}
+ .theme-switch-knob{width:24px;height:24px}
+}
+
 </style>
 </head>
 <body>
@@ -340,8 +380,18 @@ body.light-mode .settings-panel>.builder-section{
 <section class="panel preview-panel">
 <div class="panel-head"><h2>01 / Live game preview</h2><span class="tag">PLAYABLE</span></div>
 <div class="game-wrap">
-<div class="game-head"><div><div class="game-title" id="previewTitle">2048</div><div class="game-description" id="previewDescription"></div></div><div class="scores"><div class="scorebox"><small>Score</small><strong id="score">0</strong></div><div class="scorebox"><small>Best</small><strong id="best">0</strong></div></div></div>
-<div class="game-actions"><button class="btn" id="newGame">New Game ↻</button><button class="btn secondary" id="undo" disabled>Undo ↶</button><button class="btn secondary player-theme-toggle" id="playerThemeToggle" type="button" aria-label="Switch game appearance">☀️ Light Mode</button></div>
+<div class="game-head game-topbar">
+  <div class="game-brand-lockup">
+    <div class="game-logo-mark" aria-hidden="true"><span>2</span><span>0</span><span>4</span><span>8</span></div>
+    <div class="game-brand-copy"><div class="game-title" id="previewTitle">2048</div><div class="game-description" id="previewDescription"></div></div>
+  </div>
+  <div class="game-actions game-top-controls" aria-label="Game controls">
+    <button class="icon-control new-game-control" id="newGame" type="button" aria-label="New game" title="New game"><span aria-hidden="true">⟳</span></button>
+    <button class="icon-control undo-control" id="undo" type="button" aria-label="Undo last move" title="Undo last move" disabled><span aria-hidden="true">↶</span></button>
+    <button class="player-theme-toggle" id="playerThemeToggle" type="button" aria-label="Switch to light mode" aria-pressed="false" title="Toggle light and dark mode"><span class="theme-switch-track" aria-hidden="true"><span class="theme-sun">☀</span><span class="theme-moon">☾</span><span class="theme-switch-knob" id="themeSwitchKnob"></span></span></button>
+  </div>
+</div>
+<div class="scores"><div class="scorebox"><small>Score</small><strong id="score">0</strong></div><div class="scorebox"><small>Best</small><strong id="best">0</strong></div></div>
 <div class="board" id="board" aria-label="2048 game board"></div>
 <div class="status" id="gameStatus" aria-live="polite">Use arrow keys or swipe to move tiles.</div>
 <div class="help"></div>
@@ -397,7 +447,7 @@ body.light-mode .settings-panel>.builder-section{
 const $=id=>document.getElementById(id);
 const previewOverlay=$('previewOverlay'),previewMount=$('previewMount'),previewDialog=$('previewDialog'),gameWrap=document.querySelector('.preview-panel .game-wrap'),gameSplash=$('gameSplash');previewMount.appendChild(gameWrap);previewMount.appendChild(gameSplash);
 const playerThemeToggle=$('playerThemeToggle');
-function setPlayerTheme(mode,remember=true){const light=mode==='light';previewDialog.classList.toggle('player-light-mode',light);playerThemeToggle.textContent=light?'🌙 Dark Mode':'☀️ Light Mode';playerThemeToggle.setAttribute('aria-label',light?'Switch to dark mode':'Switch to light mode');if(remember){try{localStorage.setItem('gamezaar_2048_player_theme',mode);}catch(e){}}}
+function setPlayerTheme(mode,remember=true){const light=mode==='light';previewDialog.classList.toggle('player-light-mode',light);playerThemeToggle.setAttribute('aria-label',light?'Switch to dark mode':'Switch to light mode');playerThemeToggle.setAttribute('aria-pressed',light?'true':'false');playerThemeToggle.title=light?'Switch to dark mode':'Switch to light mode';if(remember){try{localStorage.setItem('gamezaar_2048_player_theme',mode);}catch(e){}}}
 playerThemeToggle.addEventListener('click',()=>setPlayerTheme(previewDialog.classList.contains('player-light-mode')?'dark':'light'));
 
 let splashTimer=null,splashInterval=null;
