@@ -370,6 +370,18 @@ body.light-mode .settings-panel>.builder-section{
  .theme-switch-knob{width:24px;height:24px}
 }
 
+
+/* Horizontal icon + value score indicators */
+.score-strip{display:flex;justify-content:flex-end;gap:8px;margin:0 0 11px}
+.score-strip .score-inline{min-width:0;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:7px;padding:7px 12px;border-radius:11px;background:linear-gradient(145deg,#3a2e50,#211a31);border:1px solid #ffffff2c;box-shadow:0 4px 10px #08061145,inset 0 1px 0 #ffffff18}
+.score-strip .score-inline strong{font-size:16px;line-height:1;font-weight:950;font-variant-numeric:tabular-nums;color:#fff4df}
+.score-icon{display:inline-grid;place-items:center;width:19px;height:19px;color:#ffca70;font-size:19px;line-height:1;text-shadow:0 1px 7px #ffb84d66}
+.best-score-icon{font-size:15px}
+.preview-dialog.player-light-mode .score-strip .score-inline{background:linear-gradient(145deg,#fff,#e9dfd1);border-color:#d9c8ae;box-shadow:0 4px 10px #5c46301c,inset 0 1px 0 #fff}
+.preview-dialog.player-light-mode .score-strip .score-inline strong{color:#44334a}
+.preview-dialog.player-light-mode .score-icon{color:#a66a20;text-shadow:none}
+@media(max-width:390px){.score-strip{gap:6px}.score-strip .score-inline{padding:6px 9px;gap:5px}.score-strip .score-inline strong{font-size:15px}}
+
 </style>
 </head>
 <body>
@@ -391,7 +403,7 @@ body.light-mode .settings-panel>.builder-section{
     <button class="player-theme-toggle" id="playerThemeToggle" type="button" aria-label="Switch to light mode" aria-pressed="false" title="Toggle light and dark mode"><span class="theme-switch-track" aria-hidden="true"><span class="theme-sun">☀</span><span class="theme-moon">☾</span><span class="theme-switch-knob" id="themeSwitchKnob"></span></span></button>
   </div>
 </div>
-<div class="scores"><div class="scorebox"><small>Score</small><strong id="score">0</strong></div><div class="scorebox"><small>Best</small><strong id="best">0</strong></div></div>
+<div class="scores score-strip" aria-label="Game scores"><div class="scorebox score-inline" aria-label="Score"><span class="score-icon" aria-hidden="true">✦</span><strong id="score">0</strong></div><div class="scorebox score-inline" aria-label="Best score"><span class="score-icon best-score-icon" aria-hidden="true">🏆</span><strong id="best">0</strong></div></div>
 <div class="board" id="board" aria-label="2048 game board"></div>
 <div class="status" id="gameStatus" aria-live="polite">Use arrow keys or swipe to move tiles.</div>
 <div class="help"></div>
