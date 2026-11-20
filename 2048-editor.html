@@ -476,6 +476,63 @@ body.light-mode .settings-panel>.builder-section{
 .score-strip .score-icon{width:16px!important;height:16px!important;font-size:16px!important}
 .score-strip .best-score-icon{font-size:13px!important}
 
+
+/* Unified day/night switch: identical geometry in both themes */
+.player-theme-toggle#playerThemeToggle{
+  width:48px!important;min-width:48px!important;max-width:48px!important;
+  height:38px!important;min-height:38px!important;flex:0 0 48px!important;
+  padding:0!important;overflow:hidden!important;position:relative!important;
+  border-radius:999px!important;box-sizing:border-box!important;
+  transition:background .22s ease,border-color .22s ease,box-shadow .22s ease!important;
+}
+#playerThemeToggle .theme-switch-track{
+  position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+  display:block!important;padding:0!important;transform:none!important;
+  font-size:13px!important;line-height:1!important;
+}
+#playerThemeToggle .theme-sun,#playerThemeToggle .theme-moon{
+  position:absolute!important;top:50%!important;transform:translateY(-50%)!important;
+  z-index:1!important;pointer-events:none!important;
+}
+#playerThemeToggle .theme-sun{left:7px!important}
+#playerThemeToggle .theme-moon{right:7px!important}
+#playerThemeToggle .theme-switch-knob{
+  position:absolute!important;left:3px!important;top:5px!important;
+  width:26px!important;height:26px!important;transform:translateX(0)!important;
+  border-radius:50%!important;z-index:2!important;
+  transition:transform .24s cubic-bezier(.2,.8,.2,1),background .22s ease,box-shadow .22s ease!important;
+}
+#playerThemeToggle[aria-pressed="true"] .theme-switch-knob{
+  transform:translateX(16px)!important;
+}
+#playerThemeToggle:not([aria-pressed="true"]){
+  background:linear-gradient(145deg,#76518d,#49345f)!important;
+  border:1px solid #ffd17a!important;
+  box-shadow:0 0 0 2px #ffbd5820,0 4px 12px #08051188,0 0 14px #c28aff45,inset 0 1px 0 #ffffff55!important;
+}
+#playerThemeToggle:not([aria-pressed="true"]) .theme-switch-knob{
+  background:linear-gradient(145deg,#fff4c8,#ffbd58)!important;
+  box-shadow:0 1px 7px #0009,0 0 9px #ffcf83aa!important;
+}
+#playerThemeToggle:not([aria-pressed="true"]) .theme-sun{color:#fff1c9!important}
+#playerThemeToggle:not([aria-pressed="true"]) .theme-moon{color:#c6b3db!important}
+#playerThemeToggle[aria-pressed="true"]{
+  background:linear-gradient(145deg,#76518d,#49345f)!important;
+  border:1px solid #cbb5ff!important;
+  box-shadow:0 0 0 2px #b99aff30,0 4px 12px #08051188,0 0 16px #a88aff55,inset 0 1px 0 #ffffff55!important;
+}
+#playerThemeToggle[aria-pressed="true"] .theme-switch-knob{
+  background:linear-gradient(145deg,#fff,#c7b5ff)!important;
+  box-shadow:0 1px 7px #0009,0 0 10px #c5aaff!important;
+}
+#playerThemeToggle[aria-pressed="true"] .theme-sun{color:#c6b3db!important}
+#playerThemeToggle[aria-pressed="true"] .theme-moon{color:#eee5ff!important}
+@media(max-width:390px){
+  .player-theme-toggle#playerThemeToggle{width:43px!important;min-width:43px!important;max-width:43px!important;flex-basis:43px!important;height:35px!important;min-height:35px!important}
+  #playerThemeToggle .theme-switch-knob{width:23px!important;height:23px!important;top:5px!important}
+  #playerThemeToggle[aria-pressed="true"] .theme-switch-knob{transform:translateX(13px)!important}
+}
+
 </style>
 </head>
 <body>
