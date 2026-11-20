@@ -441,6 +441,26 @@ body.light-mode .settings-panel>.builder-section{
   .player-theme-toggle{width:39px!important;flex-basis:39px!important;height:33px!important}
 }
 
+
+/* Topbar spacing, brighter theme switch, and flush-to-top game placement */
+.game-top-controls{gap:11px!important}
+.player-theme-toggle{
+  width:48px!important;flex:0 0 48px!important;height:38px!important;
+  border:1px solid #ffd17a!important;
+  background:linear-gradient(145deg,#76518d,#49345f)!important;
+  box-shadow:0 0 0 2px #ffbd5820,0 4px 12px #08051188,0 0 14px #c28aff45,inset 0 1px 0 #ffffff55!important;
+}
+.player-theme-toggle .theme-switch-track{transform:scale(.9)!important;color:#fff1c9!important;filter:drop-shadow(0 0 4px #ffcf83)!important}
+.player-theme-toggle .theme-switch-knob{background:linear-gradient(145deg,#fff4c8,#ffbd58)!important;box-shadow:0 1px 7px #0009,0 0 9px #ffcf83aa!important}
+.player-theme-toggle[aria-pressed="true"]{background:linear-gradient(145deg,#6752a0,#3b2c66)!important;border-color:#cbb5ff!important;box-shadow:0 0 0 2px #b99aff30,0 4px 12px #08051188,0 0 16px #a88aff70,inset 0 1px 0 #ffffff55!important}
+.player-theme-toggle[aria-pressed="true"] .theme-switch-track{color:#eee5ff!important;filter:drop-shadow(0 0 5px #c8b3ff)!important}
+.player-theme-toggle[aria-pressed="true"] .theme-switch-knob{background:linear-gradient(145deg,#fff,#c7b5ff)!important;box-shadow:0 1px 7px #0009,0 0 10px #c5aaff!important}
+.preview-dialog.light-mode .player-theme-toggle{background:linear-gradient(145deg,#fff,#e6d9ee)!important;border-color:#b58bda!important;box-shadow:0 0 0 2px #a77acb22,0 4px 10px #6e4d3030,inset 0 1px 0 #fff!important}
+#previewMount{align-items:flex-start!important;padding:0 12px 12px!important}
+.preview-dialog .game-wrap{margin:0 auto!important}
+@media(max-width:600px){#previewMount{align-items:flex-start!important;padding:0 10px 12px!important}.preview-dialog .game-wrap{margin:0 auto!important}}
+@media(max-width:390px){.game-top-controls{gap:9px!important}.player-theme-toggle{width:43px!important;flex-basis:43px!important;height:35px!important}}
+
 </style>
 </head>
 <body>
