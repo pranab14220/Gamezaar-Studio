@@ -633,6 +633,36 @@ body.light-mode .settings-panel > .builder-section[open] > summary{
 }
 body.light-mode .settings-panel > .builder-section .section-chevron{color:#986b2e}
 
+
+
+/* Floating merge-points animation at the top-center of the board */
+.board-stage{position:relative;width:100%;isolation:isolate}
+.merge-points-popup{
+  position:absolute;z-index:20;top:9px;left:50%;
+  transform:translateX(-50%) translateY(7px) scale(.82);
+  opacity:0;pointer-events:none;white-space:nowrap;
+  padding:8px 17px;border:1px solid #ffdf9a;
+  border-radius:999px;
+  background:linear-gradient(135deg,#ffe6a8 0%,#ffbd58 48%,#d98725 100%);
+  color:#38233c;font-size:clamp(16px,4vw,21px);font-weight:1000;
+  letter-spacing:.35px;font-variant-numeric:tabular-nums;
+  text-shadow:0 1px 0 #fff8;
+  box-shadow:0 7px 20px #09061166,0 0 22px #ffbd5877,inset 0 1px 1px #fff9;
+}
+.merge-points-popup.show{animation:mergePointsFloat 1.25s cubic-bezier(.18,.72,.25,1) both}
+@keyframes mergePointsFloat{
+  0%{opacity:0;transform:translateX(-50%) translateY(9px) scale(.72);filter:blur(2px)}
+  14%{opacity:1;transform:translateX(-50%) translateY(-3px) scale(1.08);filter:blur(0)}
+  28%{transform:translateX(-50%) translateY(0) scale(1)}
+  72%{opacity:1;transform:translateX(-50%) translateY(-13px) scale(1)}
+  100%{opacity:0;transform:translateX(-50%) translateY(-29px) scale(.94);filter:blur(1px)}
+}
+.preview-dialog.player-light-mode .merge-points-popup{
+  border-color:#fff0c7;background:linear-gradient(135deg,#fff0c7,#f5b94f);
+  color:#44304b;box-shadow:0 7px 20px #5c463044,0 0 20px #e8ad4e66,inset 0 1px 1px #fff;
+}
+@media(prefers-reduced-motion:reduce){.merge-points-popup.show{animation:mergePointsSimple 1.2s ease-out both}@keyframes mergePointsSimple{0%{opacity:0}15%,70%{opacity:1}100%{opacity:0}}}
+
 </style>
 </head>
 <body>
@@ -655,7 +685,7 @@ body.light-mode .settings-panel > .builder-section .section-chevron{color:#986b2
   </div>
 </div>
 <div class="scores score-strip" aria-label="Game scores"><div class="scorebox score-inline" aria-label="Score"><span class="score-icon" aria-hidden="true">✦</span><strong id="score">0</strong></div><div class="scorebox score-inline" aria-label="Best score"><span class="score-icon best-score-icon" aria-hidden="true">🏆</span><strong id="best">0</strong></div></div>
-<div class="board" id="board" aria-label="2048 game board"></div>
+<div class="board-stage"><div class="merge-points-popup" id="mergePointsPopup" aria-live="polite" aria-atomic="true"></div><div class="board" id="board" aria-label="2048 game board"></div></div>
 <div class="status" id="gameStatus" aria-live="polite">Use arrow keys or swipe to move tiles.</div>
 <div class="help"></div>
 </div>
@@ -769,7 +799,8 @@ function addTile(){const empty=[];for(let r=0;r<size;r++)for(let c=0;c<size;c++)
 function startGame(){grid=emptyGrid();score=0;won=false;keepPlaying=false;history=null;addTile();addTile();$('gameStatus').textContent='Use arrow keys or swipe to move tiles.';render();}
 function render(movements=null){const board=$('board');board.style.gridTemplateColumns='repeat('+size+',minmax(0,1fr))';board.style.gridTemplateRows='repeat('+size+',minmax(0,1fr))';board.style.gap=$('tileGap').value+'px';board.style.setProperty('--gap',$('tileGap').value+'px');board.innerHTML='';for(let r=0;r<size;r++)for(let c=0;c<size;c++){const v=grid[r][c],el=document.createElement('div');el.className='cell'+(v?' v'+v+(v>2048?' high':''):'');el.textContent=v||'';el.setAttribute('aria-label',v?'Tile '+v:'Empty');if(v){const colors=themes[theme].colors[v]||themes[theme].colors[2048];el.style.background=$('tileBgColor')?.value||colors[0];el.style.color=colors[1];const tileAsset=assetData["tile"+v]||assetData["tile"+(v>2048?2048:v)];if(tileAsset){el.style.backgroundImage="url("+tileAsset+")";el.classList.add("asset-tile");}if(assetData.tileBackground){el.style.backgroundImage="url("+assetData.tileBackground+")";el.classList.add("asset-tile");}if(movements){const from=movements[r][c];if(from){const dx=from.c-c,dy=from.r-r;if(dx||dy){const step=(board.clientWidth-20-Number($('tileGap').value)*(size-1))/size+Number($('tileGap').value);el.style.setProperty('--offset-x',(dx*step)+'px');el.style.setProperty('--offset-y',(dy*step)+'px');el.classList.add('tile-slide');}else if(from.spawn)el.classList.add('tile-spawn');}}}else{el.style.background=$('tileBgColor')?.value||'#cdc1b4';}board.appendChild(el);} $('score').textContent=score;$('best').textContent=best;$('best').parentElement.style.display=$('showBest').checked?'block':'none';$('undo').disabled=!history;}
 function compress(line){const arr=line.filter(x=>x.v);let gained=0,out=[];for(let i=0;i<arr.length;i++){if(i<arr.length-1&&arr[i].v===arr[i+1].v){out.push({v:arr[i].v*2,from:arr[i].from});gained+=arr[i].v*2;i++;}else out.push(arr[i]);}while(out.length<size)out.push({v:0,from:null});return {line:out,gained};}
-function move(dir){const before=cloneState();let changed=false,gained=0,movements=Array.from({length:size},()=>Array(size).fill(null));for(let i=0;i<size;i++){let line=[];for(let j=0;j<size;j++){let r=dir==='up'?j:dir==='down'?size-1-j:i,c=dir==='left'?j:dir==='right'?size-1-j:i;line.push({v:grid[r][c],from:grid[r][c]?{r,c}:null});}const result=compress(line);gained+=result.gained;for(let j=0;j<size;j++){let r=dir==='up'?j:dir==='down'?size-1-j:i,c=dir==='left'?j:dir==='right'?size-1-j:i,item=result.line[j];if(grid[r][c]!==item.v)changed=true;grid[r][c]=item.v;if(item.v&&item.from)movements[r][c]=item.from;}}if(!changed)return;history=before;score+=gained;best=Math.max(best,score);localStorage.setItem('gz2048_best',best);addTile();for(let r=0;r<size;r++)for(let c=0;c<size;c++)if(grid[r][c]&&!movements[r][c])movements[r][c]={r:r,c:c,spawn:true};if(!won&&grid.some(row=>row.includes(Number($('targetTile').value)))){won=true;$('gameStatus').textContent='🎉 Target reached! You can keep playing.';if(assetData.winImage)$('gameStatus').innerHTML='<img alt="You win" src="'+assetData.winImage+'" style="display:block;max-width:100%;max-height:90px;object-fit:contain;margin:5px auto"><span>🎉 Target reached! You can keep playing.</span>';if(assetData.winSound)playUploadedSound('winSound');}else if(!canMove()){$('gameStatus').textContent='Game over — start a new game to try again.';if(assetData.gameOverImage)$('gameStatus').innerHTML='<img alt="Game over" src="'+assetData.gameOverImage+'" style="display:block;max-width:100%;max-height:90px;object-fit:contain;margin:5px auto"><span>Game over — start a new game to try again.</span>';if(assetData.gameOverSound)playUploadedSound('gameOverSound');}else if(gained){$('gameStatus').textContent='+'+gained+' points';}render(movements);if($('soundEnabled').checked&&gained){if(assetData.mergeSound)playUploadedSound("mergeSound");else beep();}if($("soundEnabled").checked&&assetData.moveSound)playUploadedSound("moveSound");}
+function move(dir){const before=cloneState();let changed=false,gained=0,movements=Array.from({length:size},()=>Array(size).fill(null));for(let i=0;i<size;i++){let line=[];for(let j=0;j<size;j++){let r=dir==='up'?j:dir==='down'?size-1-j:i,c=dir==='left'?j:dir==='right'?size-1-j:i;line.push({v:grid[r][c],from:grid[r][c]?{r,c}:null});}const result=compress(line);gained+=result.gained;for(let j=0;j<size;j++){let r=dir==='up'?j:dir==='down'?size-1-j:i,c=dir==='left'?j:dir==='right'?size-1-j:i,item=result.line[j];if(grid[r][c]!==item.v)changed=true;grid[r][c]=item.v;if(item.v&&item.from)movements[r][c]=item.from;}}if(!changed)return;history=before;score+=gained;best=Math.max(best,score);localStorage.setItem('gz2048_best',best);addTile();for(let r=0;r<size;r++)for(let c=0;c<size;c++)if(grid[r][c]&&!movements[r][c])movements[r][c]={r:r,c:c,spawn:true};if(!won&&grid.some(row=>row.includes(Number($('targetTile').value)))){won=true;$('gameStatus').textContent='🎉 Target reached! You can keep playing.';if(assetData.winImage)$('gameStatus').innerHTML='<img alt="You win" src="'+assetData.winImage+'" style="display:block;max-width:100%;max-height:90px;object-fit:contain;margin:5px auto"><span>🎉 Target reached! You can keep playing.</span>';if(assetData.winSound)playUploadedSound('winSound');}else if(!canMove()){$('gameStatus').textContent='Game over — start a new game to try again.';if(assetData.gameOverImage)$('gameStatus').innerHTML='<img alt="Game over" src="'+assetData.gameOverImage+'" style="display:block;max-width:100%;max-height:90px;object-fit:contain;margin:5px auto"><span>Game over — start a new game to try again.</span>';if(assetData.gameOverSound)playUploadedSound('gameOverSound');}render(movements);if(gained)showMergePoints(gained);if($('soundEnabled').checked&&gained){if(assetData.mergeSound)playUploadedSound("mergeSound");else beep();}if($("soundEnabled").checked&&assetData.moveSound)playUploadedSound("moveSound");}
+function showMergePoints(points){const popup=$('mergePointsPopup');if(!popup)return;popup.textContent='+'+points+' points';popup.classList.remove('show');void popup.offsetWidth;popup.classList.add('show');}
 function canMove(){for(let r=0;r<size;r++)for(let c=0;c<size;c++){if(!grid[r][c])return true;if(c<size-1&&grid[r][c]===grid[r][c+1])return true;if(r<size-1&&grid[r][c]===grid[r+1][c])return true;}return false;}
 function beep(){try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=520;o.type='sine';g.gain.setValueAtTime(.055,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.11);o.start();o.stop(audioCtx.currentTime+.12);}catch(e){}}
 function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');clearTimeout(window.gzToastTimer);window.gzToastTimer=setTimeout(()=>$('toast').classList.remove('show'),2300);}
