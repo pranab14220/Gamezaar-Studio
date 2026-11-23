@@ -253,6 +253,8 @@ body.light-mode .settings-panel .smallnote{color:#756b7e!important}
 
 
 /* Player-facing appearance switch */
+#playerThemeToggle[hidden]{display:none!important}
+
 .player-theme-toggle{margin-left:auto;white-space:nowrap;font-size:11px;padding:9px 11px}
 .preview-dialog.player-light-mode{background:#f4f0e8;color:#2d2638;border-color:#d6c9b5}
 .preview-dialog.player-light-mode .game-title{color:#5d4526}
@@ -733,7 +735,7 @@ let splashTimer=null,splashInterval=null;
 function hideGameSplash(){if(splashTimer){clearTimeout(splashTimer);splashTimer=null;}if(splashInterval){clearInterval(splashInterval);splashInterval=null;}$('gameSplash').classList.remove('active');$('gameSplash').setAttribute('aria-hidden','true');}
 function showGameSplash(){hideGameSplash();$('splashCountdown').style.display='grid';let remaining=5;$('splashCountdown').textContent=String(remaining);$('splashActions').hidden=true;$('gameSplash').classList.add('active');$('gameSplash').setAttribute('aria-hidden','false');splashInterval=setInterval(()=>{remaining=Math.max(0,remaining-1);$('splashCountdown').textContent=String(remaining);if(remaining===0&&splashInterval){clearInterval(splashInterval);splashInterval=null;}},1000);splashTimer=setTimeout(()=>{$('splashActions').hidden=false;$('splashCountdown').style.display='none';splashTimer=null;},5000);}
 $('splashPlay').addEventListener('click',hideGameSplash);$('splashSkip').addEventListener('click',hideGameSplash);
-function syncStudioOptions(){const mode=document.querySelector('input[name="appearanceMode"]:checked')?.value||'dark';const allowPlayerToggle=$('allowPlayerThemeToggle').checked;playerThemeToggle.style.display=allowPlayerToggle?'':'none';previewDialog.classList.remove('fullscreen-layout','light-mode');setPlayerTheme(mode,false);}
+function syncStudioOptions(){const mode=document.querySelector('input[name="appearanceMode"]:checked')?.value||'dark';const allowPlayerToggle=$('allowPlayerThemeToggle').checked;playerThemeToggle.hidden=!allowPlayerToggle;previewDialog.classList.remove('fullscreen-layout','light-mode');setPlayerTheme(mode,false);}
 function closeLivePreview(){hideGameSplash();previewOverlay.classList.remove('open');$('openLivePreview').focus();}
 $('openLivePreview').addEventListener('click',()=>{syncStudioOptions();let playerMode='';try{playerMode=localStorage.getItem('gamezaar_2048_player_theme')||'';}catch(e){}setPlayerTheme(playerMode||(document.querySelector('input[name="appearanceMode"]:checked')?.value||'dark'),false);previewOverlay.classList.add('open');showGameSplash();});
 $('splashPlay').addEventListener('click',hideGameSplash);$('closeLivePreview').addEventListener('click',closeLivePreview);previewOverlay.addEventListener('click',e=>{if(e.target===previewOverlay)closeLivePreview();});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&previewOverlay.classList.contains('open'))closeLivePreview();});
