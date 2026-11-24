@@ -674,6 +674,22 @@ body.light-mode .settings-panel > .builder-section .section-chevron{color:#986b2
  .tile-color-pick input[type=color]{width:44px!important;height:44px!important}
  .tile-image-tools .upload-square{width:100%!important;max-width:72px;height:auto!important}
 }
+
+/* Match Racing Studio: no large purple wrapper around sections 01–10 */
+.settings-panel{
+  display:flex!important;flex-direction:column!important;gap:9px!important;row-gap:9px!important;
+  padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;
+}
+.settings-panel>.panel-head{
+  flex:0 0 auto;min-height:52px!important;margin:0!important;padding:14px 15px!important;
+  border:1px solid #ffffff20!important;border-radius:15px!important;
+  background:linear-gradient(145deg,#302744,#241e36)!important;
+  box-shadow:0 7px 18px #08061124,inset 0 1px 0 #ffffff08!important;
+}
+.settings-panel>.builder-section{flex:0 0 auto;width:100%;margin:0!important}
+@media(max-width:760px){.settings-panel{gap:9px!important;padding:0!important}.settings-panel>.panel-head{padding:13px 14px!important}}
+body.light-mode .settings-panel{background:transparent!important;border:0!important;box-shadow:none!important}
+body.light-mode .settings-panel>.panel-head{border-color:#ffffff20!important;background:linear-gradient(145deg,#302744,#241e36)!important}
 </style>
 </head>
 <body>
