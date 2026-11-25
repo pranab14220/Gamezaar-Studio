@@ -890,14 +890,6 @@ function updateAssetPreview(key,data){
 }
 initImageUploadUI();
 function initAssetUploadLimitHints2048(){
- const addNote=(input,text)=>{
-  const card=input.closest(".upload-square");
-  const anchor=card||input;
-  const note=document.createElement("div");
-  note.className="upload-limit-note";
-  note.textContent=text;
-  anchor.insertAdjacentElement("afterend",note);
- };
  const addSectionGuide=(section,lines)=>{
   if(!section)return;
   const body=section.querySelector(".builder-section-body");
@@ -908,16 +900,23 @@ function initAssetUploadLimitHints2048(){
   body.insertBefore(guide,body.firstChild);
  };
  const tileSection=document.querySelector("#visualCustomization");
- addSectionGuide(tileSection,["<strong>Appearance customization:</strong> Customize the game appearance in one place. Color controls and image uploads are paired together; uploaded images show a preview and can be removed anytime.","<strong>Tile images:</strong> Maximum 25 KB per image. Tile color and image options follow the selected target (2–8192)."]);
+ addSectionGuide(tileSection,[
+  "<strong>Appearance customization:</strong> Customize the game appearance in one place. Color controls and image uploads are paired together; uploaded images show a preview and can be removed anytime.",
+  "<strong>Game background:</strong> Maximum 150 KB per image.",
+  "<strong>Cards container:</strong> Maximum 80 KB per image.",
+  "<strong>Tile images:</strong> Maximum 25 KB per image. Tile color and image options follow the selected target (2–8192)."
+ ]);
  const soundInput=document.querySelector('[data-asset="moveSound"]');
  const soundSection=soundInput?.closest(".builder-section");
  addSectionGuide(soundSection,["<strong>Move & Merge sounds:</strong> Maximum 15 KB per file.","<strong>Win & Game Over sounds:</strong> Maximum 20 KB per file."]);
- document.querySelectorAll(".asset-file").forEach(input=>{
-  const key=input.dataset.asset,limit=ASSET_FILE_LIMITS_2048[key];
-  if(!limit)return;
-  if(key.startsWith("tile"))return;
-  if(["moveSound","mergeSound","winSound","gameOverSound"].includes(key))return;
-  addNote(input,"Maximum upload: "+formatAssetLimit2048(limit)+". Larger files will be rejected.");
+ const tileGrid=document.querySelector("#tileCustomizationGrid");
+ tileGrid?.querySelectorAll(".tile-image-card").forEach(card=>{
+  const upload=card.querySelector(".upload-square");
+  if(!upload||upload.nextElementSibling?.classList.contains("upload-limit-note"))return;
+  const note=document.createElement("div");
+  note.className="upload-limit-note";
+  note.textContent="Maximum upload: 25 KB per image. Larger files will be rejected.";
+  upload.insertAdjacentElement("afterend",note);
  });
 }
 initAssetUploadLimitHints2048();
