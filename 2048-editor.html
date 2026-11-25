@@ -690,6 +690,19 @@ body.light-mode .settings-panel > .builder-section .section-chevron{color:#986b2
 @media(max-width:760px){.settings-panel{gap:9px!important;padding:0!important}.settings-panel>.panel-head{padding:13px 14px!important}}
 body.light-mode .settings-panel{background:transparent!important;border:0!important;box-shadow:none!important}
 body.light-mode .settings-panel>.panel-head{border-color:#ffffff20!important;background:linear-gradient(145deg,#302744,#241e36)!important}
+
+/* Racing Studio-style project asset usage meter */
+.settings-panel .asset-meter{margin:2px 0 5px;padding:13px;border:1px solid #ffffff22;border-radius:13px;background:linear-gradient(145deg,#211b31,#171326);box-shadow:inset 0 1px 0 #ffffff08}
+.settings-panel .asset-meter-head{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#b9b1ca;font-size:10px;font-weight:850;letter-spacing:.55px}
+.settings-panel .asset-meter-head strong{color:#ffe0a0;font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.settings-panel .meter-track{height:10px;margin:10px 0 7px;border-radius:20px;background:#ffffff18;overflow:hidden}
+.settings-panel .meter-fill{height:100%;width:0;border-radius:20px;background:linear-gradient(90deg,#61c98b,#ffbd58);transition:width .22s ease}
+.settings-panel .meter-fill.warn{background:linear-gradient(90deg,#ffb84d,#ff795e)}
+.settings-panel .meter-fill.full{background:#ff5e67}
+.settings-panel .meter-foot{display:flex;justify-content:space-between;gap:8px;color:#b9b1ca;font-size:9px}
+.settings-panel .asset-message{margin-top:8px;color:#b9b1ca;font-size:9px;line-height:1.5}
+body.light-mode .settings-panel .asset-meter{background:linear-gradient(145deg,#211b31,#171326);border-color:#ffffff22}
+@media(max-width:420px){.settings-panel .asset-meter{padding:11px}.settings-panel .meter-foot{font-size:8px}}
 </style>
 </head>
 <body>
@@ -719,6 +732,12 @@ body.light-mode .settings-panel>.panel-head{border-color:#ffffff20!important;bac
 </section>
 <section class="panel settings-panel">
 <div class="panel-head"><h2>02 / Game settings</h2><span class="tag">CUSTOMIZE</span></div>
+<div class="asset-meter" id="assetMeter2048">
+ <div class="asset-meter-head"><span>PROJECT ASSET SIZE</span><strong id="assetSizeText">0 KB / 5624 KB</strong></div>
+ <div class="meter-track"><div class="meter-fill" id="assetMeterFill"></div></div>
+ <div class="meter-foot"><span id="assetRemaining">5624 KB remaining</span><span>Maximum custom asset budget: 5624 KB</span></div>
+ <div class="asset-message" id="assetMessage">Tracks uploaded images and audio across this 2048 project. Maximum custom asset budget: 5,624 KB.</div>
+</div>
 <details class="builder-section" open><summary>01 · Game Settings <span class="section-chevron" aria-hidden="true">⌄</span></summary><div class="builder-section-body">
 <div class="field"><label for="gameTitle">Game name</label><input type="text" id="gameTitle" maxlength="40" value="2048" placeholder="Enter game name"></div>
 <div class="field"><label for="gameDescription">Game description</label><textarea id="gameDescription" rows="3" maxlength="120" placeholder="Write a short description..." style="width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#171326;color:white;font:inherit;font-size:13px;resize:vertical"></textarea></div>
@@ -800,6 +819,10 @@ $('openLivePreview').addEventListener('click',()=>{syncStudioOptions();let playe
 $('splashPlay').addEventListener('click',hideGameSplash);$('closeLivePreview').addEventListener('click',closeLivePreview);previewOverlay.addEventListener('click',e=>{if(e.target===previewOverlay)closeLivePreview();});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&previewOverlay.classList.contains('open'))closeLivePreview();});
 let size=4,grid=[],score=0,best=Number(localStorage.getItem('gz2048_best')||0),history=null,won=false,keepPlaying=false,theme='classic',audioCtx=null;
 const assetData={};let musicAudio=null;
+const ASSET_LIMIT_2048=5624*1024;
+function assetDataBytes(value){if(typeof value!=="string"||!value.startsWith("data:"))return 0;const part=value.split(",")[1]||"";return Math.max(0,Math.floor(part.length*3/4)-(part.endsWith("==")?2:part.endsWith("=")?1:0));}
+function updateAssetMeter(){const bytes=Object.values(assetData).reduce((sum,value)=>sum+assetDataBytes(value),0),pct=Math.min(100,bytes/ASSET_LIMIT_2048*100),fill=$("assetMeterFill");if(!fill)return;$("assetSizeText").textContent=Math.ceil(bytes/1024).toLocaleString()+" KB / 5,624 KB";$("assetRemaining").textContent=Math.floor(Math.max(0,ASSET_LIMIT_2048-bytes)/1024).toLocaleString()+" KB remaining";fill.style.width=pct+"%";fill.classList.toggle("warn",bytes>=ASSET_LIMIT_2048*.9);fill.classList.toggle("full",bytes>=ASSET_LIMIT_2048);$("assetMessage").textContent=bytes>ASSET_LIMIT_2048?"Uploaded assets exceed the 5,624 KB budget. Remove or reduce some custom images/audio.":"Maximum custom asset budget: 5,624 KB. Includes backgrounds, 11 tile images, game logo, sound effects and background music.";}
+
 const themes={
 classic:{board:'#342b4e',empty:'#211b31',colors:{2:['#eee4da','#655b52'],4:['#ede0c8','#655b52'],8:['#f2b179','#fff'],16:['#f59563','#fff'],32:['#f67c5f','#fff'],64:['#f65e3b','#fff'],128:['#edcf72','#fff'],256:['#edcc61','#fff'],512:['#edc850','#fff'],1024:['#edc53f','#fff'],2048:['#edc22e','#fff']}},
 ocean:{board:'#17384a',empty:'#102b3b',colors:{2:['#d9f0f2','#24515b'],4:['#a8dadc','#24515b'],8:['#75c9d1','#103b4a'],16:['#48b5c5','#fff'],32:['#2a9dba','#fff'],64:['#287da5','#fff'],128:['#6c91c2','#fff'],256:['#5575ad','#fff'],512:['#425b91','#fff'],1024:['#354879','#fff'],2048:['#f4c95d','#253047']}},
@@ -816,6 +839,7 @@ function updateAssetPreview(key,data){
  if(key==="gameLogo"){let logo=$("previewGameLogo");if(data){if(!logo){logo=document.createElement("img");logo.id="previewGameLogo";logo.className="preview-logo";$("previewTitle").parentElement.insertBefore(logo,$("previewTitle"));}logo.src=data;}else if(logo)logo.remove();}
  if(key.indexOf("tile")===0&&grid.length)render();
  refreshImageUploadUI(key,data);
+ updateAssetMeter();
 }
 initImageUploadUI();
 document.querySelectorAll(".asset-file").forEach(input=>input.addEventListener("change",()=>{
@@ -828,6 +852,7 @@ document.querySelectorAll(".asset-file").forEach(input=>input.addEventListener("
  const reader=new FileReader();reader.onload=()=>{assetData[key]=String(reader.result);try{localStorage.setItem("gz2048_asset_"+key,assetData[key]);}catch(e){toast("Browser storage full. Use a smaller file.");return;}updateAssetPreview(key,assetData[key]);toast("✓ "+file.name+" added");};reader.readAsDataURL(file);
 }));
 ["tile2","tile4","tile8","tile16","tile32","tile64","tile128","tile256","tile512","tile1024","tile2048","tileBackground","gameBackground","boardBackground","gameLogo","winImage","gameOverImage","moveSound","mergeSound","winSound","gameOverSound","backgroundMusic"].forEach(key=>{try{const data=localStorage.getItem("gz2048_asset_"+key);if(data){assetData[key]=data;updateAssetPreview(key,data);}}catch(e){}});
+updateAssetMeter();
 $("musicEnabled").addEventListener("change",()=>{if($("musicEnabled").checked&&assetData.backgroundMusic){musicAudio=new Audio(assetData.backgroundMusic);musicAudio.loop=true;musicAudio.play().catch(()=>toast("Tap the preview to start music."));}else if(musicAudio){musicAudio.pause();musicAudio=null;}});
 
 function cloneState(){return {grid:grid.map(r=>r.slice()),score,best,won,keepPlaying};}
