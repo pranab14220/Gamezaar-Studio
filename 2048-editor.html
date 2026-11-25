@@ -922,15 +922,7 @@ function initAssetUploadLimitHints2048(){
  const soundInput=document.querySelector('[data-asset="moveSound"]');
  const soundSection=soundInput?.closest(".builder-section");
  addSectionGuide(soundSection,["<strong>Move & Merge sounds:</strong> Maximum 15 KB per file.","<strong>Win & Game Over sounds:</strong> Maximum 20 KB per file."]);
- const tileGrid=document.querySelector("#tileCustomizationGrid");
- tileGrid?.querySelectorAll(".tile-image-card").forEach(card=>{
-  const upload=card.querySelector(".upload-square");
-  if(!upload||upload.nextElementSibling?.classList.contains("upload-limit-note"))return;
-  const note=document.createElement("div");
-  note.className="upload-limit-note";
-  note.textContent="Maximum upload: 25 KB per image. Larger files will be rejected.";
-  upload.insertAdjacentElement("afterend",note);
- });
+ // Tile upload limits are communicated once in the Visual Customization section guide.
 }
 initAssetUploadLimitHints2048();
 document.querySelectorAll(".asset-file").forEach(input=>input.addEventListener("change",()=>{
