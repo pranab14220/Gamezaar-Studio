@@ -772,7 +772,7 @@ body.light-mode .settings-panel .asset-meter{background:linear-gradient(145deg,#
 <div class="smallnote">Controls the game interface appearance. Number tile colors remain based on the selected game theme.</div>
 </div></details>
 <details class="builder-section" id="visualCustomization"><summary>03 · Visual Customization · Colors, Images & Tile Design <span class="section-chevron">⌄</span></summary><div class="builder-section-body">
-<div class="tip">Customize the game appearance in one place. Color controls and image uploads are paired together; uploaded images show a preview and can be removed anytime.</div>
+
 <div class="visual-subhead">Backgrounds & tile colors</div>
 <div class="visual-pair-grid">
  <div class="visual-control-card"><label for="gameBgColor">Game background</label><div class="color-upload-row"><div class="color-swatch-wrap"><span>Color</span><input type="color" id="gameBgColor" value="#171326"></div><div class="upload-square" data-upload-key="gameBackground"><input class="asset-file" type="file" accept="image/*" data-asset="gameBackground"><div class="upload-placeholder"><span class="upload-plus">＋</span><span>Upload image</span><small>Tap to choose</small></div><img class="upload-preview" alt="Game background preview" hidden><button class="upload-remove" type="button" aria-label="Remove game background image" hidden>×</button></div></div></div>
@@ -905,7 +905,7 @@ function initAssetUploadLimitHints2048(){
   body.insertBefore(guide,body.firstChild);
  };
  const tileSection=document.querySelector("#visualCustomization");
- addSectionGuide(tileSection,["<strong>Tile images:</strong> Maximum 25 KB per image. Tile color and image options follow the selected target (2–8192)."]);
+ addSectionGuide(tileSection,["<strong>Appearance customization:</strong> Customize the game appearance in one place. Color controls and image uploads are paired together; uploaded images show a preview and can be removed anytime.","<strong>Tile images:</strong> Maximum 25 KB per image. Tile color and image options follow the selected target (2–8192)."]);
  const soundInput=document.querySelector('[data-asset="moveSound"]');
  const soundSection=soundInput?.closest(".builder-section");
  addSectionGuide(soundSection,["<strong>Move & Merge sounds:</strong> Maximum 15 KB per file.","<strong>Win & Game Over sounds:</strong> Maximum 20 KB per file."]);
