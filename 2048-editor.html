@@ -757,13 +757,14 @@ body.light-mode .settings-panel .asset-meter{background:linear-gradient(145deg,#
 </section>
 <section class="panel settings-panel">
 <div class="panel-head"><h2>02 / Game settings</h2><span class="tag">CUSTOMIZE</span></div>
-</div>
-<details class="builder-section" open><summary>01 · Game Settings <span class="section-chevron" aria-hidden="true">⌄</span></summary><div class="builder-section-body">
 <div class="asset-meter" id="assetMeter2048">
  <div class="asset-meter-head"><span>PROJECT ASSET SIZE</span><strong id="assetSizeText">0 KB / 775 KB</strong></div>
  <div class="meter-track"><div class="meter-fill" id="assetMeterFill"></div></div>
  <div class="meter-foot"><span id="assetRemaining">775 KB remaining</span><span>Maximum custom asset budget: 775 KB</span></div>
  <div class="asset-message" id="assetMessage">Tracks uploaded images and audio across this 2048 project. Maximum custom asset budget: 775 KB.</div>
+
+</div>
+<details class="builder-section" open><summary>01 · Game Settings <span class="section-chevron" aria-hidden="true">⌄</span></summary><div class="builder-section-body">
 
 <div class="field"><label for="gameTitle">Game name</label><input type="text" id="gameTitle" maxlength="40" value="2048" placeholder="Enter game name"></div>
 <div class="field"><label for="gameDescription">Game description</label><textarea id="gameDescription" rows="3" maxlength="120" placeholder="Write a short description..." style="width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#171326;color:white;font:inherit;font-size:13px;resize:vertical"></textarea></div><div class="field"><label for="titleTextColor">Game title text color</label><input type="color" id="titleTextColor" value="#ffd18a"></div><div class="field"><label for="descriptionTextColor">Description text color</label><input type="color" id="descriptionTextColor" value="#c9bddb"></div><div class="field"><label for="popupBgColor">Game popup background</label><input type="color" id="popupBgColor" value="#30213f"><div class="smallnote">Applies to the start, win and game over popup cards.</div></div>
