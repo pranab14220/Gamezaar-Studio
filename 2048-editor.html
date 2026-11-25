@@ -760,8 +760,9 @@ body.light-mode .settings-panel .asset-meter{background:linear-gradient(145deg,#
 <div class="field"><div class="themes"><button class="theme active" data-theme="classic" style="--sample:linear-gradient(90deg,#eee4da 50%,#f2b179 50%)">Classic</button><button class="theme" data-theme="ocean" style="--sample:linear-gradient(90deg,#a8dadc 50%,#457b9d 50%)">Ocean</button><button class="theme" data-theme="neon" style="--sample:linear-gradient(90deg,#b8f2e6 50%,#ff70a6 50%)">Neon</button></div></div>
 <div class="visual-subhead">Tile spacing</div>
 <div class="field"><label for="tileGap">Space between tiles <span class="range-value" id="gapLabel">9 px</span></label><input type="range" id="tileGap" min="4" max="14" value="9"></div>
-<div class="visual-subhead">Custom tile images</div>
-<div class="tip">Upload an image for each tile value. Numbers remain visible on top. PNG, JPG, WEBP.</div>
+<div class="visual-subhead">Choose Tile</div>
+<div class="field"><label for="targetTile">Select target tile to customize</label><select id="targetTile"><option value="256">256</option><option value="512">512</option><option value="1024">1024</option><option value="2048" selected>2048</option><option value="4096">4096</option><option value="8192">8192</option></select></div>
+<div class="tip">Only the selected tile customization appears below. Numbers remain visible on top of uploaded images. PNG, JPG, WEBP.</div>
  <div class="tile-image-grid" id="tileCustomizationGrid" aria-live="polite"></div>
  <div class="smallnote" id="tileCustomizationNote">Color and image controls automatically match the selected target tile.</div>
 <div class="visual-subhead">Game interface</div>
@@ -783,8 +784,7 @@ body.light-mode .settings-panel .asset-meter{background:linear-gradient(145deg,#
 </div></details>
 <details class="builder-section"><summary>05 · Board & Target <span class="section-chevron" aria-hidden="true">⌄</span></summary><div class="builder-section-body">
 <div class="field"><label for="gridSize">Grid size <span class="range-value" id="gridLabel">4 × 4</span></label><select id="gridSize"><option value="3">3 × 3</option><option value="4" selected>4 × 4</option><option value="5">5 × 5</option><option value="6">6 × 6</option></select></div>
-<div class="field"><label for="targetTile">Target tile</label><select id="targetTile"><option value="256">256</option><option value="512">512</option><option value="1024">1024</option><option value="2048" selected>2048</option><option value="4096">4096</option><option value="8192">8192</option></select></div>
-<div class="smallnote">Choose the board dimensions and the number players should reach to complete the target.</div>
+<div class="smallnote">Choose the board dimensions. Set the target tile in Visual Customization, above its tile color and image controls.</div>
 </div></details>
 <details class="builder-section"><summary>06 · Game HUD & Sound <span class="section-chevron" aria-hidden="true">⌄</span></summary><div class="builder-section-body">
 <div class="checkrow"><span>Show best score</span><input type="checkbox" id="showBest" checked></div>
@@ -831,8 +831,8 @@ function buildTileCustomizationOptions2048(){
 }
 function syncTileCustomizationOptions2048(){
  const target=Number($("targetTile")?.value||2048);
- document.querySelectorAll("#tileCustomizationGrid [data-tile-value]").forEach(card=>{card.hidden=Number(card.dataset.tileValue)>target;});
- const note=$("tileCustomizationNote");if(note)note.textContent="Showing tile colors and image uploads from 2 through "+target+". Higher tile values stay hidden until you select a higher target.";
+ document.querySelectorAll("#tileCustomizationGrid [data-tile-value]").forEach(card=>{card.hidden=Number(card.dataset.tileValue)!==target;});
+ const note=$("tileCustomizationNote");if(note)note.textContent="Showing customization for tile "+target+" only. Select another tile above to customize it.";
 }
 buildTileCustomizationOptions2048();
 syncTileCustomizationOptions2048();
