@@ -704,6 +704,13 @@ body.light-mode .settings-panel>.panel-head{border-color:#ffffff20!important;bac
 body.light-mode .settings-panel .asset-meter{background:linear-gradient(145deg,#211b31,#171326);border-color:#ffffff22}
 @media(max-width:420px){.settings-panel .asset-meter{padding:11px}.settings-panel .meter-foot{font-size:8px}}
 
+
+/* Player Day/Night mode recolors the full playable surface. */
+.preview-dialog.player-light-mode #previewMount{background-color:#f4f0e8!important;color:#2d2638!important}
+.preview-dialog.player-light-mode #previewMount .game-wrap{background:transparent!important;color:#2d2638!important}
+.preview-dialog.player-light-mode #previewMount .board{background-color:#d8cfc2!important;box-shadow:0 5px 0 #c4b9aa,0 14px 28px #5b46301c!important}
+.preview-dialog.player-light-mode #previewMount .cell:not(.v2):not(.v4):not(.v8):not(.v16):not(.v32):not(.v64):not(.v128):not(.v256):not(.v512):not(.v1024):not(.v2048):not(.high){background:#eee8df!important;color:#756b7e!important}
+.preview-dialog.player-light-mode #previewMount .status{color:#77511e!important}
 </style>
 </head>
 <body>
@@ -806,7 +813,7 @@ body.light-mode .settings-panel .asset-meter{background:linear-gradient(145deg,#
 const $=id=>document.getElementById(id);
 const previewOverlay=$('previewOverlay'),previewMount=$('previewMount'),previewDialog=$('previewDialog'),gameWrap=document.querySelector('.preview-panel .game-wrap'),gameSplash=$('gameSplash');previewMount.appendChild(gameWrap);previewMount.appendChild(gameSplash);const resultOverlay=document.createElement('div');resultOverlay.id='resultOverlay';resultOverlay.setAttribute('role','dialog');resultOverlay.setAttribute('aria-modal','true');resultOverlay.setAttribute('aria-live','assertive');resultOverlay.innerHTML='<span class="result-spark s1"></span><span class="result-spark s2"></span><span class="result-spark s3"></span><span class="result-spark s4"></span><div class="result-card" id="resultCard"><div class="result-emblem" id="resultEmblem">🏆</div><p class="result-kicker" id="resultKicker">LEVEL CLEARED</p><h2 id="resultTitle">YOU WIN!</h2><p class="result-message" id="resultMessage">Amazing! You reached your target.</p><div class="result-scores"><div class="result-score"><span><i class="result-score-icon">✦</i> Score</span><strong id="resultScore">0</strong></div><div class="result-score"><span><i class="result-score-icon">🏆</i> Best Score</span><strong id="resultBest">0</strong></div></div><button type="button" class="result-action" id="resultAgain">▶ PLAY AGAIN</button></div>';previewMount.appendChild(resultOverlay);
 const playerThemeToggle=$('playerThemeToggle');
-function setPlayerTheme(mode,remember=true){const light=mode==='light';previewDialog.classList.toggle('player-light-mode',light);playerThemeToggle.setAttribute('aria-label',light?'Switch to dark mode':'Switch to light mode');playerThemeToggle.setAttribute('aria-pressed',light?'true':'false');playerThemeToggle.title=light?'Switch to dark mode':'Switch to light mode';if(remember){try{localStorage.setItem('gamezaar_2048_player_theme',mode);}catch(e){}}}
+function syncPlayerThemeSurfaces(){const light=previewDialog.classList.contains('player-light-mode');const gameBg=$('gameBgColor')?.value||'#171326';const boardBg=$('boardBgColor')?.value||'#bbada0';previewMount.style.backgroundColor=light?'#f4f0e8':gameBg;const image=assetData.gameBackground;if(image){previewMount.style.backgroundImage='linear-gradient('+(light?'#fff8ee22':'#17132655')+','+(light?'#fff8ee22':'#17132655')+'),url("'+image+'")';}else{previewMount.style.backgroundImage='';}const board=$('board');if(board){board.style.backgroundColor=light?'#d8cfc2':boardBg;board.style.backgroundImage=assetData.boardBackground?'url("'+assetData.boardBackground+'")':'';}}function setPlayerTheme(mode,remember=true){const light=mode==='light';previewDialog.classList.toggle('player-light-mode',light);playerThemeToggle.setAttribute('aria-label',light?'Switch to dark mode':'Switch to light mode');playerThemeToggle.setAttribute('aria-pressed',light?'true':'false');playerThemeToggle.title=light?'Switch to dark mode':'Switch to light mode';syncPlayerThemeSurfaces();if(remember){try{localStorage.setItem('gamezaar_2048_player_theme',mode);}catch(e){}}}
 playerThemeToggle.addEventListener('click',()=>setPlayerTheme(previewDialog.classList.contains('player-light-mode')?'dark':'light'));
 
 let splashTimer=null,splashInterval=null;
@@ -924,6 +931,7 @@ function applyVisualCustomization(){
  const v=id=>$(id).value;
  previewDialog.style.setProperty('--creator-game-bg',v('gameBgColor'));previewMount.style.backgroundColor=v('gameBgColor');
  if(assetData.gameBackground){previewMount.style.backgroundImage='linear-gradient(#17132655,#17132655),url("'+assetData.gameBackground+'")';previewMount.style.backgroundSize='cover';previewMount.style.backgroundPosition='center';}else{previewMount.style.backgroundImage='';}
+ syncPlayerThemeSurfaces();
  previewDialog.style.setProperty('--creator-board-bg',v('boardBgColor'));
  previewDialog.style.setProperty('--creator-title-bg',v('titleBarColor'));
  previewDialog.style.setProperty('--creator-score-bg',v('scoreBgColor'));
