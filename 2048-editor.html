@@ -810,6 +810,80 @@ body.light-mode .settings-panel .asset-meter{background:linear-gradient(145deg,#
  .score-strip .score-inline{height:38px!important;min-height:38px!important;padding:5px 10px!important}
 }
 
+
+/* Reference-matched 2048 player layout: clean logo/control row, large score cards and board. */
+.preview-dialog .game-topbar{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:10px!important;min-height:0!important;padding:4px 2px 13px!important;
+  border:0!important;border-radius:0!important;background:transparent!important;
+  box-shadow:none!important;
+}
+.preview-dialog .game-brand-copy{display:none!important}
+.preview-dialog .game-brand-lockup{flex:0 0 auto!important;min-width:0!important}
+.preview-dialog .game-logo-mark{
+  display:grid!important;grid-template-columns:repeat(4,auto)!important;align-items:end!important;
+  gap:0!important;width:auto!important;height:auto!important;padding:0 4px!important;
+  border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;
+  color:#ffc629!important;font-size:clamp(38px,10vw,64px)!important;font-weight:1000!important;
+  line-height:.95!important;letter-spacing:-3px!important;text-shadow:0 3px 0 #8c4a0c,0 5px 12px #08051199!important;
+}
+.preview-dialog .game-logo-mark:before{
+  content:"♛"!important;top:-19px!important;font-size:20px!important;color:#ffd22f!important;
+  text-shadow:0 2px 0 #9a5815,0 0 10px #ffbd58!important;
+}
+.preview-dialog .game-top-controls{flex:0 0 auto!important;display:flex!important;align-items:center!important;gap:7px!important;margin:0!important}
+.preview-dialog .game-top-controls .icon-control{
+  min-width:0!important;height:clamp(42px,11vw,56px)!important;padding:0 clamp(9px,2.5vw,17px)!important;
+  border-radius:16px!important;font-size:clamp(10px,2.7vw,14px)!important;letter-spacing:0!important;
+}
+.preview-dialog .game-top-controls .control-icon{font-size:clamp(19px,5vw,27px)!important}
+.preview-dialog .game-top-controls .control-label{font-size:clamp(9px,2.4vw,13px)!important}
+.preview-dialog .player-theme-toggle{width:clamp(48px,13vw,70px)!important;height:clamp(42px,11vw,56px)!important}
+.preview-dialog .score-strip{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;margin:0 0 14px!important}
+.preview-dialog .score-strip .score-inline{
+  min-width:0!important;height:auto!important;min-height:76px!important;padding:10px 12px!important;
+  display:grid!important;grid-template-columns:auto 1fr!important;grid-template-rows:auto auto!important;
+  align-content:center!important;align-items:center!important;justify-items:start!important;column-gap:10px!important;
+  border:2px solid #8d3ac2!important;border-radius:18px!important;
+  background:linear-gradient(145deg,#392052,#211331)!important;
+  box-shadow:0 5px 0 #160d20,0 0 0 1px #c04cff22,inset 0 1px 0 #ffffff18!important;
+}
+.preview-dialog .score-strip .score-icon{grid-row:1/3;grid-column:1;font-size:clamp(26px,7vw,42px)!important;filter:none!important}
+.preview-dialog .score-strip .score-label{grid-row:1;grid-column:2;display:block!important;color:#e8d7f6!important;font-size:clamp(10px,2.8vw,16px)!important;font-weight:850!important;line-height:1.1!important}
+.preview-dialog .score-strip .score-inline strong{grid-row:2;grid-column:2;font-size:clamp(25px,7vw,39px)!important;line-height:1.05!important;color:#fff!important;font-weight:1000!important}
+.preview-dialog .board{
+  width:100%!important;max-width:560px!important;margin:0 auto!important;
+  padding:clamp(9px,2.3vw,14px)!important;gap:clamp(6px,1.8vw,11px)!important;
+  aspect-ratio:1!important;border:5px solid #9b37d2!important;border-radius:25px!important;
+  background:#24123b!important;box-shadow:0 0 0 2px #e45cff55,0 9px 0 #170d25,0 14px 32px #08051199!important;
+}
+.preview-dialog .cell{border-radius:clamp(10px,2.8vw,17px)!important;font-size:clamp(29px,8vw,54px)!important}
+.preview-dialog .cell.v128,.preview-dialog .cell.v256,.preview-dialog .cell.v512{font-size:clamp(25px,7vw,46px)!important}
+.preview-dialog .cell.v1024,.preview-dialog .cell.v2048,.preview-dialog .cell.high{font-size:clamp(21px,6vw,39px)!important}
+.preview-dialog .game-tagline{
+  display:flex;align-items:center;justify-content:center;gap:9px;width:min(94%,520px);
+  min-height:58px;margin:24px auto 7px;padding:10px 14px;
+  border:2px solid #a83dd5;border-radius:999px;
+  background:linear-gradient(145deg,#32174e,#1b102d);
+  color:#f8eafa;font-size:clamp(13px,3.7vw,21px);font-weight:850;text-align:center;
+  box-shadow:0 5px 0 #160d20,0 0 16px #b83dff33,inset 0 1px 0 #ffffff20;
+}
+.preview-dialog .game-tagline>span{color:#ffc72f;font-size:1.65em;line-height:1}
+.preview-dialog .game-tagline strong{color:#ffd12e;font-size:1.12em}
+.preview-dialog #gameStatus{min-height:14px;margin:6px 0 0;text-align:center;font-size:10px!important;opacity:.85}
+.preview-dialog.player-light-mode .score-strip .score-inline{background:linear-gradient(145deg,#fff5df,#e9d9f4)!important;border-color:#a77bc4!important}
+.preview-dialog.player-light-mode .score-strip .score-label{color:#574367!important}
+.preview-dialog.player-light-mode .score-strip .score-inline strong{color:#34213f!important}
+.preview-dialog.player-light-mode .game-tagline{background:linear-gradient(145deg,#fff8e8,#eadcf4);color:#45304f}
+@media(max-width:420px){
+ .preview-dialog .game-topbar{gap:5px!important;padding:3px 0 11px!important}
+ .preview-dialog .game-top-controls{gap:5px!important}
+ .preview-dialog .game-top-controls .icon-control{padding:0 8px!important;height:40px!important}
+ .preview-dialog .game-top-controls .control-label{font-size:8px!important}
+ .preview-dialog .score-strip .score-inline{min-height:67px!important;padding:8px!important;column-gap:7px!important}
+ .preview-dialog .game-tagline{margin-top:19px;min-height:51px;padding:8px 10px}
+}
+
 </style>
 </head>
 <body>
@@ -823,7 +897,7 @@ body.light-mode .settings-panel .asset-meter{background:linear-gradient(145deg,#
 <div class="game-head game-topbar">
   <div class="game-brand-lockup">
     <div class="game-logo-mark" aria-hidden="true"><span>2</span><span>0</span><span>4</span><span>8</span></div>
-    <div class="game-brand-copy"><div class="game-title" id="previewTitle">2048</div><div class="game-description" id="previewDescription"></div></div>
+    <div class="game-brand-copy" aria-hidden="true"><div class="game-title" id="previewTitle">2048</div><div class="game-description" id="previewDescription"></div></div>
   </div>
   <div class="game-actions game-top-controls" aria-label="Game controls">
     <button class="icon-control new-game-control" id="newGame" type="button" aria-label="New game" title="New game"><span class="control-icon" aria-hidden="true">⟳</span><span class="control-label">NEW GAME</span></button>
