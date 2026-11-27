@@ -840,16 +840,18 @@ body.light-mode .settings-panel .asset-meter{background:linear-gradient(145deg,#
 .preview-dialog .player-theme-toggle{width:clamp(48px,13vw,70px)!important;height:clamp(42px,11vw,56px)!important}
 .preview-dialog .score-strip{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;margin:0 0 14px!important}
 .preview-dialog .score-strip .score-inline{
-  min-width:0!important;height:auto!important;min-height:76px!important;padding:10px 12px!important;
-  display:grid!important;grid-template-columns:auto 1fr!important;grid-template-rows:auto auto!important;
-  align-content:center!important;align-items:center!important;justify-items:start!important;column-gap:10px!important;
-  border:2px solid #8d3ac2!important;border-radius:18px!important;
-  background:linear-gradient(145deg,#392052,#211331)!important;
-  box-shadow:0 5px 0 #160d20,0 0 0 1px #c04cff22,inset 0 1px 0 #ffffff18!important;
+  min-width:0!important;height:68px!important;min-height:68px!important;padding:9px 12px!important;
+  display:grid!important;grid-template-columns:30px minmax(0,1fr)!important;grid-template-rows:18px 1fr!important;
+  align-content:center!important;align-items:center!important;justify-items:start!important;column-gap:9px!important;
+  border:1px solid #a66acb!important;border-radius:14px!important;
+  background:linear-gradient(145deg,#38234d,#241832)!important;
+  box-shadow:0 3px 0 #160d20,inset 0 1px 0 #ffffff18!important;
 }
-.preview-dialog .score-strip .score-icon{grid-row:1/3;grid-column:1;font-size:clamp(26px,7vw,42px)!important;filter:none!important}
-.preview-dialog .score-strip .score-label{grid-row:1;grid-column:2;display:block!important;color:#e8d7f6!important;font-size:clamp(10px,2.8vw,16px)!important;font-weight:850!important;line-height:1.1!important}
-.preview-dialog .score-strip .score-inline strong{grid-row:2;grid-column:2;font-size:clamp(25px,7vw,39px)!important;line-height:1.05!important;color:#fff!important;font-weight:1000!important}
+.preview-dialog .score-strip .score-icon{grid-row:1/3;grid-column:1;justify-self:center;font-size:25px!important;line-height:1!important;filter:none!important}
+.preview-dialog .score-strip .score-label{grid-row:1;grid-column:2;display:block!important;color:#cdb9df!important;font-size:10px!important;font-weight:850!important;letter-spacing:1.15px!important;line-height:1!important}
+.preview-dialog .score-strip .score-inline strong{grid-row:2;grid-column:2;align-self:center;font-size:clamp(22px,6vw,30px)!important;line-height:1!important;color:#fff!important;font-weight:950!important;font-variant-numeric:tabular-nums!important}
+.preview-dialog.player-light-mode .score-strip .score-label{color:#76617f!important}
+@media(max-width:420px){.preview-dialog .score-strip{gap:8px!important}.preview-dialog .score-strip .score-inline{height:62px!important;min-height:62px!important;padding:8px 9px!important;grid-template-columns:25px minmax(0,1fr)!important;column-gap:7px!important}.preview-dialog .score-strip .score-icon{font-size:22px!important}.preview-dialog .score-strip .score-inline strong{font-size:clamp(20px,6vw,26px)!important}.preview-dialog .score-strip .score-label{font-size:9px!important;letter-spacing:.9px!important}}
 .preview-dialog .board{
   width:100%!important;max-width:560px!important;margin:0 auto!important;
   padding:clamp(9px,2.3vw,14px)!important;gap:clamp(6px,1.8vw,11px)!important;
@@ -904,7 +906,7 @@ body.light-mode .settings-panel .asset-meter{background:linear-gradient(145deg,#
     <button class="player-theme-toggle" id="playerThemeToggle" type="button" aria-label="Switch to light mode" aria-pressed="false" title="Toggle light and dark mode"><span class="theme-switch-track" aria-hidden="true"><span class="theme-sun">☀</span><span class="theme-moon">☾</span><span class="theme-switch-knob" id="themeSwitchKnob"></span></span></button>
   </div>
 </div>
-<div class="scores score-strip" aria-label="Game scores"><div class="scorebox score-inline" aria-label="Score"><span class="score-icon" aria-hidden="true">✦</span><strong id="score">0</strong></div><div class="scorebox score-inline" aria-label="Best score"><span class="score-icon best-score-icon" aria-hidden="true">🏆</span><strong id="best">0</strong></div></div>
+<div class="scores score-strip" aria-label="Game scores"><div class="scorebox score-inline" aria-label="Score"><span class="score-icon" aria-hidden="true">✦</span><span class="score-label">SCORE</span><strong id="score">0</strong></div><div class="scorebox score-inline" aria-label="Best score"><span class="score-icon best-score-icon" aria-hidden="true">🏆</span><span class="score-label">BEST</span><strong id="best">0</strong></div></div>
 <div class="board" id="board" aria-label="2048 game board"></div>
 <div class="status" id="gameStatus" aria-live="polite">Use arrow keys or swipe to move tiles.</div>
 <div class="help"></div>
