@@ -1123,6 +1123,7 @@ function applyVisualCustomization(){
  if(mark)mark.classList.remove('logo-minimal','logo-neon','logo-classic','logo-circle');
 }
 ['gameBgColor','boardBgColor','titleBarColor','popupBgColor','scoreBgColor','scoreDisplayTextColor','buttonScale','buttonGap','scoreScale','logoSize','scoreTextColor','bestScoreTextColor','statusTextColor','popupTitleTextColor','popupBodyTextColor','popupScoreTextColor','popupButtonTextColor','controlTextColor'].forEach(id=>$(id).addEventListener('input',applyVisualCustomization));
+ $('showGameLogo').addEventListener('change',applyVisualCustomization);
 document.querySelectorAll('[id^="tileColor"],[id^="tileTextColor"]').forEach(el=>el.addEventListener('input',()=>{const match=el.id.match(/^(?:tileColor|tileTextColor)(\d+)$/);if(match)tileColorOverrides[match[1]]=true;render();}));
 
 function applySettings(){const title=$('gameTitle').value.trim()||'2048';$('previewTitle').textContent=title;$('previewDescription').textContent=$('gameDescription').value.trim();size=Number($('gridSize').value);$('gridLabel').textContent=size+' × '+size;document.documentElement.style.setProperty('--board',themes[theme].board);document.documentElement.style.setProperty('--empty',themes[theme].empty);applyVisualCustomization();render();}
