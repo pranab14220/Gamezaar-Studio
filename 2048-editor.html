@@ -976,12 +976,8 @@ body.light-mode .settings-panel .asset-meter{background:linear-gradient(145deg,#
 <div class="field"><label for="gameTitle">Game name</label><input type="text" id="gameTitle" maxlength="40" value="2048" placeholder="Enter game name"></div>
 <div class="field"><label for="gameDescription">Game description</label><textarea id="gameDescription" rows="3" maxlength="120" placeholder="Write a short description..." style="width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#171326;color:white;font:inherit;font-size:13px;resize:vertical"></textarea></div><div class="field"><label for="popupBgColor">Game popup background</label><input type="color" id="popupBgColor" value="#30213f"><div class="smallnote">Applies to the start, win and game over popup cards.</div></div>
 </div></details>
-<details class="builder-section"><summary>02 · Appearance · Light / Dark Mode <span class="section-chevron" aria-hidden="true">⌄</span></summary><div class="builder-section-body">
-<div class="appearance-toggle-row"><span class="appearance-mode-label">☀️ Day</span><label class="mode-switch" for="appearanceModeToggle"><input type="checkbox" id="appearanceModeToggle" role="switch" aria-label="Switch between Day and Night mode"><span class="mode-switch-track"></span></label><span class="appearance-mode-label">🌙 Night</span></div><div hidden><input type="radio" name="appearanceMode" value="dark" checked><input type="radio" name="appearanceMode" value="light"></div>
-<div class="field"><label><input type="checkbox" id="allowPlayerThemeToggle" checked> Allow players to switch Light / Dark Mode</label><div class="smallnote">ON: player ko game mein Light/Dark toggle dikhega. OFF: toggle hide rahega aur creator ka selected Appearance Mode hi rahega.</div></div>
-<div class="smallnote">Controls the game interface appearance. Number tile colors remain based on the selected game theme.</div>
-</div></details>
-<details class="builder-section" id="visualCustomization"><summary>03 · Visual Customization · Colors, Images & Tile Design <span class="section-chevron">⌄</span></summary><div class="builder-section-body">
+<div hidden aria-hidden="true"><input type="checkbox" id="appearanceModeToggle" checked><input type="radio" name="appearanceMode" value="dark" checked><input type="radio" name="appearanceMode" value="light"><input type="checkbox" id="allowPlayerThemeToggle" checked></div>
+<details class="builder-section" id="visualCustomization"><summary>02 · Visual Customization · Colors, Images & Tile Design <span class="section-chevron">⌄</span></summary><div class="builder-section-body">
 
 <div class="visual-subhead">Backgrounds & tile colors</div>
 <div class="visual-pair-grid">
@@ -1006,7 +1002,7 @@ body.light-mode .settings-panel .asset-meter{background:linear-gradient(145deg,#
 <div class="field"><label for="scoreScale">Score box size <span class="range-value" id="scoreScaleLabel">100%</span></label><input type="range" id="scoreScale" min="75" max="140" value="100"></div>
 </div></details>
 
-<details class="builder-section" id="splashSettings"><summary>04 · Branding · Splash Screen <span class="section-chevron" aria-hidden="true">⌄</span></summary><div class="builder-section-body">
+<details class="builder-section" id="splashSettings"><summary>03 · Branding · Splash Screen <span class="section-chevron" aria-hidden="true">⌄</span></summary><div class="builder-section-body">
 <div class="tip">Every free game opens with the default GAMEZAAR STUDIO splash screen.</div>
 <div class="splash-brand-preview"><div class="splash-brand-name">GAMEZAAR STUDIO</div><div class="splash-brand-tagline">CREATE · PLAY · SHARE · <strong>EARN</strong></div><div class="splash-brand-copy">Your game. Your creativity. Your earning journey starts here.</div><div class="splash-brand-credit">Created with <strong>Gamezaar-Studio.in</strong></div></div>
 <div class="splash-free-note">🔒 Default GAMEZAAR splash is included in free games.</div>
