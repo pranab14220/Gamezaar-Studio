@@ -899,6 +899,42 @@ body.light-mode .settings-panel .asset-meter{background:linear-gradient(145deg,#
  .preview-dialog .game-tagline{margin-top:19px;min-height:51px;padding:8px 10px}
 }
 
+
+/* Score cards: larger bold values on the right, icons on the left */
+.score-strip .score-inline{
+  min-width:104px!important;
+  min-height:50px!important;
+  height:50px!important;
+  padding:7px 13px!important;
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:13px!important;
+}
+.score-strip .score-inline .score-icon{
+  order:0!important;
+  flex:0 0 28px!important;
+  width:28px!important;
+  height:28px!important;
+  font-size:27px!important;
+  font-weight:1000!important;
+}
+.score-strip .score-inline .best-score-icon{font-size:24px!important}
+.score-strip .score-inline strong{
+  order:1!important;
+  margin-left:auto!important;
+  font-size:23px!important;
+  line-height:1!important;
+  font-weight:1000!important;
+  letter-spacing:.2px!important;
+}
+@media(max-width:390px){
+  .score-strip .score-inline{min-width:94px!important;padding:6px 10px!important;gap:11px!important}
+  .score-strip .score-inline .score-icon{flex-basis:26px!important;width:26px!important;height:26px!important;font-size:25px!important}
+  .score-strip .score-inline .best-score-icon{font-size:22px!important}
+  .score-strip .score-inline strong{font-size:21px!important}
+}
 </style>
 </head>
 <body>
