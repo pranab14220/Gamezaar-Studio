@@ -997,6 +997,28 @@ body.light-mode .settings-panel .asset-meter{background:linear-gradient(145deg,#
 
 /* Compact popup border colour + visibility switch on one row */
 .popup-border-field{margin:10px 0 15px}.popup-border-field>label{margin-bottom:7px}.popup-border-controls{display:flex;align-items:center;gap:12px}.popup-border-controls input[type=color]{width:48px;height:38px;min-width:48px;padding:3px;border:1px solid var(--line);border-radius:9px;background:#171326;cursor:pointer}.popup-border-switch{margin:0 0 0 auto;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11px;cursor:pointer;white-space:nowrap}.popup-border-switch input{position:absolute;opacity:0;width:1px;height:1px}.popup-border-switch i{position:relative;display:block;width:36px;height:20px;border-radius:20px;background:#51465f;border:1px solid #756987;transition:background .2s,border-color .2s}.popup-border-switch i:after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#eee5f7;box-shadow:0 1px 3px #0006;transition:transform .2s}.popup-border-switch input:checked+i{background:#b8792e;border-color:#ffd18a}.popup-border-switch input:checked+i:after{transform:translateX(16px);background:#fff4d9}.popup-border-switch input:focus-visible+i{outline:2px solid var(--gold);outline-offset:2px}
+
+/* Fix text-only button previews: remove icon-button dimensions and prevent label overlap */
+.button-live-preview.button-preset-text-underline .mini-game-button,
+.button-live-preview.button-preset-text-solid .mini-game-button{
+ width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;
+ display:inline-flex!important;flex:0 0 auto!important;align-items:center!important;justify-content:center!important;
+ gap:0!important;padding:9px 13px!important;transform:none!important;
+}
+.button-live-preview.button-preset-text-underline .mini-game-button{
+ background:transparent!important;border:0!important;border-bottom:2px solid currentColor!important;
+ border-radius:0!important;box-shadow:none!important;color:#ffe0a0!important;
+}
+.button-live-preview.button-preset-text-solid .mini-game-button{
+ background:linear-gradient(135deg,#ffe0a0,#ffb84d)!important;border:1px solid #fff0c4!important;
+ border-radius:10px!important;box-shadow:0 4px 9px #0005!important;color:#38243a!important;
+}
+.button-live-preview.button-preset-text-underline .control-label,
+.button-live-preview.button-preset-text-solid .control-label{
+ display:inline!important;white-space:nowrap!important;font-size:14px!important;line-height:1.2!important;
+}
+.button-live-preview.button-preset-text-underline,
+.button-live-preview.button-preset-text-solid{gap:12px!important;justify-content:center!important;}
 </style>
 </head>
 <body>
