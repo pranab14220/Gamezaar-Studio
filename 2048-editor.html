@@ -1308,15 +1308,16 @@ document.querySelectorAll("[data-button-preset]").forEach(b=>b.addEventListener(
  $("buttonPreset").value=b.dataset.buttonPreset;
  applyButtonPreset();
 }));
-const SCORE_PRESETS_2048={"icon-star":{mode:"icon",icon:"✦",label:""},"icon-crown":{mode:"icon",icon:"♛",label:""},"text-label":{mode:"text",icon:"",label:"SCORE"},"text-compact":{mode:"text",icon:"",label:"PTS"},"icon-label":{mode:"icon-text",icon:"✦",label:"SCORE"},"icon-crown-label":{mode:"icon-text",icon:"♛",label:"BEST"}};
+const SCORE_PRESETS_2048={"icon-star":{mode:"icon",icon:"✦"},"icon-crown":{mode:"icon",icon:"♛"},"text-label":{mode:"text",icon:""},"text-compact":{mode:"text",icon:""},"icon-label":{mode:"icon-text",icon:"✦"},"icon-crown-label":{mode:"icon-text",icon:"♛"}};
+function scorePresetLabel2048(which,id){const labels=which==="score"?{"text-label":"SCORE","text-compact":"PTS","icon-label":"SCORE","icon-crown-label":"PTS"}:{"text-label":"BEST SCORE","text-compact":"BEST PTS","icon-label":"BEST SCORE","icon-crown-label":"BEST PTS"};return labels[id]||"";}
 const scorePresetState2048={score:"icon-star",best:"icon-crown"};
 function renderScorePreset2048(which){
- const preset=SCORE_PRESETS_2048[scorePresetState2048[which]]||SCORE_PRESETS_2048["icon-star"];
+ const preset=SCORE_PRESETS_2048[scorePresetState2048[which]]||SCORE_PRESETS_2048["icon-star"];preset.label=scorePresetLabel2048(which,scorePresetState2048[which]);
  const box=$(which==="score"?"scoreStylePreviewScoreBox":"scoreStylePreviewBestBox");
  if(box){box.classList.remove("preset-icon","preset-text","preset-icon-text");box.classList.add("preset-"+(preset.mode==="icon-text"?"icon-text":preset.mode));box.querySelector(".score-style-preview-icon").textContent=preset.icon;box.querySelector(".score-style-preview-label").textContent=preset.label;}
  const actual=previewDialog.querySelector(which==="score"?'[aria-label="Score"]':'[aria-label="Best score"]');
  if(actual){actual.classList.remove("score-preset-icon","score-preset-text","score-preset-icon-text");actual.classList.add("score-preset-"+(preset.mode==="icon-text"?"icon-text":preset.mode));const icon=actual.querySelector(".score-icon");if(icon)icon.textContent=preset.icon;let label=actual.querySelector(".score-label");if(!label){label=document.createElement("span");label.className="score-label";actual.insertBefore(label,actual.querySelector("strong"));}label.textContent=preset.label;}
- document.querySelectorAll('[data-score-preset="'+which+'"]').forEach(b=>b.classList.toggle("active",b.dataset.preset===scorePresetState2048[which]));
+ document.querySelectorAll('[data-score-preset="'+which+'"]').forEach(b=>{b.classList.toggle("active",b.dataset.preset===scorePresetState2048[which]);const id=b.dataset.preset;const label=scorePresetLabel2048(which,id);const icon=SCORE_PRESETS_2048[id].icon;b.querySelector("span").textContent=(icon?icon+" ":"")+label||icon;b.querySelector("small").textContent=({"icon-star":"Icon 1","icon-crown":"Icon 2","text-label":"Text 1","text-compact":"Text 2","icon-label":"Icon + Text 1","icon-crown-label":"Icon + Text 2"})[id];});
 }
 document.querySelectorAll("[data-score-preset]").forEach(b=>b.addEventListener("click",()=>{scorePresetState2048[b.dataset.scorePreset]=b.dataset.preset;renderScorePreset2048(b.dataset.scorePreset);}));
 function applyVisualCustomization(){
