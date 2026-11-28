@@ -1241,7 +1241,7 @@ function applyButtonPreset(){
   const i=b.querySelector(".control-icon");if(i)i.innerHTML=assetData[key]?'<img src="'+assetData[key]+'" alt="">':icon;
   const t=b.querySelector(".control-label");if(t)t.textContent=label;
  });
- const scale=Math.max(.75,Math.min(1.3,Number($("buttonScale").value)||100));
+ const scale=Math.max(.75,Math.min(1.3,(Number($("buttonScale").value)||100)/100));
  const gap=Math.max(0,Math.min(24,Number($("buttonGap").value)||0));
  previewDialog.style.setProperty("--creator-button-scale",scale);
  const controls=previewDialog.querySelector(".game-top-controls");
